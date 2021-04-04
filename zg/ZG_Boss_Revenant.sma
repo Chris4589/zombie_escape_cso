@@ -686,7 +686,7 @@ public Create_Fireball(id)
 	
 	static Fireball;Fireball = create_entity("info_target")
 
-	if(pev_valid(Fireball)) return;
+	if(!pev_valid(Fireball)) return;
 
 	engfunc(EngFunc_SetOrigin, Fireball, Origin)
 

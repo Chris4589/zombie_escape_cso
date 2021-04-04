@@ -12,7 +12,7 @@
 #define TIEMPO 15
 
 #define OBERON_CLASSNAME "oberon" 
-#define OBERON_HEALTH 100000.0
+#define OBERON_HEALTH 50000.0
 
 #define TASK_HOOKINGUP 123312312 
 #define TASK_HOOKINGDOWN 123312313 
@@ -146,6 +146,17 @@ public event_RoundStart()
 	g_iTiempo = TIEMPO;
 	
 	remove_entity_by_classname(OBERON_CLASSNAME); 
+
+	set_cvar_num("mp_roundtime", 7);
+
+	server_cmd("zp_mutilador_enable 0");
+	server_cmd("zp_alien_enabled 0");
+	server_cmd("zp_ninja_enabled 0");
+	server_cmd("zp_sirio_enabled 0");
+	server_cmd("zp_sniper_enabled 0");
+
+	server_cmd("zp_wesker_enabled 0");
+	server_cmd("zp_surv_enabled 0");
 } 
 public f_Menu( id )
 {

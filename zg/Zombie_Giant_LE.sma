@@ -721,7 +721,9 @@ public Set_PlayerZombie(id)
 	
 	// HP
 	static HP; HP = ArrayGetCell(GiantBaseHP, CodeTitan)
-	static PlayerNum; PlayerNum = fnGetAlive()+1 * 32000;
+	//console_print(0, "players %d", fnGetAlive() )
+	static PlayerNum; PlayerNum = fnGetAlive() <= 0 ? 8000 : fnGetAlive() * 5000;
+	//console_print(0, "hp %d", PlayerNum )
 	
 	HP *= PlayerNum
 
@@ -1053,7 +1055,7 @@ fnGetAlive()
 	
 	for (id = 1; id <= g_MaxPlayers; id++)
 	{
-		if (is_alive(id) && 2 >= get_user_team(id) >= 1)
+		if (is_user_alive(id))
 			iAlive++
 	}
 	
