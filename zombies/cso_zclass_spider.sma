@@ -151,7 +151,7 @@ public client_putinserver(iPlayer) ResetValues(iPlayer);
 public zp_user_infected_post(iPlayer) {
 	if(!zp_get_user_nemesis(iPlayer) && zp_get_user_zombie_class(iPlayer) == g_iZClassID) {
 		ResetValues(iPlayer);
-		UTIL_ColorChat(iPlayer, "!y[!gArachne!y] Your ability [!gHook -> R | Bomb -> G!y]");
+		UTIL_ColorChat(iPlayer, "!y[!gArachne!y] Tu habilidad [!gHook -> R | Bomb -> G!y]");
 	}
 }
 public zp_user_humanized_post(iPlayer) if(zp_get_user_zombie_class(iPlayer) == g_iZClassID) ResetValues(iPlayer);

@@ -3641,7 +3641,10 @@ public fw_SetClientKeyValue(id, const infobuffer[], const key[])
 public fw_ClientUserInfoChanged(id)
 {
 	if(!is_user_connected(id))
-		return;
+		return PLUGIN_CONTINUE;
+		
+	if( g_iStatus[ id ] != LOGUEADO )
+		return PLUGIN_CONTINUE;
 	// Cache player's name
 	/*get_user_name(id, g_playername[id], charsmax(g_playername[]))
 	
@@ -3655,7 +3658,19 @@ public fw_ClientUserInfoChanged(id)
 		if (!equal(currentmodel, g_playermodel[id]))
 			cs_set_user_model(id, g_playermodel[id]);
 	}*/
+	
+	static name[ 32 ];
+	get_user_info( id, "name", name, 31 );
+	
+	if( equal( g_playername[ id ], name ) ) 
+		return PLUGIN_HANDLED;
+	
+	copy(g_playername[ id ], 31, name)
+	set_user_info( id, "name", g_playername[ id ] );
+	return PLUGIN_CONTINUE;
 }
+
+
 
 // Forward Get Game Description
 public fw_GetGameDescription()

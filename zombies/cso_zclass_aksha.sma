@@ -117,9 +117,9 @@ public plugin_init() {
 }
 
 public plugin_precache() {
-	g_iZClassID = zp_register_class(CLASS_ZOMBIE, ZCLASS_NAME, ZCLASS_INFO, ZCLASS_MODEL, ZCLASS_CLAWMODEL, 
-		15, 2, ADMIN_ALL, ZCLASS_HEALTH, 0, ZCLASS_SPEED, ZCLASS_GRAVITY, ZCLASS_KNOCKBACK);
-
+	g_iZClassID = zp_register_class(CLASS_ZOMBIE, ZCLASS_NAME, ZCLASS_INFO, ZCLASS_MODEL, 
+	ZCLASS_CLAWMODEL, 13, 0, ADMIN_ALL, ZCLASS_HEALTH, 0, ZCLASS_SPEED, ZCLASS_GRAVITY, ZCLASS_KNOCKBACK);
+	
 	// Precache models
 	engfunc(EngFunc_PrecacheModel, ZCLASS_BOMBMODEL);
 	engfunc(EngFunc_PrecacheModel, FLAME_MODEL);
@@ -141,7 +141,7 @@ public client_putinserver(iPlayer) ResetValues(iPlayer);
 public zp_user_infected_post(iPlayer) {
 	if(!zp_get_user_nemesis(iPlayer) && zp_get_user_zombie_class(iPlayer) == g_iZClassID) {
 		ResetValues(iPlayer);
-		UTIL_ColorChat(iPlayer, "!y[!gЯкша!y] !yСпособность: !g[Поглощение] !y-> !gG !y| !g[Восстановление] !y-> !gT");
+		UTIL_ColorChat(iPlayer, "!y[!gYaksha!y] !yCapacidad: !g[Absorción] !y-> !gG !y| !g[Восстановление] !y-> !gT");
 	}
 }
 
@@ -163,7 +163,7 @@ public Command_Charge(iPlayer) {
 	if(!is_user_alive(iPlayer) || !zp_get_user_zombie(iPlayer) || zp_get_user_nemesis(iPlayer)
 	|| zp_get_user_zombie_class(iPlayer) != g_iZClassID || get_user_weapon(iPlayer) != CSW_KNIFE) return PLUGIN_CONTINUE;
 	if(pev(iPlayer, pev_flags) & FL_INWATER) {
-		UTIL_ColorChat(iPlayer, "!y[!gПоглощение!y] !yНельзя использовать когда вы в !gВоде!y!");
+		UTIL_ColorChat(iPlayer, "!y[!gAbsorción!y] !yNo se puede utilizar en !gAgua!y!");
 
 		return PLUGIN_HANDLED;
 	}
@@ -203,7 +203,7 @@ public CPlayer__ImpulseCommands(iPlayer) {
 
 	if(pev(iPlayer, pev_impulse) == 201) {
 		if(task_exists(iPlayer + TASKID_RECOVERYRESET) || pev(iPlayer, pev_health) >= zp_get_zombie_maxhealth(iPlayer)) {
-			UTIL_ColorChat(iPlayer, task_exists(iPlayer + TASKID_RECOVERYRESET) ? "!y[!gВосстановление!y] !yСпособность перезаряжается..." : "!y[!gВосстановление!y] !yВы имеете Максимальное Кол-во Здоровья!");
+			UTIL_ColorChat(iPlayer, task_exists(iPlayer + TASKID_RECOVERYRESET) ? "!y[!gRecuperación!y] !yRecargas de habilidad..." : "!y[!gRecuperación!y] !yTienes máxima salud!");
 
 			return HAM_IGNORED;
 		}
@@ -212,7 +212,7 @@ public CPlayer__ImpulseCommands(iPlayer) {
 
 			set_pev(iPlayer, pev_health, pev(iPlayer, pev_health) >= float(zp_get_zombie_maxhealth(iPlayer) - RECOVERY_HEALTH) ? float(zp_get_zombie_maxhealth(iPlayer)) : pev(iPlayer, pev_health) + float(RECOVERY_HEALTH));
 			RecoveryHealth(iPlayer);
-			UTIL_ColorChat(iPlayer, "!y[!gВосстановление!y] !yПерезарядка: !g%d !yсек.", RECOVERY_RESET);
+			UTIL_ColorChat(iPlayer, "!y[!gRecuperación!y] !yRecargar: !g%d !yseg.", RECOVERY_RESET);
 		}
 	}
 
@@ -376,7 +376,7 @@ public CWeapon__Deploy(iItem) {
 		set_task(float(CHARGE_RESET), "CTaskID__ChargeReset", iPlayer + TASKID_CHARGERESET);
 
 		fm_set_rendering(iPlayer, kRenderFxNone);
-		UTIL_ColorChat(iPlayer, "!y[!gПоглощение!y] !yПерезарядка: !g%d !yсек.", CHARGE_RESET);
+		UTIL_ColorChat(iPlayer, "!y[!gAbsorción!y] !yRecargar: !g%d !yseg.", CHARGE_RESET);
 	}
 
 	set_pev(iPlayer, pev_viewmodel2, ZCLASS_BOMBMODEL);
@@ -403,7 +403,7 @@ public CPlayer__TraceAttack(iVictim, iAttacker, Float: flDamage, Float: vecDirec
 		g_iCharge[iVictim][2] += 1;
 		UTIL_SendWeaponAnim(iVictim, ANIM_SKILL_GUARD1 + g_iCharge[iVictim][2], ANIM_TIME_SKILL_GUARD);
 
-		if(pev(iVictim, pev_weaponanim) == ANIM_SKILL_GUARD5) UTIL_ColorChat(iVictim, "!y[!gПоглощение!y] !yНажмите !yG !yчтобы высвободить энергию.")
+		if(pev(iVictim, pev_weaponanim) == ANIM_SKILL_GUARD5) UTIL_ColorChat(iVictim, "!y[!gAbsorción!y] !yHaga clic en !yG !ypara liberar energía.")
 	}
 
 	return HAM_IGNORED;
@@ -441,7 +441,7 @@ public CTaskID__Discharge(iPlayer) {
 	g_iCharge[iPlayer][0] = CHARGE_END;
 
 	fm_set_rendering(iPlayer, kRenderFxNone);
-	UTIL_ColorChat(iPlayer, "!y[!gПоглощение!y] !yПерезарядка: !g%d !yсек.", CHARGE_RESET);
+	UTIL_ColorChat(iPlayer, "!y[!gAbsorción!y] !yRecargar: !g%d !yseg.", CHARGE_RESET);
 }
 
 public CTaskID__ChargeReset(iPlayer) {
@@ -453,7 +453,7 @@ public CTaskID__ChargeReset(iPlayer) {
 	g_iCharge[iPlayer][0] = CHARGE_NONE;
 	g_iCharge[iPlayer][1] = 0;
 	g_iCharge[iPlayer][2] = 0;
-	UTIL_ColorChat(iPlayer, "!y[!gПоглощение!y] !yСпособность: !gГотова!");
+	UTIL_ColorChat(iPlayer, "!y[!gAbsorción!y] !yCapacidad: !gListo!");
 }
 
 public CTaskID__RecoveryReset(iPlayer) {
@@ -462,7 +462,7 @@ public CTaskID__RecoveryReset(iPlayer) {
 	if(!is_user_alive(iPlayer) || !zp_get_user_zombie(iPlayer) || zp_get_user_nemesis(iPlayer) || zp_get_user_zombie_class(iPlayer) != g_iZClassID)
 		return;
 
-	UTIL_ColorChat(iPlayer, "!y[!gВосстановление!y] !yСпособность: !gГотова!");
+	UTIL_ColorChat(iPlayer, "!y[!gRecuperación!y] !yCapacidad: !gListo!");
 }
 
 public CTaskID__BlockVelocity(iPlayer) {
