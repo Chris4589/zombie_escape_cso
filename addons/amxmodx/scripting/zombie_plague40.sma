@@ -64,6 +64,7 @@ const MAX_STATS_SAVED = 64
 #include <engine>
 #include <regex>
 #include <print_center_fx>
+#include <apanel>
 
 native active_button();//para que no revivan si tocan el escape
 
@@ -374,22 +375,8 @@ new g_iMultiplicador[ 33 ][ 2 ];
 
 new const _HappyHour[][__HappyData] =
 {
-    { "04",     1000,                 2 },
-    { "05",     1000,                 2 },
-
-    { "11",     1400,                 2 },
-    { "11",     1400,                 2 },
-    { "13",     1400,                 3 },
-
- 	{ "14",     1400,                 3 },
-  	{ "15",     1400,                 3 },
-  	{ "16",     1000,                 2 },
-
-    { "18",     1000,                 2 },
-    { "19",     1400,                 3 },
-
-    { "21",     1000,                 3 },
-    { "22",     1000,                 3 }
+    { "00",     1000,                 2 },
+    { "12",     1400,                 2 }
 }
 
 new const RequiredExp[MAX_LEVEL]=
@@ -995,6 +982,10 @@ public advacc_guardado_login_success( id )
 
 		formatex( szQuery, charsmax( szQuery ), "SELECT * FROM %s WHERE id_cuenta='%d'", szTable, g_id[ id ] );
 		SQL_ThreadQuery( g_hTuple, "DataHandler", szQuery, iData, 2 );
+
+
+		if( is_user_admin(id) ) 
+			apanel_get_admin_tag( id, gSzTag[id], charsmax(gSzTag[]) )
 		
 	}
 }
@@ -1083,7 +1074,7 @@ public is_user_inparty(const id) return g_PartyData[id][In_Party] ? 1 : 0;
 public plugin_precache()
 {
 	// Register earlier to show up in plugins list properly after plugin disable/error at loading
-	register_plugin("ZEA | Zombie Escape Apocalypse", PLUGIN_VERSION, "MeRcyLeZZ & Hypnotize")
+	register_plugin("Zombie Escape Evolution", PLUGIN_VERSION, "MeRcyLeZZ & Hypnotize")
 	
 	// To switch plugin on/off
 	register_concmd("zp_toggle", "cmd_toggle", _, "<1/0> - Enable/Disable Zombie Plague (will restart the current map)", 0)
@@ -3383,6 +3374,7 @@ public client_putinserver(id)
 	get_user_name(id, g_playername[id], charsmax(g_playername[]))
 
 	gSzTag[id][0] = EOS;
+
 	g_iMultiplicador[id][ 0 ] = 1;
 	g_iMultiplicador[id][ 1 ] = 1;
 
@@ -3659,14 +3651,14 @@ public fw_ClientUserInfoChanged(id)
 			cs_set_user_model(id, g_playermodel[id]);
 	}*/
 	
-	static name[ 32 ];
+	/*static name[ 32 ];
 	get_user_info( id, "name", name, 31 );
 	
 	if( equal( g_playername[ id ], name ) ) 
 		return PLUGIN_HANDLED;
 	
 	copy(g_playername[ id ], 31, name)
-	set_user_info( id, "name", g_playername[ id ] );
+	set_user_info( id, "name", g_playername[ id ] );*/
 	return PLUGIN_CONTINUE;
 }
 
@@ -9609,7 +9601,7 @@ public remove_stuff()
 	}
 	
 	// Remove all doors
-	if (get_pcvar_num(cvar_removedoors) > 1)
+	else if (get_pcvar_num(cvar_removedoors) > 1)
 	{
 		ent = -1;
 		while ((ent = engfunc(EngFunc_FindEntityByString, ent, "classname", "func_door")) != 0)
@@ -9865,8 +9857,8 @@ public ShowHUD(taskid)
 	{
 		// Show health, class and ammo packs
 		set_hudmessage(g_ColorHud[g_iHud[id]][hudColor][0], g_ColorHud[g_iHud[id]][hudColor][1], g_ColorHud[g_iHud[id]][hudColor][2], HUD_STATS_X, HUD_STATS_Y, 0, 6.0, 1.1, 0.0, 0.0, -1)
-		ShowSyncHudMsg(ID_SHOWHUD, g_MsgSync2, "Vida: %d - Armadura: %d^nClase: %s^nExperiencia: %d/%d [ %i%% ]^nNivel: %d/%d || Reset: %d^nAmmo packs: %d^nDamage: %d^n^n%s", 
-			get_user_health(id), get_user_armor(id), class, g_iExp[id], RequiredExp[lvl], porcentaje(float(g_iExp[id]), float(RequiredExp[lvl])), g_iLevel[id], MAX_LEVEL, g_iReset[id], g_ammopacks[id], g_iDamage[id], PartyMsg);
+		ShowSyncHudMsg(ID_SHOWHUD, g_MsgSync2, "Vida: %d - Armadura: %d^nClase: %s^nExperiencia: %d/%d [ %i%% ]^nNivel: %d/%d || Reset: %d^nAmmo packs: %d - Coins: %d^n[Hora Feliz] [%s]^n^n%s", 
+			get_user_health(id), get_user_armor(id), class, g_iExp[id], RequiredExp[lvl], porcentaje(float(g_iExp[id]), float(RequiredExp[lvl])), g_iLevel[id], MAX_LEVEL, g_iReset[id], g_ammopacks[id], get_user_coins(id), g_bHappyTime ? "ON" : "OFF", PartyMsg);
 	}
 
 	set_dhudmessage( 125, 125, 125, -1.0, 0.0, 1, 0.0, 1.0 );
@@ -11968,6 +11960,10 @@ RefreshHH()
 {
     g_bHappyTime = false;
     g_iDefaultDamage = DEFAULT_DAMAGE;
+
+    if(!get_pcvar_num(cvar_modes))
+    	g_iDefaultDamage = DEFAULT_DAMAGE*2;
+
     g_iHappyMulti = 1;
 
     static i, current_hour[3], szDay[5], iActive; iActive = 0;
@@ -11989,7 +11985,7 @@ RefreshHH()
         }
     }
     get_time( "%a", szDay, 4 );
-    if( equal( szDay, "Sat" ) && !iActive && !get_pcvar_num(cvar_event) || get_pcvar_num(cvar_event) && !iActive )
+    if( equal( szDay, "Sun" ) && !iActive && !get_pcvar_num(cvar_event) || get_pcvar_num(cvar_event) && !iActive )
     {
 		g_bHappyTime = true;
 		g_iHappyMulti = 3;
@@ -12008,10 +12004,10 @@ public show_menu_buy1(id)
 	strip_user_weapons(id);
 	give_item(id, "weapon_knife");
 	
-	cmdMenu(id)
+	cmd_Menu_guns(id)
 }
 
-public cmdMenu(id)
+public cmd_Menu_guns(id)
 {
 	if( g_bAutoSeleccion[id] || g_bAnterior[id] || g_class[id] >= SURVIVOR )
 		return PLUGIN_HANDLED;
@@ -12023,7 +12019,7 @@ public cmdMenu(id)
 	len = 0;
 
 	len += formatex(menu[len], sizeof menu - 1 - len, "\rArmamento^n^n");
-
+	//error
 	ArrayGetString(g_szName, g_iSelected[id][PRIMARIA], szItem, charsmax(szItem) );
 	len += formatex(menu[len], sizeof menu - 1 - len, "\r1. \wPrimary [\y%s\w]^n", g_iSelected[id][PRIMARIA] <= -1 ? "None" : szItem);
 
@@ -12199,7 +12195,7 @@ public handler_skins( id, menu, item )
 			menu_armas( id, cat );
 		}
 	}
-	cmdMenu(id);
+	cmd_Menu_guns(id);
 	return PLUGIN_HANDLED;
 }
 
@@ -12305,7 +12301,7 @@ public menu_bombas_handler(id, menu, item)
 	    return PLUGIN_HANDLED;
 	}
 	g_iGranada[id] = item;
-	cmdMenu(id);
+	cmd_Menu_guns(id);
 	menu_destroy(menu);
 	return PLUGIN_HANDLED;
 }
@@ -12630,6 +12626,12 @@ public DataHandler( failstate, Handle:Query, error[ ], error2, data[ ], datasize
 				
 				formatex( szQuery, charsmax( szQuery ), "SELECT * FROM %s WHERE id_user = %d AND MapName = ^"%s^"", g_szTableRecord, g_id[ id ], szMapName );
 				SQL_ThreadQuery( g_hTuple, "DataHandler", szQuery, iData, sizeof(iData) );
+
+				client_print_color(id, print_team_blue, "Tu ID es %d pueden usarla para referenciarte con ella.", g_id[ id ]);
+				client_print_color(id, print_team_blue, "Tu ID es %d pueden usarla para referenciarte con ella.", g_id[ id ]);
+				client_print_color(id, print_team_blue, "Tu ID es %d pueden usarla para referenciarte con ella.", g_id[ id ]);
+				client_print_color(id, print_team_blue, "Tu ID es %d pueden usarla para referenciarte con ella.", g_id[ id ]);
+				client_print_color(id, print_team_blue, "Tu ID es %d pueden usarla para referenciarte con ella.", g_id[ id ]);
 				
 				g_iStatus[ id ] = LOGUEADO;
 			}
@@ -13192,7 +13194,7 @@ public clcmd_say(id)
 			formatex(class, charsmax(class), "%s", rango[iRango_player][range_name]);
 	}
 	
-	formatex(prefix, charsmax(prefix), "%s ^x04%s^x01[ ^x04%s^x01 - ^x04%d^x01 ]^x03 %s", g_isalive[id] ? "^x01" : "^x01*MUERTO* ", gSzTag[id], class, g_iLevel[id], g_playername[id])
+	formatex(prefix, charsmax(prefix), "%s ^x04%s^x01 [ ^x04%s^x01 - ^x04%d^x01 ]^x03 %s", g_isalive[id] ? "^x01" : "^x01*MUERTO* ", gSzTag[id], class, g_iLevel[id], g_playername[id])
 	
 	if(is_user_admin(id)) format(said, charsmax(said), "^x04%s", said)
 	format(said, charsmax(said), "%s^x01 :  %s", prefix, said)

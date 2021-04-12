@@ -13,7 +13,7 @@
 #include <zp43_armas>
 
 #define PLUGIN "[Luna's Weapon] Dual Beretta Gunslinger"
-#define VERSION "2.0.36"
+#define VERSION "2.0.37"
 #define AUTHOR "Celena Luna/Aoki Melodia"
 
 #define V_MODEL "models/zombie_plague/v_gunkatav2.mdl"
