@@ -748,7 +748,7 @@ new g_iCategoria[33];
 new bool:g_bAutoSeleccion[33], bool: g_bAnterior[33];
 
 // Game vars
-new g_pPercent, cvar_bubblepush;
+new g_pPercent;
 new cvar_timedroga, cvar_timeCampo, cvar_radiodroga, cvar_damageHE;
 new Regex:xResult, xReturnValue, xError[64];
 new g_pluginenabled, bool:bOffCheck // ZP enabled
@@ -1633,7 +1633,7 @@ public plugin_init()
 	unregister_forward(FM_Spawn, g_fwSpawn)
 	unregister_forward(FM_PrecacheSound, g_fwPrecacheSound)
 	register_touch("trigger_hurt", "player", "touch_trigger_hurt")
-	register_touch(entclas, "player", "entity_touch");
+	register_touch(entclas, "player", "touch_bubble");
 	register_impulse(IMPULSE_FLASHLIGHT, "cmdBlock_linterna");
 
 	// Client commands
@@ -1768,7 +1768,6 @@ public plugin_init()
 	cvar_timeCampo = register_cvar("zp_bubble_time", "8");
 	cvar_radiodroga = register_cvar("zp_droga_radio", "400");
 	cvar_damageHE = register_cvar("zp_hedamage", "800");
-	cvar_bubblepush = register_cvar("zp_bubble_push", "100.0");
 	cvar_warmup = register_cvar("zp_delay", "10");
 	cvar_lighting = register_cvar("zp_lighting", "j")
 	cvar_triggered = register_cvar("zp_triggered_lights", "1")
@@ -2559,11 +2558,10 @@ public fw_PlayerSpawn_Post(id)
 				// Turn on Night Vision automatically?
 				if (get_pcvar_num(cvar_nvggive) == 1)
 				{
-					g_nvisionenabled[id] = true
-					
 					// Custom nvg?
 					if (get_pcvar_num(cvar_customnvg))
 					{
+						g_nvisionenabled[id] = true
 						remove_task(id+TASK_NVISION)
 						off(id)
 						set_task(0.1, "set_user_nvision", id+TASK_NVISION, _, _, "b")
@@ -3184,24 +3182,28 @@ public fw_UsePushable()
 	
 	return HAM_IGNORED;
 }
-public entity_touch(touched, toucher)
+public touch_bubble(touched, toucher)
 {
+	if( !is_valid_ent(touched) || !is_user_valid_alive(toucher) )
+		return;
+
 	if( g_class[toucher] >= ZOMBIE )
 	{
-		new Float:pos_ptr[3], Float:pos_ptd[3], Float:push_power = get_pcvar_float(cvar_bubblepush);
+		new Float:pos_ptr[3], Float:pos_ptd[3];
 
 		pev(touched, pev_origin, pos_ptr);
 		pev(toucher, pev_origin, pos_ptd);
 
-		for(new i = 0; i < 3; i++)
-		{
-			pos_ptd[i] -= pos_ptr[i];
-			pos_ptd[i] *= push_power;
-		}
+		xs_vec_sub( pos_ptd, pos_ptr, pos_ptd );
+		xs_vec_mul_scalar( pos_ptd, 4.0, pos_ptd );
+
 		set_pev(toucher, pev_velocity, pos_ptd);
 		set_pev(toucher, pev_impulse, pos_ptd);
+
+		set_task(0.4, "freeze_player", toucher);
 	}
 }
+
 public touch_trigger_hurt(iEnt, id)
 {
 	if(is_user_alive(id))
@@ -7094,7 +7096,7 @@ zombieme(id, infector, nemesis, silentmode, rewards)
 	g_iGhost[id] = 0;
 	// Way to go...
 	g_class[id] = ZOMBIE;
-
+	g_nvisionenabled[id] = false
 	g_has_speed_boost[id] = false
 	remove_task(id+TASK_SPEED_BOOST);
 	remove_task(id+TASK_NVISION);
@@ -7321,11 +7323,10 @@ zombieme(id, infector, nemesis, silentmode, rewards)
 			// Turn on Night Vision automatically?
 			if (get_pcvar_num(cvar_nvggive) == 1)
 			{
-				g_nvisionenabled[id] = true
-				
 				// Custom nvg?
 				if (get_pcvar_num(cvar_customnvg))
 				{
+					g_nvisionenabled[id] = true
 					remove_task(id+TASK_NVISION)
 					off(id)
 					set_task(0.1, "set_user_nvision", id+TASK_NVISION, _, _, "b")
@@ -7660,11 +7661,10 @@ humanme(id, survivor, silentmode)
 			// Turn on Night Vision automatically?
 			if (get_pcvar_num(cvar_nvggive) == 1)
 			{
-				g_nvisionenabled[id] = true
-				
 				// Custom nvg?
 				if (get_pcvar_num(cvar_customnvg))
 				{
+					g_nvisionenabled[id] = true
 					remove_task(id+TASK_NVISION)
 					off(id)
 					set_task(0.1, "set_user_nvision", id+TASK_NVISION, _, _, "b")
@@ -9029,33 +9029,21 @@ public bubble_explode(id)
 	entity_set_vector(iEntity,EV_VEC_origin, Origin);
 	entity_set_model(iEntity,model);
 	entity_set_int(iEntity, EV_INT_solid, SOLID_TRIGGER);
+	entity_set_int(iEntity, EV_INT_movetype, MOVETYPE_FLY);
 	entity_set_size(iEntity, Float: {-110.0, -110.0, -110.0}, Float: {110.0, 110.0, 110.0});
 	entity_set_int(iEntity, EV_INT_renderfx, kRenderFxGlowShell);
 	entity_set_int(iEntity, EV_INT_rendermode, kRenderTransAlpha);
 	entity_set_float(iEntity, EV_FL_renderamt, 50.0);
-
-	engfunc(EngFunc_MessageBegin, MSG_PVS, SVC_TEMPENTITY, originF, 0);
-	write_byte(TE_DLIGHT);
-	engfunc(EngFunc_WriteCoord, originF[0]);
-	engfunc(EngFunc_WriteCoord, originF[1]);
-	engfunc(EngFunc_WriteCoord, originF[2]);
-	write_byte(15);
-	write_byte(255);
-	write_byte(255);
-	write_byte(255);
-	write_byte(2);
-	write_byte(0);
-	message_end();
     
-	if(is_valid_ent(iEntity))
-	{
-		new Float:vColor[3];
+	new Float:vColor[3];
 
-		for(new i = 0; i < 3; i++) // nose que es
-			vColor[i] = random_float(0.0, 255.0);
+	for(new i = 0; i < 3; i++)
+		vColor[i] = random_float(0.0, 255.0);
 
-		entity_set_vector(iEntity, EV_VEC_rendercolor, vColor);
-	}
+	entity_set_vector(iEntity, EV_VEC_rendercolor, vColor);
+
+	drop_to_floor( iEntity );
+	
 	set_task(get_pcvar_float(cvar_timeCampo), "DeleteEntity", iEntity);
 	return PLUGIN_CONTINUE;
 }

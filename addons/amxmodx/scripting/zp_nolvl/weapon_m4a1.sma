@@ -14,7 +14,7 @@ public plugin_init()
 {
 	register_plugin("Weapon", "0.1", "Hypnotize")
 	// Add your own code here
-	g_item = zp_arma("M4A1 Carbine", 0, 0, PRIMARIA, ADMIN_ALL, "");
+	g_item = zp_arma("M4A1 Carbine", 12, 0, PRIMARIA, ADMIN_ALL, "");
 }
 
 public dar_arma(id, item)
