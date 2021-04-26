@@ -65,7 +65,44 @@ const MAX_STATS_SAVED = 64
 #include <fun>
 #include <engine>
 #include <regex>
+#include <sys_cuentas>
+#include <sqlx>
 #include <print_center_fx>
+
+new const szTable[] = "zp_datos";
+
+new g_id[ 33 ];
+new Handle:g_hTuple;
+
+enum
+{
+	REGISTRAR_USUARIO,
+	LOGUEAR_USUARIO,
+	GUARDAR_DATOS,
+	SQL_RANK
+};
+
+new g_iStatus[33];
+enum
+{
+	NO_LOGUEADO = 0,
+	LOGUEADO
+}
+
+public user_login_post(id, iUserid) {
+	if (is_user_connected(id)) {
+
+		new szQuery[ MAX_MENU_LENGTH ], iData[ 2 ];
+
+		g_id[ id ] = iUserid;
+
+		iData[ 0 ] = id;
+		iData[ 1 ] = LOGUEAR_USUARIO;
+
+		formatex( szQuery, charsmax( szQuery ), "SELECT * FROM %s WHERE id_cuenta='%d'", szTable, g_id[ id ] );
+		SQL_ThreadQuery( g_hTuple, "DataHandler", szQuery, iData, 2 );
+	}
+}
 
 /*================================================================================
  [Constants, Offsets, Macros]
@@ -232,21 +269,28 @@ enum
 enum _:menu_granadas 
 {
     granada_nombre[90],
-    cantidad_he,
-    cantidad_smoke,
-    cantidad_flash,
+    cantidad_fire,
+    cantidad_chain,
+    cantidad_bubble,
+    cantidad_pipe,
+    cantidad_frost,
+    cantidad_droga,
     granada_nivel
 };
 //flash = frost/droga, smoke = campo/pipe
 new const Granadas[][menu_granadas] = 
 { 
-	{"Fire + Frost", 1, 1, 1, 3 },//0
-	{"Chain + Frost", 1, 0, 1, 6},//1
-	{"Chain + Fire", 2, 0, 0, 15},//2
-	{"2 Chain", 2, 0, 0, 10},//3
-	{"Pipe + Frost", 0, 1, 1, 11},//4
-	{"Chain + Droga", 1, 0, 1, 12}
-
+	{ "1 Fire", 1, 0, 0, 0, 0, 0, 1 },//0
+	{ "1 Frost", 0, 0, 0, 0, 1, 0, 3 },//1
+	{ "Frost + Fire", 1, 0, 0, 1, 0, 0, 6 },//2
+	{ "Fire + Chain", 1, 1, 0, 0, 0, 0, 8 },//3
+	{ "Chain + Frost", 0, 1, 0, 0, 1, 0, 12 },//4
+	{ "Chain + Droga", 0, 1, 0, 0, 0, 1, 14 },
+	{ "Frost + Droga", 0, 0, 0, 0, 1, 1, 16 },
+	{ "Fire + Pipe", 1, 0, 0, 1, 0, 0, 18 },
+	{ "Chain + Bubble", 0, 1, 1, 0, 0, 0, 20 },
+	{ "Pipe + Bubble", 0, 0, 1, 1, 0, 0, 22 },
+	{ "Droga + Bubble", 0, 0, 1, 0, 0, 1, 24 }
 };
 new g_iGranada[33];
 
@@ -1793,7 +1837,12 @@ public event_round_start()
 
 	for(new i = 1; i <= g_maxplayers; ++i)
 	{
+		if( !is_logged(i) || g_iStatus[ i ] != LOGUEADO )
+			continue;
+
 		set_player_light( i, lighting );
+
+		guardar_datos( i );
 
 		g_iCategoria[i] = 0;
 		g_nvisionenabled[i] = g_bAnterior[i] = false;
@@ -2771,6 +2820,13 @@ public wpn_gi_reset_weapon(id)
 
 public client_disconnect(id)
 {
+	if( g_iStatus[ id ] == LOGUEADO )
+	{
+		guardar_datos( id );
+		g_iStatus[ id ] = NO_LOGUEADO;
+	}
+	
+	
 	if(g_PartyData[id][In_Party])
     	g_PartyData[id][Position] ? g_PartyData[id][Amount_In_Party] > 1 ? destoy_party(id) : remove_party_user(id) : destoy_party(id)
         
@@ -3777,26 +3833,7 @@ public show_menu_zclass(id, type)
 
 		if(ArrayGetCell(g_zclass_admin, class) == ADMIN_ALL)
 		{
-			if(type == CLASS_ZOMBIE)
-			{
-				// Add to menu
-				if (class == g_zombieclassnext[id])
-					formatex(menu, charsmax(menu), "\d%s %s", buffer, buffer2)
-				else
-					formatex(menu, charsmax(menu), "%s \y%s", buffer, buffer2)
-			}
-			else
-			{
-				// Add to menu
-				if (class == g_humanclassnext[id])
-					formatex(menu, charsmax(menu), "\d%s %s", buffer, buffer2)
-				else
-					formatex(menu, charsmax(menu), "%s \y%s", buffer, buffer2)
-			}
-		}
-		else
-		{
-			if(admin & ArrayGetCell(g_zclass_admin, class))
+			if( playerLevel[id] >= ArrayGetCell(g_zclass_level, class) && playerReset[id] >= ArrayGetCell(g_zclass_reset, class) || playerReset[id] > ArrayGetCell(g_zclass_reset, class))
 			{
 				if(type == CLASS_ZOMBIE)
 				{
@@ -3813,6 +3850,41 @@ public show_menu_zclass(id, type)
 						formatex(menu, charsmax(menu), "\d%s %s", buffer, buffer2)
 					else
 						formatex(menu, charsmax(menu), "%s \y%s", buffer, buffer2)
+				}
+				
+			}
+			else
+			{
+				formatex(menu, charsmax(menu), "%s \r[ N: %d - RR %d ]", buffer, ArrayGetCell(g_zclass_level, class), ArrayGetCell(g_zclass_reset, class))
+			}
+		}
+		else
+		{
+			if(admin & ArrayGetCell(g_zclass_admin, class))
+			{
+				if( playerLevel[id] >= ArrayGetCell(g_zclass_level, class) && playerReset[id] >= ArrayGetCell(g_zclass_reset, class) || playerReset[id] > ArrayGetCell(g_zclass_reset, class))
+				{
+					if(type == CLASS_ZOMBIE)
+					{
+						// Add to menu
+						if (class == g_zombieclassnext[id])
+							formatex(menu, charsmax(menu), "\d%s %s", buffer, buffer2)
+						else
+							formatex(menu, charsmax(menu), "%s \y%s", buffer, buffer2)
+					}
+					else
+					{
+						// Add to menu
+						if (class == g_humanclassnext[id])
+							formatex(menu, charsmax(menu), "\d%s %s", buffer, buffer2)
+						else
+							formatex(menu, charsmax(menu), "%s \y%s", buffer, buffer2)
+					}
+					
+				}
+				else
+				{
+					formatex(menu, charsmax(menu), "%s \r[ N: %d - RR %d ]", buffer, ArrayGetCell(g_zclass_level, class), ArrayGetCell(g_zclass_reset, class))
 				}
 			}
 			else
@@ -4249,12 +4321,23 @@ public menu_zclass(id, menuid, item)
 		// Store selection for the next infection
 		if(ArrayGetCell(g_zclass_type, classid) == CLASS_ZOMBIE)
 		{
-			g_zombieclassnext[id] = classid;
+			//if( playerLevel[id] < level && playerReset[id] == reset || g_iReset[id] < reset  )
+			if (playerLevel[id] < ArrayGetCell(g_zclass_level, classid) && playerReset[id] == ArrayGetCell(g_zclass_reset, classid) || playerReset[id] < ArrayGetCell(g_zclass_reset, classid))
+			{
+				show_menu_zclass(id, CLASS_ZOMBIE)
+				return PLUGIN_HANDLED;
+			}
+			g_zombieclassnext[id] = classid;	
 		}
 		else
 		{
+			if (playerLevel[id] < ArrayGetCell(g_zclass_level, classid) && playerReset[id] == ArrayGetCell(g_zclass_reset, classid) || playerReset[id] < ArrayGetCell(g_zclass_reset, classid))
+			{
+				show_menu_zclass(id, CLASS_HUMAN)
+				return PLUGIN_HANDLED;
+			}
 			g_humanclassnext[id] = classid;
-		} 
+		}  
 		static name[32];
 		ArrayGetString(g_zclass_name, classid, name, charsmax(name))
 		
@@ -4270,10 +4353,20 @@ public menu_zclass(id, menuid, item)
 		{
 			if(ArrayGetCell(g_zclass_type, classid) == CLASS_ZOMBIE)
 			{
+				if (playerLevel[id] < ArrayGetCell(g_zclass_level, classid) && playerReset[id] == ArrayGetCell(g_zclass_reset, classid) || playerReset[id] < ArrayGetCell(g_zclass_reset, classid))
+				{
+					show_menu_zclass(id, CLASS_ZOMBIE)
+					return PLUGIN_HANDLED;
+				}
 				g_zombieclassnext[id] = classid;
 			}
 			else
 			{
+				if (playerLevel[id] < ArrayGetCell(g_zclass_level, classid) && playerReset[id] == ArrayGetCell(g_zclass_reset, classid) || playerReset[id] < ArrayGetCell(g_zclass_reset, classid))
+				{
+					show_menu_zclass(id, CLASS_HUMAN)
+					return PLUGIN_HANDLED;
+				}
 				g_humanclassnext[id] = classid;
 			} 
 			static name[32];
@@ -7993,10 +8086,13 @@ infection_explode(ent)
 	engfunc(EngFunc_RemoveEntity, ent)
 }
 // Bubble Grenade Explosion
-public bubble_explode(id)
+public bubble_explode(ent)
 {
+	if ( ent < 0 )
+		return PLUGIN_HANDLED;
+
 	static Float:originF[3];
-	pev(id, pev_origin, originF);
+	pev(ent, pev_origin, originF);
 
 	create_blast9(originF);
 
@@ -8005,12 +8101,9 @@ public bubble_explode(id)
 	if(!is_valid_ent(iEntity))
 	    return PLUGIN_HANDLED;
 
-	new Float: Origin[3];
-	entity_get_vector(id, EV_VEC_origin, Origin);
-
 	entity_set_string(iEntity, EV_SZ_classname, entclas);
 
-	entity_set_vector(iEntity,EV_VEC_origin, Origin);
+	entity_set_vector(iEntity,EV_VEC_origin, originF);
 	entity_set_model(iEntity,model);
 	entity_set_int(iEntity, EV_INT_solid, SOLID_TRIGGER);
 	entity_set_int(iEntity, EV_INT_movetype, MOVETYPE_FLY);
@@ -8028,6 +8121,7 @@ public bubble_explode(id)
 	
 	drop_to_floor( iEntity );
 	set_task(get_pcvar_float(cvar_timeCampo), "DeleteEntity", iEntity);
+	engfunc(EngFunc_RemoveEntity, ent)
 	return PLUGIN_CONTINUE;
 }
 public DeleteEntity(entity)
@@ -11156,29 +11250,53 @@ public get_grenades(id, item)
 {
 	if(!is_user_alive(id))
 		return;
-	switch(item)
+
+	new HE = 0, FLASH = 0, SMOKE = 0;
+	
+	//flash = frost/droga, smoke = campo/pipe
+	if(Granadas[item][cantidad_bubble] > 0)
+		SMOKE += Granadas[item][cantidad_bubble];
+	
+	if(Granadas[item][cantidad_pipe] > 0)
 	{
-		case 1..2: g_iHe[id] += 1;
-		case 3: g_iHe[id] += 2;
-		case 4: g_iPipe[id] = 1;
-		case 5: { g_iHe[id] = 1; g_iDroga[id] = 1; }
+		SMOKE += Granadas[item][cantidad_pipe];
+		g_iPipe[id] = Granadas[item][cantidad_pipe];
 	}
-	if(Granadas[item][cantidad_he] > 0)
+
+	if(Granadas[item][cantidad_fire] > 0)
+		HE += Granadas[item][cantidad_fire];
+
+	if(Granadas[item][cantidad_chain] > 0)
+	{
+		HE += Granadas[item][cantidad_chain];
+		g_iHe[id] = Granadas[item][cantidad_chain];
+	}
+
+	if(Granadas[item][cantidad_frost] > 0)
+		FLASH += Granadas[item][cantidad_frost];
+
+	if(Granadas[item][cantidad_droga] > 0)
+	{
+		FLASH += Granadas[item][cantidad_droga];
+		g_iDroga[id] = Granadas[item][cantidad_droga];
+	}
+
+	if(HE > 0)
 	{
 		give_item(id, "weapon_hegrenade")
-		cs_set_user_bpammo(id, CSW_HEGRENADE, Granadas[item][cantidad_he])
+		cs_set_user_bpammo(id, CSW_HEGRENADE, HE);
 	}
 		
-	if(Granadas[item][cantidad_flash] > 0)
+	if(FLASH > 0)
 	{
 		give_item(id, "weapon_flashbang")
-		cs_set_user_bpammo(id, CSW_FLASHBANG, Granadas[item][cantidad_flash])
+		cs_set_user_bpammo(id, CSW_FLASHBANG, FLASH);
 	}
 		
-	if(Granadas[item][cantidad_smoke] > 0)
+	if(SMOKE > 0)
 	{
 		give_item(id, "weapon_smokegrenade")
-		cs_set_user_bpammo(id, CSW_SMOKEGRENADE, Granadas[item][cantidad_smoke])
+		cs_set_user_bpammo(id, CSW_SMOKEGRENADE, SMOKE);
 	}
 		
 }
@@ -11814,4 +11932,126 @@ stock precache_player_model( const modelname[] )
 	// Check TFiles inquiries 
 	copy(longname[strlen(longname)-4], charsmax(longname) - (strlen(longname)-4), "T.mdl") ;
 	if (file_exists(longname)) precache_generic(longname); 
+}
+
+public guardar_datos( id )  {
+	if(!is_logged(id) || g_iStatus[ id ] != LOGUEADO)
+		return;
+
+	new szQuery[ MAX_MENU_LENGTH ], iData[ 2 ];
+	iData[ 0 ] = id;
+	iData[ 1 ] = GUARDAR_DATOS;
+	
+	formatex( szQuery, charsmax( szQuery ), "UPDATE %s SET _ WHERE id_cuenta='%d'", 
+		szTable, g_id[ id ] );
+	SQL_ThreadQuery( g_hTuple, "DataHandler", szQuery, iData, 2 );
+}
+
+public checkRank( id ) {
+	if(!is_logged(id) || g_iStatus[ id ] != LOGUEADO)
+		return;
+
+	new szQuery[ MAX_MENU_LENGTH ], iData[ 2 ];
+	
+	iData[ 0 ] = id;
+	iData[ 1 ] = SQL_RANK;
+	formatex( szQuery, charsmax( szQuery ), "SELECT (COUNT(*) + 1) FROM `%s` WHERE `reset` > '%d' OR (`reset` = '%d' AND `level` > '%d')", szTable, playerReset[ id ], playerReset[ id ], playerLevel[ id ] );
+	SQL_ThreadQuery( g_hTuple, "DataHandler", szQuery, iData, 2 );
+	
+}
+
+
+public DataHandler( failstate, Handle:Query, error[ ], error2, data[ ], datasize, Float:flTime ) 
+{
+	switch( failstate ) 
+	{
+		case TQUERY_CONNECT_FAILED: 
+		{
+			log_to_file( "SQL_LOG_TQ.txt", "Error en la conexion al MySQL [%i]: %s", error2, error );
+			return;
+		}
+		case TQUERY_QUERY_FAILED:
+		log_to_file( "SQL_LOG_TQ.txt", "Error en la consulta al MySQL [%i]: %s", error2, error );
+	}
+	
+	new id = data[ 0 ];
+	
+	if( !is_user_connected( id ) )
+		return;
+	
+	switch( data[ 1 ] ) 
+	{
+		case LOGUEAR_USUARIO: 
+		{
+			if( SQL_NumResults( Query ) )
+			{
+				//g_iLevel[ id ] = SQL_ReadResult( Query, 1 );
+				/*g_iReset[ id ] = SQL_ReadResult( Query, 2 );
+				g_iExp[ id ] = SQL_ReadResult( Query, 3 );
+				g_iRango[ id ] = SQL_ReadResult( Query, 4 );
+				g_ammopacks[ id ] = SQL_ReadResult( Query, 5 );
+				g_iHud[ id ] = SQL_ReadResult( Query, 6 );
+				g_iNVsion[ id ] = SQL_ReadResult( Query, 7 );*/
+				//hat 8
+				//zombies kills 9
+
+				// Set the custom HUD display task
+				set_task(1.0, "ShowHUD", id+TASK_SHOWHUD, _, _, "b");
+			
+				g_iStatus[ id ] = LOGUEADO;
+			}
+			else
+			{
+				new szQuery[ MAX_MENU_LENGTH ], iData[ 2 ];
+				
+				iData[ 0 ] = id;
+				iData[ 1 ] = REGISTRAR_USUARIO;
+				
+				/*formatex( szQuery, charsmax( szQuery ), "INSERT INTO %s (id_cuenta, level, reset, exp, rango, ammopacks, hud, nvision, hat, kill_zombies, escapes) VALUES (%d, %d, %d, %d, %d, %d, %d, %d, %d, 0, %d)", 
+					szTable, g_id[ id ], g_iLevel[ id ], g_iReset[ id ], g_iExp[ id ], g_iRango[ id ], g_ammopacks[ id ], g_iHud[ id ], g_iNVsion[ id ], g_iHat[ id ], g_iEscapes[ id ] );
+				SQL_ThreadQuery( g_hTuple, "DataHandler", szQuery, iData, 2 );*/
+			}
+		}
+		case REGISTRAR_USUARIO: 
+		{
+			if( failstate < TQUERY_SUCCESS ) 
+			{
+				console_print( id, "Error al crear un usuario: %s.", error );
+			}
+			else
+			{
+				new szQuery[ MAX_MENU_LENGTH ], iData[ 2 ];
+				
+				iData[ 0 ] = id;
+				iData[ 1 ] = LOGUEAR_USUARIO;
+
+				formatex( szQuery, charsmax( szQuery ), "SELECT * FROM %s WHERE id_cuenta='%d'", szTable, g_id[ id ] );
+				SQL_ThreadQuery( g_hTuple, "DataHandler", szQuery, iData, 2 );
+			}
+		}
+		case GUARDAR_DATOS:
+		{
+			if( failstate < TQUERY_SUCCESS )
+				console_print( id, "Error en el guardado de datos." );
+			else
+			console_print( id, "Datos guardados." );
+		}
+		case SQL_RANK:
+		{
+			if( SQL_NumResults( Query ) )
+				zp_colored_print( id,  "^4%s^1 Tu Rank es ^4%i", g_szPrefix, SQL_ReadResult( Query, 0 ) );
+		}
+		
+	}
+}
+
+public MySQL_Init() {
+	g_hTuple = sqlConection( );
+	
+	if ( !g_hTuple ) {
+		log_to_file( "SQL_ERROR.txt", "No se pudo conectar con la base de datos." );
+		return pause( "a" );
+	}
+
+	return PLUGIN_CONTINUE;
 }

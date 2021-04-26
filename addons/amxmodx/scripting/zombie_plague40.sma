@@ -277,27 +277,30 @@ enum
 enum _:menu_granadas 
 {
     granada_nombre[90],
-    cantidad_he,
-    cantidad_smoke,
-    cantidad_flash,
+    cantidad_fire,
+    cantidad_chain,
+    cantidad_bubble,
+    cantidad_pipe,
+    cantidad_frost,
+    cantidad_droga,
     granada_nivel
 };
 //flash = frost, smoke = campo
 new const Granadas[][menu_granadas] = 
 { 
-	{"Fire", 1, 0, 0, 1 },//0
-	{"Fire + Frost", 1, 0, 1, 3 },//1
-	{"Chain + Frost", 1, 0, 1, 6},//2
-	{"Chain + Fire", 2, 0, 0, 15},//3
-	{"2 Chain", 2, 0, 0, 10},//4
-	{"2 Chain + Frost", 2, 0, 1, 11},//5
-	{"Chain + Frost + Fire", 2, 0, 1, 12},//6
-	{"2 Chain + 2 Frost", 2, 0, 2, 13},//7
-	{"2 Chain + Droga", 2, 0, 1, 14},//8
-	{"Pipe + Droga", 0, 1, 1, 15},//9
-	{"2 Chain + Pipe", 2, 1, 0, 16},//10
-	{"Frost + Pipe + Buble", 1, 2, 0, 20},//11
-	{"2Frost + 2Pipe + 2Buble", 0, 4, 2, 22}//12
+	{"Fire", 1, 0, 0, 0, 0, 0, 1 },//0
+	{"Fire + Frost", 1, 0, 0, 0, 1, 0, 3 },//1
+	{"Chain + Frost", 0, 1, 0, 0, 1, 0, 6},//2
+	{"Chain + Fire", 1, 1, 0, 0, 0, 0, 15},//3
+	{"2 Chain", 0, 2, 0, 0, 0, 0, 10},//4
+	{"2 Chain + Frost", 0, 2, 0, 0, 1, 0, 11},//5
+	{"Chain + Frost + Fire", 1, 1, 0, 0, 1, 0, 12},//6
+	{"2 Chain + 2 Frost", 0, 2, 0, 0, 2, 0, 13},//7
+	{"2 Chain + Droga", 0, 2, 0, 0, 0, 1, 14},//8
+	{"Pipe + Droga", 0, 0, 0, 1, 0, 1, 15},//9
+	{"2 Chain + Pipe", 0, 2, 0, 1, 0, 0, 16},//10
+	{"Frost + Pipe + Buble", 0, 0, 1, 1, 1, 0, 20},//11
+	{"2Frost + 2Pipe + 1Buble", 0, 0, 1, 2, 2, 0, 22}//12
 
 };
 new g_iGranada[33];
@@ -3998,12 +4001,11 @@ public fw_ThinkGrenade(entity)
 		}
 		case NADE_TYPE_CAMPO: // Flare
 		{
-			/*bubble_explode(entity) */
+			bubble_explode(entity);
 			return HAM_SUPERCEDE;
 		}
 		case NADE_TYPE_PIPEBOMB:
 		{
-		    //--g_iPipe[owner]; 
 		    set_task(0.1, "hook", entity, _, _, "a", 15); 
 		    set_task(1.5, "deleteGren", entity) 
 		 
@@ -9009,10 +9011,13 @@ infection_explode(ent)
 	engfunc(EngFunc_RemoveEntity, ent)
 }
 // Bubble Grenade Explosion
-public bubble_explode(id)
+public bubble_explode(ent)
 {
+	if ( ent < 0 )
+		return PLUGIN_HANDLED;
+		
 	static Float:originF[3];
-	pev(id, pev_origin, originF);
+	pev(ent, pev_origin, originF);
 
 	create_blast9(originF);
 
@@ -9021,12 +9026,9 @@ public bubble_explode(id)
 	if(!is_valid_ent(iEntity))
 	    return PLUGIN_HANDLED;
 
-	new Float: Origin[3];
-	entity_get_vector(id, EV_VEC_origin, Origin);
-
 	entity_set_string(iEntity, EV_SZ_classname, entclas);
 
-	entity_set_vector(iEntity,EV_VEC_origin, Origin);
+	entity_set_vector(iEntity,EV_VEC_origin, originF);
 	entity_set_model(iEntity,model);
 	entity_set_int(iEntity, EV_INT_solid, SOLID_TRIGGER);
 	entity_set_int(iEntity, EV_INT_movetype, MOVETYPE_FLY);
@@ -9044,7 +9046,10 @@ public bubble_explode(id)
 
 	drop_to_floor( iEntity );
 	
+	engfunc(EngFunc_RemoveEntity, ent)
+
 	set_task(get_pcvar_float(cvar_timeCampo), "DeleteEntity", iEntity);
+
 	return PLUGIN_CONTINUE;
 }
 public DeleteEntity(entity)
@@ -9190,6 +9195,7 @@ droga_explode(ent)
 	        client_cmd(victim, "spk %s", sound_drogado);
         }
     }
+    engfunc( EngFunc_RemoveEntity, ent )
 }
 
 public movimiento(taskid)
@@ -12313,36 +12319,54 @@ public get_grenades(id, item)
 {
 	if(!is_user_alive(id))
 		return;
-	switch(item)
+
+	new HE = 0, FLASH = 0, SMOKE = 0;
+	
+	//flash = frost/droga, smoke = campo/pipe
+	if(Granadas[item][cantidad_bubble] > 0)
+		SMOKE += Granadas[item][cantidad_bubble];
+	
+	if(Granadas[item][cantidad_pipe] > 0)
 	{
-		case 2..3: g_iHe[id] += 1;
-		case 4..5: g_iHe[id] += Granadas[item][cantidad_he];
-		case 6: g_iHe[id] += 1;
-		case 7: g_iHe[id] += Granadas[item][cantidad_he];
-		case 8: { g_iHe[id] += Granadas[item][cantidad_he]; g_iDroga[id] = 1; }
-		case 9: { g_iPipe[id] = 1; g_iDroga[id] = 1; }
-		case 10: { g_iPipe[id] = 1; g_iHe[id] += 2; }
-		case 11: { g_iPipe[id] = 1; /*droga, bubble*/ }
-		case 12: { g_iPipe[id] = 2; /*bubble2*/ }
+		SMOKE += Granadas[item][cantidad_pipe];
+		g_iPipe[id] = Granadas[item][cantidad_pipe];
 	}
-	if(Granadas[item][cantidad_he] > 0)
+
+	if(Granadas[item][cantidad_fire] > 0)
+		HE += Granadas[item][cantidad_fire];
+
+	if(Granadas[item][cantidad_chain] > 0)
+	{
+		HE += Granadas[item][cantidad_chain];
+		g_iHe[id] = Granadas[item][cantidad_chain];
+	}
+
+	if(Granadas[item][cantidad_frost] > 0)
+		FLASH += Granadas[item][cantidad_frost];
+
+	if(Granadas[item][cantidad_droga] > 0)
+	{
+		FLASH += Granadas[item][cantidad_droga];
+		g_iDroga[id] = Granadas[item][cantidad_droga];
+	}
+
+	if(HE > 0)
 	{
 		give_item(id, "weapon_hegrenade")
-		cs_set_user_bpammo(id, CSW_HEGRENADE, Granadas[item][cantidad_he])
+		cs_set_user_bpammo(id, CSW_HEGRENADE, HE);
 	}
 		
-	if(Granadas[item][cantidad_flash] > 0)
+	if(FLASH > 0)
 	{
 		give_item(id, "weapon_flashbang")
-		cs_set_user_bpammo(id, CSW_FLASHBANG, Granadas[item][cantidad_flash])
+		cs_set_user_bpammo(id, CSW_FLASHBANG, FLASH);
 	}
 		
-	if(Granadas[item][cantidad_smoke] > 0)
+	if(SMOKE > 0)
 	{
 		give_item(id, "weapon_smokegrenade")
-		cs_set_user_bpammo(id, CSW_SMOKEGRENADE, Granadas[item][cantidad_smoke])
-	}
-		
+		cs_set_user_bpammo(id, CSW_SMOKEGRENADE, SMOKE);
+	}		
 }
 public register_arma(plugin, params)
 {

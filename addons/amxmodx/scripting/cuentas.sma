@@ -5,6 +5,30 @@
 #include <fakemeta>
 #include <print_center_fx>
 
+//#define use_reapi
+
+
+
+#if !defined use_reapi
+	stock is_user_steam_2( i )
+	{
+		new value = false; 
+		
+		static szAuthid[ 9 ]; get_user_authid( i, szAuthid, 8 );
+
+		if( equali( "STEAM_0:", szAuthid) || equali( "STEAM_1:", szAuthid ))
+			value = true;
+
+		return value;	
+	}
+
+#else
+
+#define is_user_steam_2(%1) is_user_steam(%1)
+
+#endif
+
+
 /*
 
 	CREATE TABLE zp_cuentas 
@@ -44,20 +68,20 @@ new const PluginAuthor[] = "Hypnotize";
 
 //apartado para escribir el nombre del creador del mod
 //area modificable
-new const ModName[] = "Zombie Escape CSO";//nombre del mod
-new const ModAuthor[] = "Hypnotize - divstarproject.com"; //acá pones tu nombre si lo usaste para un modo tuyo
+new const ModName[] = "Zombie Plague";//nombre del mod
+new const ModAuthor[] = "Hypnotize"; //acá pones tu nombre si lo usaste para un modo tuyo
 new const ModVersion[] = "1.0b";//versión del modo
-new const g_szForo[] = "lwfservers.net/foro/";
+new const g_szForo[] = "petardas.com";
 //apartado para escribir el nombre del creador del mod
 //area modificable
 
 new const g_szTabla[ ] = "zp_cuentas";
-new const g_szPrefijo[ ] = "[ZE]";
+new const g_szPrefijo[ ] = "[ZP]";
 
-new const MYSQL_HOST[] = "45.58.56.194";
-new const MYSQL_USER[] = "root";
-new const MYSQL_PASS[] = "MiFaMiLia321_3";
-new const MYSQL_DATEBASE[] = "scs_christopher";
+new const MYSQL_HOST[] = "209.216.78.25";
+new const MYSQL_USER[] = "antrax";
+new const MYSQL_PASS[] = "antrax123";
+new const MYSQL_DATEBASE[] = "db_test";
 
 new Handle:g_hTuple;
 
@@ -216,7 +240,7 @@ public register_account( id )
 
 	get_user_authid( id, szSteam, charsmax( szSteam ) );
 
-	g_iStatus_steam[ id ] = is_user_steam( id ) ? 1 : 0;
+	g_iStatus_steam[ id ] = is_user_steam_2( id ) ? 1 : 0;
 
 	formatex( szQuery, charsmax( szQuery ), "INSERT INTO %s (Pj, Password, status_steam, steam_id) VALUES (^"%s^", ^"%s^", %d, ^"%s^")", g_szTabla, g_szPlayerName[ id ], g_szPassword[ id ], g_iStatus_steam[ id ], szSteam );
 	SQL_ThreadQuery(g_hTuple, "DataHandler", szQuery, iData, 2);
@@ -342,7 +366,7 @@ public DataHandler( failstate, Handle:Query, error[ ], error2, data[ ], datasize
 			if( SQL_NumResults( Query ) ) 
 			{
 				g_id[ id ] = SQL_ReadResult( Query, 0 );
-				g_iStatus_steam[ id ] = is_user_steam( id ) ? 1 : 0;
+				g_iStatus_steam[ id ] = is_user_steam_2( id ) ? 1 : 0;
 				
 				new iRet; ExecuteForward(g_fwLogin, iRet, id, g_id[ id ]);
 
@@ -377,7 +401,7 @@ public DataHandler( failstate, Handle:Query, error[ ], error2, data[ ], datasize
 
 			if( g_estado[ id ] == REGISTRADO )
 			{
-				if( is_user_steam( id ) )
+				if( is_user_steam_2( id ) )
 				{
 					if( g_iStatus_steam[ id ] )
 					{
@@ -482,7 +506,7 @@ public fw_respawn_post( id )
 	if( !is_user_connected( id ) ) 
 		return;
 
-	if( is_user_steam( id ) && !g_iStatus_steam[ id ] )
+	if( is_user_steam_2( id ) && !g_iStatus_steam[ id ] )
 	{
 		new szQuery[ MAX_MOTD_LENGTH ], iData[ 2 ];
 
