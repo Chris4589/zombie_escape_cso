@@ -221,8 +221,6 @@ public plugin_precache()
 		else precache_model(SPRITES[i])
 	}
 	
-	formatex(Buffer, sizeof(Buffer), "get_%s", system_name)
-	register_clcmd(Buffer, "give_item")
 	register_clcmd(weapon_name_buffer_1, "weapon_hook")
 	register_clcmd(weapon_name_buffer_2, "weapon_hook")
 	register_forward(FM_PrecacheEvent, "Forward_PrecacheEvent_Post", 1)

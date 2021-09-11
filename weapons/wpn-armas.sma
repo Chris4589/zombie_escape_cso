@@ -4,19 +4,11 @@
 #include <hamsandwich>
 #include <fun>
 #include <cstrike>
+#include <zp43_armas>
 
 #define PLUGIN	"New Plugin"
 #define AUTHOR	"Hypnotize"
 #define VERSION	"1.0"
-
-#define ALS50 55555
-#define KSG12 44444
-#define THOMI 33333
-#define NORMAL 0000
-
-enum{ PRIMARIA=1, SECUNDARIA, KNIFE, ESPECIALES, MAX_ARMS };
-native zp_arma(const name[], level, reset, categoria, admin, const adm_tipo[]);
-forward dar_arma(id, item);
 
 enum armas_caracteristicas { 
 	NOMBRE[20],
@@ -27,46 +19,36 @@ enum armas_caracteristicas {
 	RESET,
 	TIPO,
 	ADMIN_TIPO,
-	ADMIN_DESC[120],
-	ARMA
+	ADMIN_DESC[120]
 }
 
 new const g_armas_prim[][armas_caracteristicas] = 
 {   
-	//knife
-	{"test1", CSW_KNIFE, "weapon_knife", 0, 0, 0, KNIFE, ADMIN_ALL, "", NORMAL},
-	{"test2", CSW_KNIFE, "weapon_knife", 0, 0, 1, KNIFE, ADMIN_ALL, "", NORMAL},
-	{"test3", CSW_KNIFE, "weapon_knife", 0, 0, 10, KNIFE, ADMIN_ALL, "", NORMAL},
+	{ "Glock" , CSW_GLOCK18 , "weapon_glock18" , 40, 0, 0, SECUNDARIA, ADMIN_ALL, ""},  
+	{ "USP" , CSW_USP , "weapon_usp", 12, 5, 0, SECUNDARIA, ADMIN_ALL, ""},
+	{ "P228" , CSW_P228 , "weapon_p228", 40, 8, 0, SECUNDARIA, ADMIN_ALL, ""},
+	{ "Deagle" , CSW_DEAGLE , "weapon_deagle", 40, 12, 0, SECUNDARIA, ADMIN_ALL, ""},
+	{ "Fiveseven" , CSW_FIVESEVEN , "weapon_fiveseven", 40, 18, 0, SECUNDARIA, ADMIN_ALL, ""},
+	{ "Dual Elite" , CSW_ELITE , "weapon_elite", 60, 22, 0, SECUNDARIA, ADMIN_ALL, ""} ,
 	
-	{ "Glock" , CSW_GLOCK18 , "weapon_glock18" , 40, 0, 0, SECUNDARIA, ADMIN_ALL, "", NORMAL},  
-	{ "USP" , CSW_USP , "weapon_usp", 12, 15, 0, SECUNDARIA, ADMIN_ALL, "", NORMAL},
-	{ "P228" , CSW_P228 , "weapon_p228", 40, 30, 0, SECUNDARIA, ADMIN_ALL, "", NORMAL},
-	{ "Deagle" , CSW_DEAGLE , "weapon_deagle", 21, 50, 0, SECUNDARIA, ADMIN_ALL, "", NORMAL},
-	{ "Fiveseven" , CSW_FIVESEVEN , "weapon_fiveseven", 40, 70, 0, SECUNDARIA, ADMIN_ALL, "", NORMAL},
-	{ "Dual Elite" , CSW_ELITE , "weapon_elite", 60, 80, 0, SECUNDARIA, ADMIN_ALL, "", NORMAL} ,
-	
-	{ "Schmidt TMP" , CSW_TMP , "weapon_tmp", 60, 1, 0, PRIMARIA, ADMIN_ALL, "", NORMAL},
-	{ "Ingram MAC-10" , CSW_MAC10 , "weapon_mac10" , 60, 10, 0, PRIMARIA, ADMIN_ALL, "", NORMAL}, 
-	{ "Thompson" , CSW_MP5NAVY , "weapon_mp5navy" , 60, 18, 0, PRIMARIA, ADMIN_ALL, "", THOMI}, 
-	{ "Navy MP5" , CSW_UMP45 , "weapon_ump45" , 60, 27, 0, PRIMARIA, ADMIN_ALL, "", NORMAL}, 
-	{ "Ksg12" , CSW_M3 , "weapon_m3" , 28, 36, 0, PRIMARIA, ADMIN_ALL, "", KSG12}, 
-	{ "XM1014 M4" , CSW_XM1014 , "weapon_xm1014" , 28, 45, 0, PRIMARIA, ADMIN_ALL, "", NORMAL}, 
-	{ "FN P90" , CSW_P90 , "weapon_p90" , 100, 55, 0, PRIMARIA, ADMIN_ALL, "", NORMAL}, 
-	{ "Schmidt Scout" , CSW_SCOUT , "weapon_scout" , 10, 65, 0, PRIMARIA, ADMIN_ALL, "", NORMAL}, 
-	{ "Famas" , CSW_FAMAS , "weapon_famas" , 90, 76, 0, PRIMARIA, ADMIN_ALL, "", NORMAL}, 
-	{ "IMI Galil" , CSW_GALIL , "weapon_galil" , 105, 88, 0, PRIMARIA, ADMIN_ALL, "", NORMAL}, 
-	{ "AK-47 Kalashnikov" , CSW_AK47 , "weapon_ak47" , 90, 96, 0, PRIMARIA, ADMIN_ALL, "", NORMAL},
-	{ "M4A1 Carbine" , CSW_M4A1, "weapon_m4a1", 90, 110, 0, PRIMARIA, ADMIN_ALL, "", NORMAL},
-	{ "SG-552 Commando" , CSW_SG552 , "weapon_sg552" , 90, 136, 0, PRIMARIA, ADMIN_ALL, "", NORMAL},
-	{ "Aug" , CSW_AUG , "weapon_aug" , 90, 158, 0, PRIMARIA, ADMIN_ALL, "", NORMAL},
-	{ "Al S50" , CSW_AWP , "weapon_awp" , 10, 175, 0, PRIMARIA, ADMIN_ALL, "", ALS50},
-	{ "G3SG1 Auto-Sniper" , CSW_G3SG1 , "weapon_g3sg1" , 60, 186, 0, PRIMARIA, ADMIN_ALL, "", NORMAL},
-	{ "SG-550 Auto-Sniper" , CSW_SG550 , "weapon_sg550" , 60, 200, 0, PRIMARIA, ADMIN_ALL, "", NORMAL},
-	{ "M249 SAW" , CSW_M249 , "weapon_m249" , 200, 220, 0, PRIMARIA, ADMIN_ALL, "", NORMAL}
+	{ "Schmidt TMP" , CSW_TMP , "weapon_tmp", 60, 1, 0, PRIMARIA, ADMIN_ALL, ""},
+	{ "Ingram MAC-10" , CSW_MAC10 , "weapon_mac10" , 60, 1, 0, PRIMARIA, ADMIN_ALL, ""}, 
+	{ "MP5 NAVY" , CSW_MP5NAVY , "weapon_mp5navy" , 60, 1, 0, PRIMARIA, ADMIN_ALL, ""}, 
+	{ "Navy MP5" , CSW_UMP45 , "weapon_ump45" , 60, 3, 0, PRIMARIA, ADMIN_ALL, ""}, 
+	{ "M3" , CSW_M3 , "weapon_m3" , 28, 4, 0, PRIMARIA, ADMIN_ALL, ""}, 
+	{ "XM1014 M4" , CSW_XM1014 , "weapon_xm1014" , 28, 8, 0, PRIMARIA, ADMIN_ALL, ""}, 
+	{ "FN P90" , CSW_P90 , "weapon_p90" , 100, 12, 0, PRIMARIA, ADMIN_ALL, ""}, 
+	{ "Famas" , CSW_FAMAS , "weapon_famas" , 90, 16, 0, PRIMARIA, ADMIN_ALL, ""}, 
+	{ "IMI Galil" , CSW_GALIL , "weapon_galil" , 105, 18, 0, PRIMARIA, ADMIN_ALL, ""}, 
+	{ "AK-47 Kalashnikov" , CSW_AK47 , "weapon_ak47" , 90, 20, 0, PRIMARIA, ADMIN_ALL, ""},
+	{ "M4A1 Carbine" , CSW_M4A1, "weapon_m4a1", 90, 22, 0, PRIMARIA, ADMIN_ALL, ""},
+	{ "SG-552 Commando" , CSW_SG552 , "weapon_sg552" , 90, 22, 0, PRIMARIA, ADMIN_ALL, ""},
+	{ "G3SG1 Auto-Sniper" , CSW_G3SG1 , "weapon_g3sg1" , 60, 23, 0, PRIMARIA, ADMIN_ALL, ""},
+	{ "SG-550 Auto-Sniper" , CSW_SG550 , "weapon_sg550" , 60, 23, 0, PRIMARIA, ADMIN_ALL, ""},
+	{ "M249 SAW" , CSW_M249 , "weapon_m249" , 200, 24, 0, PRIMARIA, ADMIN_ALL, ""}
 }
 
 new g_item[ sizeof(g_armas_prim) ];
-new gMsgSayText;
 
 public plugin_init()
 {
@@ -74,43 +56,22 @@ public plugin_init()
 	// Add your own code here
 	for(new i = 0; i < sizeof(g_armas_prim); ++i)
 		g_item[i] = zp_arma(g_armas_prim[i][NOMBRE], g_armas_prim[i][NIVEL], g_armas_prim[i][RESET], g_armas_prim[i][TIPO], g_armas_prim[i][ADMIN_TIPO], g_armas_prim[i][ADMIN_DESC]);
-
-	gMsgSayText = get_user_msgid("SayText");
 }
 
-public dar_arma(id, item){
-	if( item > charsmax(g_armas_prim) )
+public dar_arma(id, item) {
+	if (!arm_range(item))
 		return;
 	
-	if( g_item[item] != item )
-		return;
-	switch(g_armas_prim[item][ARMA])
-	{
-		case NORMAL:{
-			give_item(id, g_armas_prim[item][WEAPON_NAME]);
-			if( g_armas_prim[item][TIPO] != KNIFE ){
-				cs_set_user_bpammo(id, g_armas_prim[item][CSW_NAME], g_armas_prim[item][BPAMMO]);
-			}
-		}
-		case ALS50:{
-			SendCmd(id, "w_as50");
-		}
-		case KSG12:{
-			SendCmd(id, "w_ksg12");
-		}
-		case THOMI:{
-			SendCmd(id, "w_thomi");
+	give_item(id, g_armas_prim[item][WEAPON_NAME]);
+	cs_set_user_bpammo(id, g_armas_prim[item][CSW_NAME], g_armas_prim[item][BPAMMO]);
+}
+public arm_range(item) {
+	new value = false;
+	for (new i = 0; i < sizeof(g_armas_prim); ++i) {
+		if (g_item[i] == item) {
+			value = true;
+			break;
 		}
 	}
-	
-	return;
-}
-
-SendCmd(const iClient, const szCommand[])
-{
-    message_begin(MSG_ONE, SVC_DIRECTOR, _, iClient);
-    write_byte(strlen(szCommand) + 2);
-    write_byte(10);
-    write_string(szCommand);
-    message_end();
+	return value;
 }

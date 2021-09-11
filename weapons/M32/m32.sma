@@ -4,7 +4,7 @@
 #include <fakemeta_util>
 #include <fun>
 #include <hamsandwich>
-#include <xs>
+//#include <xs>
 #include <cstrike>
 #include <zombieplague>
 #include <zp43_armas>
@@ -58,7 +58,7 @@ public plugin_init()
     //register_clcmd("buyammo1", "clcmd_buyammo")
     //register_clcmd("buyammo2", "clcmd_buyammo")
     g_itemDmg =  zp_register_extra_item("M32", 500, 0 ,ZP_TEAM_HUMAN)
-    g_itemid = zp_arma( "M32", 0, 0, PRIMARIA, ADMIN_BAN, "[SILVER]" );
+    g_itemid = zp_arma( "M32", 1, 1, PRIMARIA, ADMIN_BAN, "[SILVER]" );
     gmsgWeaponList = get_user_msgid("WeaponList")
     g_MaxPlayers = get_maxplayers()
 }
