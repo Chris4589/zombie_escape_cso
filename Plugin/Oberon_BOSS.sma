@@ -12,7 +12,7 @@
 #define TIEMPO 15
 
 #define OBERON_CLASSNAME "oberon" 
-#define OBERON_HEALTH 50000.0
+#define OBERON_HEALTH 30000.0
 
 #define TASK_HOOKINGUP 123312312 
 #define TASK_HOOKINGDOWN 123312313 
@@ -67,6 +67,9 @@ public plugin_init()
 	register_event( "HLTV", "event_RoundStart", "a", "1=0", "2=0" );
 	
 	register_clcmd( "say /boss", "f_Menu" );
+
+	register_clcmd("oberon_test", "get_origin");
+	register_clcmd("oberon_spawn", "create_oberon");
 
 	get_mapname( g_szMap, charsmax( g_szMap ) );
 	get_configsdir( g_szPath, charsmax( g_szPath ) );
@@ -142,10 +145,16 @@ stock remove_entity_by_classname(const classname[])
 public event_RoundStart() 
 { 
 	remove_task( 5678 );
+	remove_task(512512);
+	//remove_task(oberon+2012);
 	g_bTocado = false;
 	g_iTiempo = TIEMPO;
 	
+	remove_entity_by_classname("hole_hook");
 	remove_entity_by_classname(OBERON_CLASSNAME); 
+	if(task_exists(g_IdEnt+666)) remove_task(g_IdEnt+666);
+	remove_task(TASK_HOOKINGDOWN);
+	remove_task(TASK_HOOKINGUP);
 
 	set_cvar_num("mp_roundtime", 7);
 
@@ -229,8 +238,8 @@ public create_oberon()
 	entity_set_float(ent, EV_FL_friction, 1.0);
 	entity_set_float(ent, EV_FL_animtime, 2.0);
 	entity_set_float(ent, EV_FL_framerate, 1.0);
-	entity_set_float(ent, EV_VEC_velocity, 350.0);
-	entity_set_float(ent, EV_FL_maxspeed, 350.0);
+	entity_set_float(ent, EV_VEC_velocity, 450.0);//speed
+	entity_set_float(ent, EV_FL_maxspeed, 500.0);//max speed
 
 	entity_set_int(ent, EV_INT_flags, FL_MONSTER|FL_MONSTERCLIP);
 	entity_set_int(ent, EV_INT_fixangle, 1);
@@ -244,8 +253,11 @@ public create_oberon()
 	
 	set_pev(ent, pev_iuser4, 0); 
 	
-	entity_set_float(ent, EV_FL_nextthink, halflife_time() + 0.01); 
-	set_task(8.0, "do_random_skill", ent+666, _, _, "b"); 
+	entity_set_float(ent, EV_FL_nextthink, halflife_time() + 0.01);
+
+	if(task_exists(g_IdEnt+666)) remove_task(g_IdEnt+666);
+
+	set_task(18.0, "do_random_skill", ent+666, _, _, "b"); 
 	
 	if(!g_reg) 
 	{ 
@@ -284,10 +296,12 @@ public fw_think(ent)
 	
 	if(is_user_alive(victim) && zp_get_class(victim) < ZOMBIE) 
 	{ 
-		if(distance <= 500.0) 
+		if(distance <= 300.0) 
 		{ 
 			if(!is_valid_ent(ent)) 
-				return PLUGIN_CONTINUE;     
+				return PLUGIN_CONTINUE; 
+
+			//client_print(0, print_center, "think");    
 			
 			new Float:Ent_Origin[3], Float:Vic_Origin[3]; 
 			
@@ -298,26 +312,26 @@ public fw_think(ent)
 			
 			if( random_num( 1, 2 )  == 1 ) 
 			{ 
-				set_entity_anim(ent, 14); 
+				set_entity_anim(ent, 14); //atacke garra
 				entity_set_aim(ent, victim); 
 				emit_sound(ent, CHAN_BODY, oberon_attack_sound[4], 1.0, ATTN_NORM, 0, PITCH_NORM); 
 				
-				set_task(1.0, "do_takedmg", ent);
+				set_task(1.0, "do_takedmg", ent);//baja hp a la gente en su rango
 				
 				entity_set_float(ent, EV_FL_nextthink, get_gametime() + 1.0); 
 			} 
 			else 
 			{ 
-				set_entity_anim(ent, 15);  
+				set_entity_anim(ent, 15);  //atacke garra2
 				entity_set_aim(ent, victim);    
 				emit_sound(ent, CHAN_BODY, oberon_attack_sound[5], 1.0, ATTN_NORM, 0, PITCH_NORM); 
 				
-				set_task(0.5, "do_takedmg", ent);             
+				set_task(0.5, "do_takedmg", ent); //baja hp a la gente en su rango           
 				
 				entity_set_float(ent, EV_FL_nextthink, get_gametime() + 0.01); 
 			} 
 		} 
-		else 
+		else //esta caminando
 		{ 
 			static moving_anim; 
 			moving_anim = 13; 
@@ -335,7 +349,7 @@ public fw_think(ent)
 			pev(victim, pev_origin, Vic_Origin);  
 			
 			npc_turntotarget(ent, Ent_Origin, victim, Vic_Origin);  
-			hook_ent(ent, victim, 100.0);  
+			hook_ent(ent, victim, 490.0);  
 			
 			entity_set_float(ent, EV_FL_nextthink, get_gametime() + 0.2);  
 		} 
@@ -369,7 +383,7 @@ public do_random_skill(ent)
 	switch( random_num( 0, 100 ) ) 
 	{ 
 		case 0..37: do_attack3(ent);
-		case 38..68: do_hole(ent);
+		//case 38..68: do_hole(ent);
 		case 69..100: do_bomb(ent);      
 	}     
 	
@@ -385,7 +399,7 @@ public do_bomb(oberon)
 	
 	set_entity_anim(oberon, 18); 
 	
-	set_task(3.0, "do_skill_bomb", oberon+2015, _, _, "b"); 
+	set_task(3.0, "do_skill_bomb", oberon+2015/*, _, _, "b"*/); 
 	set_task(10.0, "stop_skill_bomb", oberon); 
 } 
 
@@ -397,6 +411,7 @@ public stop_skill_bomb(oberon)
 	remove_task(oberon+2015); 
 	
 	set_entity_anim(oberon, 12); 
+	entity_set_float(oberon, EV_FL_nextthink, halflife_time() + 0.01);
 	set_task(2.0, "reset_think", oberon); 
 } 
 
@@ -601,10 +616,6 @@ public do_hole(oberon)
 	if(!is_valid_ent(oberon)) 
 		return; 
 
-
-	static ient;
-	ient = find_ent_by_class(-1, "hole_hook");
-	remove_entity(ient); 
 	remove_task(512512);  
 
 	set_entity_anim(oberon, 19);
@@ -648,6 +659,7 @@ public do_hole(oberon)
 			arg[0] = oberon; 
 			arg[1] = i; 
 			
+			remove_task(512512);
 			set_task(0.01, "do_hook_player", 512512, arg, sizeof(arg), "b"); 
 		} 
 	} 
@@ -671,7 +683,7 @@ public do_hook_player(arg[2])
 public stop_hook(oberon) 
 { 
 	oberon -= 2012; 
-
+	remove_task(oberon+2012);
 	if(!is_valid_ent(oberon))
 		return;
 	
@@ -682,6 +694,7 @@ public stop_hook(oberon)
 	remove_task(512512); 
 	
 	do_takedmg(oberon); 
+	entity_set_float(oberon, EV_FL_nextthink, halflife_time() + 0.01);
 	set_task(1.0, "reset_think", oberon); 
 } 
 
@@ -735,7 +748,9 @@ public hookingup(ent)
 	pev(ent, pev_origin, Ent_Origin); 
 	pev(Enemy, pev_origin, Vic_Origin); 
 	
-	npc_turntotarget(ent, Ent_Origin, Enemy, Vic_Origin);    
+	npc_turntotarget(ent, Ent_Origin, Enemy, Vic_Origin); 
+
+	remove_task(ent+TASK_HOOKINGUP);   
 	return PLUGIN_HANDLED;
 } 
 
@@ -756,6 +771,8 @@ public set_func1(ent)
 { 
 	if(is_valid_ent(ent))
 		set_pev(ent, pev_iuser3, 1); 
+
+	entity_set_float(ent, EV_FL_nextthink, halflife_time() + 0.01);
 } 
 
 public hookingdown2(ent) 
@@ -764,6 +781,8 @@ public hookingdown2(ent)
 	
 	if( !is_valid_ent(ent) ) 
 		return PLUGIN_HANDLED;
+
+	remove_task(ent+TASK_HOOKINGDOWN);
 	
 	static Enemy;
 	Enemy = FindClosesEnemy(ent); 
@@ -807,11 +826,10 @@ public fw_touch(ent, touch)
 			if(is_user_alive(i) && entity_range(ent, i) <= 300.0) 
 			{ 
 				hit_screen(i); 
+
 				
 				static Float:Damage; 
-				Damage = random_float(10.0, 25.0); 
-				
-				Damage *= 1.5; 
+				Damage = random_float(10.0, 25.0) * 1.5; 
 
 				if( Damage >= get_user_health( i ) )
 					user_kill( i );
@@ -853,7 +871,7 @@ public do_takedmg(ent2)
 	
 	drop_to_floor(ent); 
 	
-	set_task(1.0, "remove_knife_effect", ent); 
+	set_task(0.5, "remove_knife_effect", ent); 
 	
 	
 	for(new i = 1; i <= MAX_PLAYERS; i++) 
@@ -861,9 +879,11 @@ public do_takedmg(ent2)
 		if(zp_get_class(i) >= ZOMBIE)
 			continue;
 
-		if(is_user_alive(i) && entity_range(ent2, i) <= 300.0) 
+		if(is_user_alive(i) && entity_range(ent2, i) <= 400.0) 
 		{ 
 			hit_screen(i); 
+
+			//client_print(0, print_center, "garrazo"); 
 			
 			static Float:Damage; 
 			Damage = random_float(7.5, 15.0); 
@@ -886,21 +906,6 @@ public remove_knife_effect(ent)
 	remove_entity(ent); 
 } 
 
-public move_entity(ent) 
-{ 
-	if(!pev_valid(ent)) 
-		return FMRES_IGNORED; 
-		
-	static Float:Origin[3]; 
-	
-	Origin[0] = 4290.0; 
-	Origin[1] = 4290.0; 
-	Origin[2] = 4290.0; 
-	
-	set_pev(ent, pev_origin, Origin); 
-	entity_set_float(ent, EV_FL_nextthink, halflife_time() + 0.01); 
-	return PLUGIN_HANDLED;
-} 
 
 public fw_takedmg(victim, inflictor, attacker, Float:damage, damagebits) 
 { 
@@ -930,6 +935,19 @@ public fw_takedmg(victim, inflictor, attacker, Float:damage, damagebits)
 		fnRemoveENT( );
 	}
 } 
+
+public move_entity(ent) 
+{ 
+    static Float:Origin[3] ;
+     
+    Origin[0] = 4290.0;
+    Origin[1] = 4290.0 ;
+    Origin[2] = 4290.0 ;
+     
+    set_pev(ent, pev_origin, Origin) ;
+    entity_set_float(ent, EV_FL_nextthink, halflife_time() + 99999999.0) ;
+} 
+
 
 stock set_entity_anim(ent, anim) 
 { 
@@ -1099,7 +1117,7 @@ public hook_ent(ent, victim, Float:speed)
 		
 		fl_Velocity[0] = (VicOrigin[0] - EntOrigin[0]) / fl_Time; 
 		fl_Velocity[1] = (VicOrigin[1] - EntOrigin[1]) / fl_Time; 
-		fl_Velocity[2] = (VicOrigin[2] - EntOrigin[2]) / fl_Time ;
+		fl_Velocity[2] = (VicOrigin[2] - EntOrigin[2]) / fl_Time;
 	} 
 	else 
 	{ 
@@ -1140,6 +1158,7 @@ public hook_ent2(ent, Float:VicOrigin[3], Float:speed)
 	} 
 	
 	entity_set_vector(ent, EV_VEC_velocity, fl_Velocity); 
+	entity_set_float(ent, EV_FL_nextthink, halflife_time() + 0.01); 
 	return PLUGIN_HANDLED;
 } 
 

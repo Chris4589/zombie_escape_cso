@@ -80,7 +80,7 @@ new const g_szTabla[ ] = "zp_cuentas";
 new const g_szPrefijo[ ] = "[ SVL MEXICO ]";
 
 new const MYSQL_HOST[] = "45.58.56.30";
-new const MYSQL_USER[] = "svlmexico";
+new const MYSQL_USER[] = "adminpanel";
 new const MYSQL_PASS[] = "obidiotapia";
 new const MYSQL_DATEBASE[] = "svlmexico";
 
@@ -103,6 +103,17 @@ new server[ 30 ];
 
 new cvar_type;
 
+new bool:happyTime, happyMultiplier, happyDamage;
+
+enum _:__HappyData { happy_hour[3], happy_damage, happy_multiplier };
+
+new const _HappyHour[][__HappyData] =
+{
+	{ "20", 400, 2 },
+	{ "22", 400, 3 },
+	{ "23", 400, 1 }
+};
+
 public plugin_init()  
 {
 	register_plugin( 
@@ -114,6 +125,8 @@ public plugin_init()
 	register_clcmd("CREAR_PASSWORD", "register_account");
 	register_clcmd("LOGUEAR_PASSWORD", "login_account");
 
+	register_clcmd("say /hh", "checkhapy");
+
 	register_forward(FM_ClientUserInfoChanged, "fw_ClientUserInfoChanged");
 	RegisterHookChain( RG_CBasePlayer_RoundRespawn, "fw_respawn_post", true );
 
@@ -122,6 +135,7 @@ public plugin_init()
 	RegisterHookChain(RG_HandleMenu_ChooseTeam, "message_showmenu");
 
 	register_logevent("EventRoundEnd", 2, "1=Round_End");
+	register_event("HLTV", "event_round_start", "a", "1=0", "2=0")
 	
 	g_fwLogin = CreateMultiForward("advacc_guardado_login_success", ET_IGNORE, FP_CELL);
 	
@@ -132,6 +146,11 @@ public plugin_init()
 	get_user_ip( 0, server, 29 );
 
 	Mysql_init( );
+}
+
+public checkhapy(id) {
+	client_print_color(id, print_team_blue, "La HH esta^x04 %sctivada", happyTime ? "A" : "Desa");
+	return PLUGIN_HANDLED;
 }
 
 public plugin_natives()
@@ -146,6 +165,21 @@ public plugin_natives()
 
 	register_native("set_user_coins", "native_set_coins", 1);
 	register_native("get_user_coins", "native_get_coins", 1);
+	register_native("isHappyHour", "native_ishh", 1);
+	register_native("happyMultiplier", "native_hhmultiplier", 1);
+	register_native("happyDamage", "native_hhDmg", 1);
+}
+
+public native_hhDmg() {
+	return happyDamage;
+}
+
+public native_ishh() {
+	return happyTime;
+}
+
+public native_hhmultiplier() {
+	return happyMultiplier;
 }
 
 public native_set_coins(id, cant) {
@@ -668,6 +702,37 @@ public Mysql_init()
 	formatex( szQuery, charsmax( szQuery ), "SELECT COUNT(*) FROM %s", g_szTabla);
 	SQL_ThreadQuery(g_hTuple, "DataHandlerServer", szQuery, iData, 2);
 	return PLUGIN_CONTINUE;
+}
+
+public event_round_start() {
+	checkHH();
+}
+
+public checkHH() {
+	happyTime = false;
+	happyMultiplier = 1;
+
+	static i, current_hour[3], szDay[5]; get_time("%H", current_hour, 2);
+	for( i = 0 ; i < sizeof _HappyHour ; ++i )
+	{
+		if(equal(_HappyHour[i][happy_hour], current_hour))
+		{
+			happyTime = true;
+			happyDamage = _HappyHour[i][happy_damage];
+			happyMultiplier = _HappyHour[i][happy_multiplier];
+			client_print_color(0, print_team_blue, "HORA FELIZ^x04 ACTIVA!^x01 Multiplicador: ^x04%d", happyMultiplier);
+			break;
+		}
+	}
+
+	get_time( "%a", szDay, 4 );
+	if(equal( szDay, "Sun" ))
+	{
+		happyTime = true;
+		happyMultiplier = 2;
+		client_print_color(0, print_team_blue, "HORA FELIZ TODO EL DIA^x04!^x01 Multiplicador: ^x04%d!", happyMultiplier);
+		client_print_color(0, print_team_blue, "HORA FELIZ TODO EL DIA^x04!^x01 Multiplicador: ^x04%d!", happyMultiplier);
+	}
 }
 
 public plugin_end()
