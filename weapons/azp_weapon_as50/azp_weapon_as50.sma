@@ -97,13 +97,13 @@ public plugin_init()
 	cvar_spd_as50 = register_cvar("zp_as50_spd", "1.9")
 	cvar_as50_ammo = register_cvar("zp_as50_ammo", "100")
 	register_logevent("event_round_start", 2, "1=Round_Start")
-	g_itemid_as50 = zp_arma("Al AS50", 0, 0, PRIMARIA, ADMIN_ALL, "");
+	g_itemid_as50 = zp_arma("Al AS50", 18, 0, PRIMARIA, ADMIN_ALL, "");
 	g_MaxPlayers = get_maxplayers()
 	gmsgWeaponList = get_user_msgid("WeaponList")
 }
 public event_round_start()
 {
-	for(new i = 1;i <= get_maxplayers() ;++i )
+	for(new i = 1;i <= 32 ;++i )
 	{
 		g_has_as50[i] = false
 	}

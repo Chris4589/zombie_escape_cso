@@ -126,6 +126,7 @@ public plugin_init()
 	register_clcmd("LOGUEAR_PASSWORD", "login_account");
 
 	register_clcmd("say /hh", "checkhapy");
+	register_clcmd("say /horarios", "menuHorarios");
 
 	register_forward(FM_ClientUserInfoChanged, "fw_ClientUserInfoChanged");
 	RegisterHookChain( RG_CBasePlayer_RoundRespawn, "fw_respawn_post", true );
@@ -612,6 +613,32 @@ public save_data(id) {
 	formatex( szQuery, charsmax( szQuery ), "UPDATE %s SET Online = '%d', LastServer=^"%s^", coins = '%d' WHERE id = '%d'", 
 		g_szTabla, g_online[id], server, g_points[ id ], g_id[ id ] );
 	SQL_ThreadQuery(g_hTuple, "DataHandler", szQuery, iData, 2);
+}
+
+public menuHorarios(index) {
+	new i, szBuffer[1024], len, szTime[10]; len = 0;
+	len += formatex(szBuffer[len], charsmax(szBuffer)-len, 
+	"<head><style>\
+	table {font-family:arial, sans-serif;border-collapse:collapse;width:100%;}\
+	td, th {border:1px solid #dddddd;text-align:center;padding:8px;}\
+	tr:nth-child(even) {background-color:#dddddd;color:#000;}\
+	body {color:#FFF;background:#000;}\
+	</style>\
+	</head><body>\
+	<center><h2>Horarios/Ganancias Happy Hour</h2>\
+	<table>\
+	<tr><th>Hora</th><th>Damage</th><th>Multiplicador</th></tr>");
+
+	for( i = 0 ; i < sizeof _HappyHour ; ++i )
+	{
+		len += formatex(szBuffer[len], charsmax(szBuffer)-len, 
+		"<tr><td>%s</td><td>%d</td><td>x%d</td></tr>", _HappyHour[i][happy_hour], _HappyHour[i][happy_damage], _HappyHour[i][happy_multiplier]);
+	}
+
+	get_time("%H:%M", szTime, 9);
+	len += formatex(szBuffer[len], charsmax(szBuffer)-len, "</table><div>NOTA: Los multiplicadores se suman a tu multiplicador personal<br>Hora del servidor: %s</div></body>", szTime);
+
+	show_motd(index, szBuffer, "Happy Hour");
 }
 
 public fw_ClientUserInfoChanged(id, buffer) 

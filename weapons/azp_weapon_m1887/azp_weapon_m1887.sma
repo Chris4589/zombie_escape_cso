@@ -93,13 +93,13 @@ public plugin_init()
 	RegisterHam(Ham_TraceAttack, "func_plat", "fw_TraceAttack", 1)
 	RegisterHam(Ham_TraceAttack, "func_rotating", "fw_TraceAttack", 1)
 
-	cvar_dmg_m1887 = register_cvar("zp_m1887_dmg", "1.4")
+	cvar_dmg_m1887 = register_cvar("zp_m1887_dmg", "1.5")
 	cvar_recoil_m1887 = register_cvar("zp_m1887_recoil", "0.55")           
 	cvar_clip_m1887 = register_cvar("zp_m1887_clip", "8")
-        cvar_spd_m1887 = register_cvar("zp_m1887_spd", "1.0")
+        cvar_spd_m1887 = register_cvar("zp_m1887_spd", "1.3")
 	cvar_m1887_ammo = register_cvar("zp_m1887_ammo", "64")
 	
-	g_itemid_m1887 = zp_arma("Winchester M1887", 12, 0, PRIMARIA, ADMIN_ALL, "");
+	g_itemid_m1887 = zp_arma("Winchester M1887", 10, 0, PRIMARIA, ADMIN_ALL, "");
 	g_MaxPlayers = get_maxplayers()
 	gmsgWeaponList = get_user_msgid("WeaponList")
 }

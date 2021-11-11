@@ -23,7 +23,7 @@ new const szButtonClasses[][] = {
 	"ha activado el boton del escape corran todos!!!"
 };
 
-new g_iButtons, bool:g_Revive, Float:TimeRequest, g_iButton_Selected[33];
+new g_iButtons, bool:g_Revive, Float:TimeRequest, g_iButton_Selected[33], cvar_time;
 public plugin_init()
 {
 	register_plugin(szPluginInfo[0], szPluginInfo[1], szPluginInfo[2])
@@ -44,10 +44,11 @@ public plugin_init()
 
 	LoadMapButtonsFile();
 
-	RegisterHam(Ham_Use, "func_rot_button", "fw_HamUse_Pre", false);
-	RegisterHam(Ham_Use, "func_button", "fw_HamUse_Pre", false);
+	cvar_time = register_cvar("time_button", "45");
+	RegisterHam(Ham_Use, "func_rot_button", "fw_HamUse_Pre", 1);
+	RegisterHam(Ham_Use, "func_button", "fw_HamUse_Pre", 1);
 	register_event("HLTV", "event_round_start", "a", "1=0", "2=0")
-	register_clcmd("say btn", "fngg")
+	//register_clcmd("say btn", "fngg")
 }
 public fngg(id)
 {
@@ -62,10 +63,10 @@ public handler_active()
 public event_round_start()
 {
 	g_Revive = false;
-	TimeRequest = get_gametime() + 30;
+	TimeRequest = get_gametime() + get_pcvar_num(cvar_time);
 }
 
-public fw_HamUse_Pre(iButton, id, useType, Float:value)
+public fw_HamUse_Pre(iButton, id)
 {
 	if(g_iButtons)
 	{
@@ -85,7 +86,7 @@ public fw_HamUse_Pre(iButton, id, useType, Float:value)
 				{
 					if(TimeRequest >= get_gametime())
 					{
-						client_print_color(id, print_team_blue, "%s debes esperar 60 ^x04segundos^x1 para activar este^x04 boton", TAG);
+						client_print_color(0, print_team_blue, "%s debes esperar 45 ^x04segundos^x1 para activar este^x04 boton", TAG);
 						return HAM_SUPERCEDE;
 					}
 					else

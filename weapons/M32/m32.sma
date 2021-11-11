@@ -30,7 +30,7 @@ new m32_V_MODEL[64] = "models/v_m32.mdl"
 new cvar_clip_m32, cvar_m32_ammo,cvar_dmg
 new g_has_m32[33], g_has_damage[33];
 new g_MaxPlayers, g_orig_event_m32
-new g_itemid
+new g_itemid, g_buff;
 
 new g_itemDmg;
 
@@ -51,14 +51,15 @@ public plugin_init()
     register_forward(FM_PlaybackEvent, "PlaybackEvent")
     register_event("HLTV", "event_round_start", "a", "1=0", "2=0")
 
-    cvar_clip_m32 = register_cvar("m32_clip", "6")
+    cvar_clip_m32 = register_cvar("m32_clip", "7")
     cvar_m32_ammo = register_cvar("m32_ammo", "25")
     cvar_dmg = register_cvar("m32_dmg","300.0")
     
     //register_clcmd("buyammo1", "clcmd_buyammo")
     //register_clcmd("buyammo2", "clcmd_buyammo")
     g_itemDmg =  zp_register_extra_item("M32", 500, 0 ,ZP_TEAM_HUMAN)
-    g_itemid = zp_arma( "M32", 1, 1, PRIMARIA, ADMIN_BAN, "[SILVER]" );
+    g_buff =  zp_register_extra_item("M32 BUFF", 600, 0 ,ZP_TEAM_HUMAN)
+    g_itemid = zp_arma( "M32", 5, 1, PRIMARIA, ADMIN_ALL, "[SILVER]" );
     gmsgWeaponList = get_user_msgid("WeaponList")
     g_MaxPlayers = get_maxplayers()
 }
@@ -94,6 +95,10 @@ public zp_extra_item_selected(id, itemid)
     if(itemid==g_itemDmg) 
     {
         give_m32(id)
+    }
+    if(itemid==g_buff) 
+    {
+        g_has_damage[id] = true;
     }
 }
 
@@ -429,7 +434,7 @@ public pfn_touch(ptr, ptd)
             new a = FM_NULLENT
             // Get distance between victim and epicenter
             while((a = find_ent_in_sphere(a,originF,300.0)) != 0) {
-                if( a!=owner&& a!=ptr&&pev(a,pev_takedamage)!=DAMAGE_NO) ExecuteHamB( Ham_TakeDamage, a ,owner ,owner,  g_has_damage[owner] ? (get_pcvar_float(cvar_dmg)*2) : get_pcvar_float(cvar_dmg), DMG_BULLET )
+                if( a!=owner&& a!=ptr&&pev(a,pev_takedamage)!=DAMAGE_NO) ExecuteHamB( Ham_TakeDamage, a ,owner ,owner,  g_has_damage[owner] ? (get_pcvar_float(cvar_dmg)+ 100) : get_pcvar_float(cvar_dmg), DMG_BULLET )
                 set_pev(ptr, pev_flags, FL_KILLME)
             }
         }

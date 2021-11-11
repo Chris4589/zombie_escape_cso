@@ -92,7 +92,7 @@ public plugin_init()
 	RegisterHam(Ham_TraceAttack, "func_plat", "fw_TraceAttack", 1)
 	RegisterHam(Ham_TraceAttack, "func_rotating", "fw_TraceAttack", 1)
 
-	cvar_dmg_tar21 = register_cvar("zp_tar21_dmg", "1.0")
+	cvar_dmg_tar21 = register_cvar("zp_tar21_dmg", "1.5")
 	cvar_recoil_tar21 = register_cvar("zp_tar21_recoil", "0.9")
 	cvar_clip_tar21 = register_cvar("zp_tar21_clip", "30")
 	cvar_spd_tar21 = register_cvar("zp_tar21_spd", "0.98")

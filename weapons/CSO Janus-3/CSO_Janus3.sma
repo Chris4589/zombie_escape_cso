@@ -10,7 +10,7 @@
 #define AUTHOR "Dias Pendragon"
 
 #define DAMAGE_A 35 // Damage in Non-Charged Mode
-#define DAMAGE_B 70 // Damage in Charged Mode
+#define DAMAGE_B 90 // Damage in Charged Mode
 #define CHARGE_AMMO 20 // After shoot X bullets, you can active Janus Transform System
 #define CHARGE_LIMITTIME 7 // After X Second(s), Janus Transform System will be turned off if not using
 #define CHARGE_TIME 7 // Time Use for Janus Transform System
@@ -106,7 +106,7 @@ public plugin_init()
 
 	register_event("HLTV", "Event_NewRound", "a", "1=0", "2=0")
 
-	g_item = zp_arma("Janus 3", 0, 0, PRIMARIA, ADMIN_ALL, "");
+	g_item = zp_arma("Janus 3", 12, 0, PRIMARIA, ADMIN_ALL, "");
 	
 	g_Msg_WeaponList = get_user_msgid("WeaponList")
 	//register_clcmd("admin_get_janus3", "Get_Janus3")

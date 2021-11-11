@@ -16,7 +16,7 @@
 #define WEAPON_SECRET_CODE 1942
 #define old_event "events/m3.sc"
 
-#define DAMAGE 45
+#define DAMAGE 50
 #define SPEED 0.35
 #define RECOIL 0.5
 #define RELOAD_TIME 4.5
@@ -86,7 +86,7 @@ public plugin_init()
 	
 	register_clcmd("weapon_m3", "hook_weapon")
 	
-	g_item = zp_arma( "Gatling", 0, 0, PRIMARIA, ADMIN_BAN, "[SILVER]" );
+	g_item = zp_arma( "Gatling", 28, 3, PRIMARIA, ADMIN_BAN, "[SILVER]" );
 	//register_clcmd("admin_get_gatling", "get_gatling", ADMIN_BAN)
 }
 

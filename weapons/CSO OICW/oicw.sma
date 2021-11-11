@@ -27,8 +27,8 @@ new g_item;
 #define WEAPON_SECRETCODE 1992
 
 #define DAMAGE 25
-#define GRENADE_DAMAGE 300
-#define GRENADE_RADIUS 110
+#define GRENADE_DAMAGE 500
+#define GRENADE_RADIUS 300
 #define BPAMMO 90
 #define GRENADE_DEFAULT 6
 #define RELOAD_TIME 3.5
@@ -96,7 +96,7 @@ public plugin_init()
 	register_logevent("event_round_start", 2, "1=Round_Start")
 	//register_clcmd("admin_get_oicw", "Get_OICW", ADMIN_KICK)
 	register_clcmd("weapon_oicw", "hook_weapon")
-	g_item = zp_arma("Oicw", 0, 0, PRIMARIA, ADMIN_ALL, "");
+	g_item = zp_arma("Oicw", 6, 0, PRIMARIA, ADMIN_ALL, "");
 }
 public event_round_start(){
 	for(new i=1; i<= get_maxplayers(); ++i)

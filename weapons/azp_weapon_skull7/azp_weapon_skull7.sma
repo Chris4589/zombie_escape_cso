@@ -99,7 +99,7 @@ public plugin_init()
 	cvar_spd_skull7 = register_cvar("zp_skull7_spd", "1.13")
 	cvar_skull7_ammo = register_cvar("zp_skull7_ammo", "240")
 	
-	g_itemid_skull7 = zp_arma("Skull-7", 0, 0, PRIMARIA, ADMIN_ALL, "");
+	g_itemid_skull7 = zp_arma("Skull-7", 24, 0, PRIMARIA, ADMIN_ALL, "");
 	g_MaxPlayers = get_maxplayers()
 }
 public event_round_start()

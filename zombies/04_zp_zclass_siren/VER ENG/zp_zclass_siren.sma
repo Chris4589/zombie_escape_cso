@@ -200,6 +200,8 @@ public message_DeathMsg(msg_id, msg_dest, id)
 	// Non-player attacker or self kill
 	if(!is_user_connected(iAttacker) || iAttacker == iVictim)
 		return PLUGIN_CONTINUE
+
+	g_bSiren[iVictim] = false;
 		
 	// Killed by siren scream
 	if(g_bKilledByScream[iVictim])

@@ -47,7 +47,7 @@ enum {
 #define ZCLASS_MODEL 					"akshazombi_origin_fix"
 #define ZCLASS_CLAWMODEL				"v_knife_zombiaksha_fx.mdl"
 #define ZCLASS_BOMBMODEL				"models/zombie_plague/v_zombibomb_aksha_fix.mdl"
-#define ZCLASS_HEALTH					15000
+#define ZCLASS_HEALTH					5000
 #define ZCLASS_SPEED					250	
 #define ZCLASS_GRAVITY 					0.75
 #define ZCLASS_KNOCKBACK				0.50

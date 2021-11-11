@@ -10,12 +10,12 @@
 #define VERSION "1.0"
 #define AUTHOR "Dias Pendragon"
 
-#define DAMAGE_A 31
-#define DAMAGE_B 100
+#define DAMAGE_A 90
+#define DAMAGE_B 120
 #define EXPLOSION_AMMO 10
 #define RADIUS 100.0
 
-#define CLIP 120
+#define CLIP 50
 
 #define CSW_BALROG7 CSW_M249
 #define weapon_BALROG7 "weapon_m249"
@@ -67,7 +67,7 @@ public plugin_init()
 
 	register_event("HLTV", "Event_NewRound", "a", "1=0", "2=0")
 
-	g_item = zp_arma("Balrog 7", 24, 0, PRIMARIA, ADMIN_IMMUNITY, "[ GOLD ]");
+	g_item = zp_arma("Balrog 7", 5, 6, PRIMARIA, ADMIN_ALL, "[ GOLD ]");
 	
 	g_MaxPlayers = get_maxplayers()
 	 

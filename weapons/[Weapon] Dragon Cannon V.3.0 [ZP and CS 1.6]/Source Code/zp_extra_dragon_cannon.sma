@@ -91,7 +91,7 @@ public plugin_init()
 	g_cvar_damage = register_cvar("cannon_damage", "850.0")
 	
 	register_clcmd("weapon_cannon", "hook_weapon")
-	g_dragoncannon = zp_arma( "Dragon Cannon", 10, 20, PRIMARIA, ADMIN_ALL, "[]" );
+	g_dragoncannon = zp_arma( "Dragon Cannon", 10, 8, PRIMARIA, ADMIN_ALL, "[]" );
 	register_logevent("event_round_start", 2, "1=Round_Start")
 	//register_clcmd("do_shoot", "do_shoot")
 }

@@ -180,7 +180,7 @@ public plugin_init()
 	cvar_trail[1] = register_cvar("blockmg_smoke_trail", "1")
 	
 	g_MaxPlayers = get_maxplayers()
-	variable = zp_arma("lego MG50", 29, 0, PRIMARIA, ADMIN_ALL, "")
+	variable = zp_arma("lego MG50", 28, 0, PRIMARIA, ADMIN_ALL, "")
 }
 
 public plugin_precache()

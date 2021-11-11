@@ -107,7 +107,7 @@ public plugin_init()
 	register_event("HLTV", "Event_NewRound", "a", "1=0", "2=0")
 	// CMD
 	register_clcmd("weapon_xm1014", "Hook_Weapon")
-	g_item = zp_arma("Rail Cannon", 0, 1, PRIMARIA, ADMIN_BAN, "[ SILVER ]");
+	g_item = zp_arma("Rail Cannon", 15, 1, PRIMARIA, ADMIN_ALL, "[ SILVER ]");
 	//register_clcmd("say /get", "Get_RailCannon")
 }
 public Event_NewRound()

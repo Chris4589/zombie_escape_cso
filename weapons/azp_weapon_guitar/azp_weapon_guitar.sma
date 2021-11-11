@@ -94,13 +94,13 @@ public plugin_init()
 	RegisterHam(Ham_TraceAttack, "func_plat", "fw_TraceAttack", 1)
 	RegisterHam(Ham_TraceAttack, "func_rotating", "fw_TraceAttack", 1)
 
-	cvar_dmg_guitar = register_cvar("zp_guitar_dmg", "1.2")
+	cvar_dmg_guitar = register_cvar("zp_guitar_dmg", "1.5")
 	cvar_recoil_guitar = register_cvar("zp_guitar_recoil", "0.98")
 	cvar_clip_guitar = register_cvar("zp_guitar_clip", "30")
 	cvar_spd_guitar = register_cvar("zp_guitar_spd", "1.19")
 	cvar_guitar_ammo = register_cvar("zp_guitar_ammo", "180")
 	
-	g_itemid_guitar = zp_arma( "Guittar", 0, 0, PRIMARIA, ADMIN_ALL, "" );
+	g_itemid_guitar = zp_arma( "Guittar", 4, 0, PRIMARIA, ADMIN_ALL, "" );
 	g_MaxPlayers = get_maxplayers()
 	gmsgWeaponList = get_user_msgid("WeaponList")
 	register_logevent("event_round_start", 2, "1=Round_Start")

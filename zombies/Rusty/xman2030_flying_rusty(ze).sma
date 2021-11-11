@@ -41,7 +41,7 @@ new const g_iHudGreen					= 0;
 new const Float:g_flHudX				= 0.8; //Позиция худа
 new const Float:g_flHudY				= 0.7;
 
-new const g_iClassHealth 			= 7000;
+new const g_iClassHealth 			= 3000;
 new const g_iClassSpeed				= 260;
 new const Float:g_flClassGravity 	= 0.85;
 new const Float:g_flClassKnockback	= 0.3;

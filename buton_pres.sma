@@ -16,7 +16,7 @@ new const szPluginInfo[][] = { "[Zombie Escape] Show Buttons", "v1.1", "totopizz
 
 #define TAG "^x04[ZE]^x03"
 
-new g_szButtonsFile[128];
+new g_szButtonsFile[128], Float:g_time;
 enum { A_BUTTON=1, THE_BUTTON, ESCAPE_BUTTON }
 
 new const szButtonClasses[][] = {
@@ -46,13 +46,22 @@ public plugin_init()
 
 	LoadMapButtonsFile();
 
+	register_event("HLTV", "event_round_start", "a", "1=0", "2=0")
+
 	RegisterHam(Ham_Use, "func_rot_button", "fw_HamUse_Pre", false);
 	RegisterHam(Ham_Use, "func_button", "fw_HamUse_Pre", false);
 }
 
+public event_round_start() {
+	g_time = get_gametime() + 20.0;
+}
 
 public fw_HamUse_Pre(iButton, id, useType, Float:value)
 {
+	if ( g_time > get_gametime()) {
+		client_print_color(id, print_team_blue, "Debes esperar a tu equipo antes de escapar!");
+		return HAM_IGNORED; 
+	}
 	if(g_iButtons)
 	{
 		new iButtonType; iButtonType = get_entvar(iButton, var_iuser1);

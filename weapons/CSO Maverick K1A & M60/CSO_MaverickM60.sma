@@ -16,8 +16,8 @@
 #define CSW_BASEDON CSW_M249
 #define weapon_basedon "weapon_m249"
 
-#define DAMAGE 31
-#define CLIP 100
+#define DAMAGE 90
+#define CLIP 50
 #define BPAMMO 200
 #define SPEED 1.15
 #define RECOIL 0.75
@@ -75,7 +75,7 @@ public plugin_init()
 
 	register_event("HLTV", "Event_NewRound", "a", "1=0", "2=0")
 
-	g_Weapon = zp_arma("Maverick M60", 28, 0, PRIMARIA, ADMIN_ALL, "");		
+	g_Weapon = zp_arma("Maverick M60", 18, 2, PRIMARIA, ADMIN_ALL, "");		
 	
 	g_Msg_CurWeapon = get_user_msgid("CurWeapon")
 }

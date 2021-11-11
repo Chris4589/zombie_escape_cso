@@ -10,7 +10,7 @@
 #define AUTHOR "Dias Pendragon"
 
 #define DAMAGE_A 110 // 140 for zombie, 70 for human
-#define DAMAGE_B 150 // 560 for zombie, 280 for human
+#define DAMAGE_B 190 // 560 for zombie, 280 for human
 
 #define CLIP 15
 #define BPAMMO 64
@@ -172,7 +172,7 @@ public plugin_init()
 	
 	register_clcmd("weapon_janus11", "Hook_Weapon")
 	//register_clcmd("say /get", "Get_Janus11")
-	g_item = zp_arma( "Janus-11", 0, 0, PRIMARIA, ADMIN_BAN, "[VIP+]" );
+	g_item = zp_arma( "Janus-11", 14, 4, PRIMARIA, ADMIN_ALL, "[VIP+]" );
 }
 public event_round_start(){
 for(new i=1; i<= 32; ++i)

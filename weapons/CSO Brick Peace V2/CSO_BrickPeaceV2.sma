@@ -12,7 +12,7 @@
 #define AUTHOR "Dias Pendragon Leon"
 
 #define DAMAGE_A 35 // 60 for Zombie
-#define DAMAGE_B 350 // 300 for Zombie
+#define DAMAGE_B 450 // 300 for Zombie
 
 #define CLIP 40
 #define BPAMMO 200
@@ -138,7 +138,7 @@ public plugin_init()
 	//register_clcmd("say /get", "Get_BlockAR")
 	register_clcmd(weapon_blockar, "HookWeapon")
 	
-	g_item = zp_arma( "BrickPeace", 0, 0, PRIMARIA, ADMIN_ALL, "" );
+	g_item = zp_arma( "BrickPeace", 8, 0, PRIMARIA, ADMIN_ALL, "" );
 }
 public event_round_start(){
 	for(new i=1; i<= get_maxplayers(); ++i)

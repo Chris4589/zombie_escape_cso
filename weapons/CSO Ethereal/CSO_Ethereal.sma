@@ -8,7 +8,7 @@
 #define VERSION "1.0"
 #define AUTHOR "Dias Pendragon"
 
-#define DAMAGE 50
+#define DAMAGE 55
 #define CLIP 30
 #define SPEED 1.0
 #define RECOIL 0.75
@@ -91,7 +91,7 @@ public plugin_init()
 	register_clcmd(weapon_ethereal, "Hook_Weapon")
 	
 	//register_clcmd("say /get", "Get_Ethereal")
-	g_item = zp_arma( "Ethereal", 0, 0, PRIMARIA, ADMIN_ALL, "" );
+	g_item = zp_arma( "Ethereal", 25, 4, PRIMARIA, ADMIN_BAN, "[ GOLD ]" );
 }
 public event_round_start(){
 	for(new i=1; i<= 32; ++i)

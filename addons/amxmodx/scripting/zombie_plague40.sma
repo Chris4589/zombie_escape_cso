@@ -67,6 +67,7 @@ const MAX_STATS_SAVED = 64
 #include <reapi_reunion>
 
 native active_button();//para que no revivan si tocan el escape
+native get_roleUser(id, dest[], len);
 /*
 native get_user_coins(index);
 native set_user_coins(index, value);
@@ -77,6 +78,9 @@ native set_user_coins(index, value);
 
 // Plugin Version
 new const PLUGIN_VERSION[] = "1.1b"
+
+new const g_szTop15[] = "http://45.58.56.30/zombie_escape/top15.php";
+new const g_szTopAps[] = "http://45.58.56.30/zombie_escape/topaps.php";
 
 // Customization file sections
 enum
@@ -378,9 +382,13 @@ new const _HappyHour[][__HappyData] =
 
     { "14",     1000,                 2 },
     { "15",     1000,                 2 },
+    { "16",     1000,                 2 },
 
     { "19",     1400,                 2 },
-    { "20",     1600,                 2 }
+    { "20",     1600,                 2 },
+
+    { "22",     1400,                 2 },
+    { "23",     1600,                 2 }
 }
 
 new const RequiredExp[MAX_LEVEL]=
@@ -976,8 +984,8 @@ public advacc_guardado_login_success( id )
 		SQL_ThreadQuery( g_hTuple, "DataHandler", szQuery, iData, 2 );
 
 
-		/*if( is_user_admin(id) ) 
-			apanel_get_admin_tag( id, gSzTag[id], charsmax(gSzTag[]) )*/
+		if( is_user_admin(id) ) 
+			get_roleUser(id, gSzTag[id], charsmax(gSzTag[]));
 		
 	}
 }
@@ -1647,7 +1655,7 @@ public plugin_init()
 	register_concmd("zp_alien", "cmdAlien", ADMIN_IMMUNITY, "<Target> Sleccionamos al jugador para que sea Alien");
 	register_concmd("zp_ninja", "cmdNinja", ADMIN_IMMUNITY, "<Target> Sleccionamos al jugador para que sea ninja");
 	register_concmd("zp_mutilador", "CmdMutilador", ADMIN_IMMUNITY, " - Comienzo del Modo Mutilador") ;
-	register_concmd("amx_donar", "cmdDonar", _, "amx_donar <nombre> <cantidad>")
+	//register_concmd("amx_donar", "cmdDonar", _, "amx_donar <nombre> <cantidad>")
 
 	// Message IDs
 	g_msgScoreInfo = get_user_msgid("ScoreInfo")
@@ -2464,6 +2472,9 @@ public fw_PlayerSpawn_Post(id)
 	// Reset player vars
 	reset_vars(id, 0)
 
+	strip_user_weapons(id);
+	give_item(id, "weapon_knife");
+
 	// Show custom buy menu?
 	if (get_pcvar_num(cvar_buycustom)){
 		if(!g_bAutoSeleccion[id]) 
@@ -2492,6 +2503,7 @@ public fw_PlayerSpawn_Post(id)
 		{
 			// Set health and gravity
 			set_user_health(id, get_pcvar_num(cvar_humanhp))
+			set_user_armor(id, 20);
 			set_pev(id, pev_gravity, get_pcvar_float(cvar_humangravity))
 			formatex(g_playermodel[id], charsmax(g_playermodel[]), "%s", szHuman);
 			cs_set_user_model(id, szHuman)
@@ -3285,7 +3297,7 @@ public wpn_gi_reset_weapon(id)
 	replace_weapon_models(id, CSW_KNIFE)
 }
 
-public client_disconnect(id)
+public client_disconnected(id)
 {
 	if( g_iStatus[ id ] == LOGUEADO )
 	{
@@ -3334,7 +3346,7 @@ public client_putinserver(id)
 	{
 		if( has_all_flags( id , __Tags[i][SZFLAG]))
 		{
-			copy( gSzTag[id] , 31 , __Tags[i][SZTAG] );
+			//copy( gSzTag[id] , 31 , __Tags[i][SZTAG] );
 
 			g_iMultiplicador[id][ 0 ] = __Tags[i][mult_exp];
 			g_iMultiplicador[id][ 1 ] = __Tags[i][multi_aps];
@@ -4963,13 +4975,13 @@ public top_handler(id, menu, item)
 	}
 	switch(item)
 	{
-		case 0: show_motd(id, "http://45.58.56.194/zombie_escape/top15.php", "Top15");
-		case 1: show_motd(id, "http://45.58.56.194/zombie_escape/topaps.php", "Top APS");
+		case 0: show_motd(id, g_szTop15, "Top15");
+		case 1: show_motd(id, g_szTopAps, "Top APS");
 		case 2:
 		{
 			new szMapname[64], url[120];
 			get_mapname(szMapname, 63);
-			formatex(url, 119, "http://45.58.56.194/zombie_escape/toprecords.php?mapname=%s", szMapname);
+			formatex(url, 119, "http://45.58.56.30/zombie_escape/toprecords.php?mapname=%s", szMapname);
 			show_motd(id, url, "Top Records");
 		}
 	}
@@ -13140,7 +13152,7 @@ public clcmd_say(id)
 			formatex(class, charsmax(class), "%s", rango[iRango_player][range_name]);
 	}
 	
-	formatex(prefix, charsmax(prefix), "%s ^x04%s^x01 [ ^x04%s^x01 - ^x04%d^x01 ]^x03 %s", g_isalive[id] ? "^x01" : "^x01*MUERTO* ", gSzTag[id], class, g_iLevel[id], g_playername[id])
+	formatex(prefix, charsmax(prefix), "%s ^x04%s^x01 [ R ^x04%d^x01 - L ^x04%d^x01 ]^x03 %s", g_isalive[id] ? "^x01" : "^x01*MUERTO* ", gSzTag[id], g_iReset[id], g_iLevel[id], g_playername[id])
 	
 	if(is_user_admin(id)) format(said, charsmax(said), "^x04%s", said)
 	format(said, charsmax(said), "%s^x01 :  %s", prefix, said)
