@@ -24,7 +24,7 @@
 
 #define V_MODEL "models/v_janus11.mdl"
 #define P_MODEL "models/p_janus11.mdl"
-//#define W_MODEL "models/w_janus11.mdl"
+#define W_MODEL "models/w_janus11.mdl"
 
 new const WeaponSounds[][] =
 {
@@ -182,7 +182,7 @@ public plugin_precache()
 {
 	precache_model(V_MODEL)
 	//precache_model(P_MODEL)
-	//precache_model(W_MODEL)
+	precache_model(W_MODEL)
 	
 	for(new i = 0; i < sizeof(WeaponSounds); i++)
 		precache_sound(WeaponSounds[i])

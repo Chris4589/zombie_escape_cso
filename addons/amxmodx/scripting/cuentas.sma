@@ -69,20 +69,20 @@ new const PluginAuthor[] = "Hypnotize";
 
 //apartado para escribir el nombre del creador del mod
 //area modificable
-new const ModName[] = "Zombie Plague Clasic";//nombre del mod
+new const ModName[] = "Zombie Escape";//nombre del mod
 new const ModAuthor[] = "Hypnotize"; //acá pones tu nombre si lo usaste para un modo tuyo
 new const ModVersion[] = "1.0b";//versión del modo
-new const g_szForo[] = "svlmexico.com";
+new const g_szForo[] = "lwfservers.net";
 //apartado para escribir el nombre del creador del mod
 //area modificable
 
 new const g_szTabla[ ] = "zp_cuentas";
-new const g_szPrefijo[ ] = "[ SVL MEXICO ]";
+new const g_szPrefijo[ ] = "[ lwfservers ]";
 
-new const MYSQL_HOST[] = "45.58.56.30";
-new const MYSQL_USER[] = "adminpanel";
-new const MYSQL_PASS[] = "obidiotapia";
-new const MYSQL_DATEBASE[] = "svlmexico";
+new const MYSQL_HOST[] = "db.serverscstrike.com";
+new const MYSQL_USER[] = "scs_lwforever21";
+new const MYSQL_PASS[] = "Fqm6b6BbC6WLERnu";
+new const MYSQL_DATEBASE[] = "scs_lwforever21";
 
 new Handle:g_hTuple;
 

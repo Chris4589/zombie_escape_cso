@@ -17,7 +17,7 @@
 // Level 1 Config
 #define V_MODEL "models/v_plasmagun2.mdl"
 #define P_MODEL "models/p_plasmagun.mdl"
-//#define W_MODEL "models/w_plasmagun.mdl"
+#define W_MODEL "models/w_plasmagun.mdl"
 
 new const WeaponSounds[7][] =
 {
@@ -146,7 +146,7 @@ public plugin_precache()
 {
 	engfunc(EngFunc_PrecacheModel, V_MODEL)
 	engfunc(EngFunc_PrecacheModel, P_MODEL)
-	//engfunc(EngFunc_PrecacheModel, W_MODEL)
+	engfunc(EngFunc_PrecacheModel, W_MODEL)
 	
 	new i
 	for(i = 0; i < sizeof(WeaponSounds); i++)

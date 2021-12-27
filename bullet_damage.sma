@@ -6,6 +6,8 @@
 #define DIRECTOR_HUD_MESSAGE	0
 #define NORMAL_HUD_MESSAGE	1
 
+native zp_get_damage(id);
+
 
 new pCvar_VictimC, pCvar_OurselfC, pCvar_AttackerC, pCvar_BulletMode, pCvar_Bullet_Distance, pCvar_Bullet_Walls, 
 pCvar_Bullet_ShowSpec, pCvar_Bullet_Hs_Mode, pCvar_Bullet_Text_Mode, pCvar_Bullet_Show_Mode, pCvar_Accumulated_Damage
@@ -115,6 +117,7 @@ public Event_Damage( Victim )
 		
 	static damage, R, G, B, pCvar_H, pCvar_TMODE 
 	damage = read_data( 2 )
+	//damage = zp_get_damage(Attacker);
 	
 	pCvar_H = get_pcvar_num( pCvar_Bullet_Hs_Mode )
 	pCvar_TMODE = get_pcvar_num( pCvar_Bullet_Text_Mode )

@@ -10,7 +10,7 @@
 #define VERSION "1.0"
 #define AUTHOR "Dias Pendragon"
 
-#define DAMAGE_A 40 // Damage in Non-Charged Mode
+#define DAMAGE_A 50 // Damage in Non-Charged Mode
 #define DAMAGE_B 80 // Damage in Charged Mode
 #define CHARGE_AMMO 57 // After shoot X bullets, you can active Janus Transform System
 #define CHARGE_LIMITTIME 7 // After X Second(s), Janus Transform System will be turned off if not using
@@ -125,7 +125,7 @@ public plugin_precache()
 {
 	engfunc(EngFunc_PrecacheModel, V_MODEL)
 	//engfunc(EngFunc_PrecacheModel, P_MODEL)
-	//engfunc(EngFunc_PrecacheModel, W_MODEL)
+	engfunc(EngFunc_PrecacheModel, W_MODEL)
 	
 	new i
 	for(i = 0; i < sizeof(Janus7_Sounds); i++)

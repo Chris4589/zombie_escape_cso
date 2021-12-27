@@ -992,6 +992,7 @@ public advacc_guardado_login_success( id )
 
 public plugin_natives()
 {
+	register_native("zp_weapons_force_buy", "force_give_weapon", 0);
 	register_native("zp_arma", "register_arma", 0);
 	register_native("enable_skins", "handler_skins_enable", 1);
 	register_native("zp_set_no_jump", "handler_set_nojump", 1);
@@ -1056,6 +1057,11 @@ public plugin_natives()
 
 	register_native("zp_damage_req", "native_damage", 1);
 	register_native("zp_set_exp", "native_exp", 1);
+	register_native("zp_get_damage", "native_getdamage", 1);
+}
+
+public native_getdamage(id) {
+	return g_iDamage[id];
 }
 
 public native_exp(id, value)
@@ -9794,13 +9800,13 @@ public ShowHUD(taskid)
 	{
 		// Show health, class and ammo packs
 		set_hudmessage(g_ColorHud[g_iHud[id]][hudColor][0], g_ColorHud[g_iHud[id]][hudColor][1], g_ColorHud[g_iHud[id]][hudColor][2], HUD_STATS_X, HUD_STATS_Y, 0, 6.0, 1.1, 0.0, 0.0, -1)
-		ShowSyncHudMsg(ID_SHOWHUD, g_MsgSync2, "Vida: %d - Armadura: %d^nClase: %s^nExperiencia: %d/%d [ %i%% ]^nNivel: %d/%d || Reset: %d^nAmmo packs: %d^n[Hora Feliz] [%s]^n^n%s", 
-			get_user_health(id), get_user_armor(id), class, g_iExp[id], RequiredExp[lvl], porcentaje(float(g_iExp[id]), float(RequiredExp[lvl])), g_iLevel[id], MAX_LEVEL, g_iReset[id], g_ammopacks[id], g_bHappyTime ? "ON" : "OFF", PartyMsg);
+		ShowSyncHudMsg(ID_SHOWHUD, g_MsgSync2, "Vida: %d - Chaleco: %d^nClase: %s^nExperiencia: %d/%d [ %i%% ]^nNivel: %d/%d || Reset: %d^nDamage: %d/%d^nAmmo packs: %d^n[Hora Feliz] [%s]^n^n%s", 
+			get_user_health(id), get_user_armor(id), class, g_iExp[id], RequiredExp[lvl], porcentaje(float(g_iExp[id]), float(RequiredExp[lvl])), g_iLevel[id], MAX_LEVEL, g_iReset[id], g_iDamage[id], g_iDefaultDamage, g_ammopacks[id], g_bHappyTime ? "ON" : "OFF", PartyMsg);
 	}
 
 	set_dhudmessage( 125, 125, 125, -1.0, 0.0, 1, 0.0, 1.0 );
-	//show_dhudmessage( 0, "[ ZB: %d ] (%d) [ HM: %d]", g_scorezombies, (g_scorezombies+g_scorehumans), g_scorehumans );
-	show_dhudmessage( 0, "[Zombies] [ROUND] [Humans]^n %d^t^t^t^t^t^t^t%d^t^t^t^t^t^t^t%d", g_scorezombies, (g_scorezombies+g_scorehumans), g_scorehumans );
+	show_dhudmessage( 0, "[ ZB: %d ] (%d) [ HM: %d]", g_scorezombies, (g_scorezombies+g_scorehumans), g_scorehumans );
+	//show_dhudmessage( 0, "[Zombies] [ROUND] [Humans]^n %d^t^t^t^t^t^t^t%d^t^t^t^t^t^t^t%d", g_scorezombies, (g_scorezombies+g_scorehumans), g_scorehumans );
 }
 
 // Play idle zombie sounds
@@ -12156,6 +12162,41 @@ public Anteriores(id)
 	obtenerArmas(id, g_iSelected[id][PRIMARIA], PRIMARIA);
 	obtenerArmas(id, g_iSelected[id][SECUNDARIA], SECUNDARIA);
 	obtenerArmas(id, g_iSelected[id][KNIFE], KNIFE);
+}
+
+public force_give_weapon(plugin, params) {
+	static szItem[120], cat;
+
+	new szNombre[32]; get_string(2, szNombre, charsmax(szNombre));
+
+	for( new i = 0; i < gTotalItems; i++ )
+	{
+		ArrayGetString(g_szName, i, szItem, charsmax(szItem) );
+		if (equali(szNombre, szItem)) {
+			cat = ArrayGetCell( g_iCat, i );
+
+			getWeapons(get_param(1), i, cat);
+			break;
+		}
+		
+	}
+}
+
+public getWeapons(id, aItem, cat) {
+	if(!is_user_alive(id) || !is_user_connected(id) || g_class[id] >= SURVIVOR)
+		return;
+
+	new ret;
+	ExecuteForward(fw_Item_Selected, ret, id, aItem);
+	
+	if ( ret == PLUGIN_HANDLED )
+		client_print(id, print_chat, "No puedes comprarlo ahora.");
+	else
+	{
+		new szItemName[32];
+		ArrayGetString(g_szName, aItem, szItemName, charsmax(szItemName));
+		zp_colored_print(id, "Has comprado: ^x04%s^x01", szItemName);
+	}
 }
 
 public obtenerArmas(id, aItem, cat)

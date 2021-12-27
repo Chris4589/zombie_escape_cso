@@ -24,7 +24,7 @@
 
 #define V_MODEL "models/v_thanatos11_fix.mdl"
 #define P_MODEL "models/p_thanatos11.mdl"
-//#define W_MODEL "models/w_thanatos11.mdl"
+#define W_MODEL "models/w_thanatos11.mdl"
 #define S_MODEL "models/thanatos11_scythe.mdl"
 
 new const WeaponSounds[16][] =
@@ -203,7 +203,7 @@ public plugin_precache()
 {
 	precache_model(V_MODEL)
 	//precache_model(P_MODEL)
-	//precache_model(W_MODEL)
+	precache_model(W_MODEL)
 	precache_model(S_MODEL)
 	g_ScytheDeath = precache_model(SCYTHE_DEATH)
 	

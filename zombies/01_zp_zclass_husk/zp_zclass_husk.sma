@@ -18,8 +18,8 @@ enum (+= 100) {
 
 new const zclass_name[] = { "Zombie Husk" } 
 new const zclass_info[] = { "Throw a FireBall" } 
-/*new const zclass_model[] = { "Husk" } 
-new const zclass_clawmodel[] = { "v_husk_hands.mdl" }*/
+new const zclass_model[] = { "Husk" } 
+new const zclass_clawmodel[] = { "v_husk_hands.mdl" }
 const zclass_health = 1700
 const zclass_speed = 200
 const Float:zclass_gravity = 0.7 
@@ -52,7 +52,7 @@ public plugin_init()
 	
 	register_forward(FM_Touch, "fw_Touch")
 	register_forward(FM_PlayerPreThink, "fw_PlayerPreThink")
-	//g_itemid = zp_register_extra_item("Anti Husk", 12, 150, ZP_TEAM_HUMAN);
+	g_itemid = zp_register_extra_item("Anti Husk", 12, 150, ZP_TEAM_HUMAN);
 	// HAM Forwards
 	RegisterHam(Ham_Spawn, "player", "fw_PlayerSpawn_Post", 1)
 	RegisterHam(Ham_Killed, "player", "fw_PlayerKilled")
@@ -62,7 +62,8 @@ public plugin_init()
 
 public plugin_precache()
 {
-	g_Husk = zp_register_zombie_class(zclass_name, zclass_info, 1, zclass_health, zclass_speed, zclass_gravity, zclass_knockback) 
+	g_Husk = zp_register_class(CLASS_ZOMBIE, zclass_name, zclass_info, zclass_model, zclass_clawmodel, 
+		15, 0, ADMIN_BAN, zclass_health, 0, zclass_speed, zclass_gravity, zclass_knockback)
 	
 	engfunc(EngFunc_PrecacheModel, fire_model)
 	
@@ -90,12 +91,9 @@ public event_RoundStart(){
 }
 public zp_user_infected_post(id, infector)
 {
-	g_bHusk[id] = false;
-	if (zp_get_user_zombie_class(id) == g_Husk)
+	g_bHusk[id] = false;//7 n 10
+	if (zp_get_user_zombie_class(id) == g_Husk && NINJA <= zp_get_class(id) <= LAST_ZOMBIE)
 	{
-		if(zp_get_user_nemesis(id))
-			return
-		
 		g_iLastFire[id] = 0.0
 		
 		print_chatColor(id, "\g[ZP]\n To launch a \gFireBall\n press \g^"R^"\n.") 
@@ -110,7 +108,7 @@ public fw_PlayerPreThink(id)
 	static iButton; iButton = pev(id, pev_button)
 	static iOldButton; iOldButton = pev(id, pev_oldbuttons)
 	
-	if(zp_get_user_zombie(id) && (zp_get_user_zombie_class(id) == g_Husk) && !zp_get_user_nemesis(id))
+	if(zp_get_user_zombie(id) && (zp_get_user_zombie_class(id) == g_Husk) && zp_get_class(id) < NEMESIS)
 	{
 		if((iButton & IN_RELOAD) && !(iOldButton & IN_RELOAD))
 		{			
@@ -170,7 +168,7 @@ public fw_PlayerKilled(victim, attacker, shouldgib)
 		remove_task(victim+TASK_BURN)
 }
 
-public client_disconnect(id)
+public client_disconnected(id)
 	remove_task(id+TASK_BURN)
 
 public MakeFire(id)

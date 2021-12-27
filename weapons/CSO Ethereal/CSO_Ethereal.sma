@@ -20,7 +20,7 @@
 
 #define V_MODEL "models/v_ethereal2.mdl"
 #define P_MODEL "models/p_ethereal.mdl"
-//#define W_MODEL "models/w_ethereal.mdl"
+#define W_MODEL "models/w_ethereal.mdl"
 
 new const Ethereal_Sounds[4][] = 
 {
@@ -101,7 +101,7 @@ public plugin_precache()
 {
 	engfunc(EngFunc_PrecacheModel, V_MODEL)
 	//engfunc(EngFunc_PrecacheModel, P_MODEL)
-	//engfunc(EngFunc_PrecacheModel, W_MODEL)
+	engfunc(EngFunc_PrecacheModel, W_MODEL)
 	
 	new i
 	for(i = 0; i < sizeof(Ethereal_Sounds); i++)
