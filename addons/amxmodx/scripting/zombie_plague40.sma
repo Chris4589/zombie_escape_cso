@@ -68,6 +68,7 @@ const MAX_STATS_SAVED = 64
 
 native active_button();//para que no revivan si tocan el escape
 native get_roleUser(id, dest[], len);
+native get_flagsUser(id, dest[], len);
 /*
 native get_user_coins(index);
 native set_user_coins(index, value);
@@ -372,7 +373,8 @@ new const __Tags[][__TagData] =
 	{ "[ BRONZE ]" , "cefijmqrstu", 2, 2 }
 }
 
-new gSzTag[ 33 ][ 32 ];
+new g_szTag[ 33 ][ 32 ];
+new g_szFlags[ 33 ][ 32 ];
 new g_iMultiplicador[ 33 ][ 2 ];
 
 new const _HappyHour[][__HappyData] =
@@ -984,9 +986,20 @@ public advacc_guardado_login_success( id )
 		SQL_ThreadQuery( g_hTuple, "DataHandler", szQuery, iData, 2 );
 
 
-		if( is_user_admin(id) ) 
-			get_roleUser(id, gSzTag[id], charsmax(gSzTag[]));
-		
+		if( is_user_admin(id) ) {
+			get_roleUser(id, g_szTag[id], charsmax(g_szTag[]));
+			get_flagsUser(id, g_szFlags[id], charsmax(g_szFlags[]));
+
+			for(new i=0; i < sizeof(__Tags); i++)
+			{
+				if(equali(g_szFlags[id], __Tags[i][SZFLAG]))
+				{
+					g_iMultiplicador[id][ 0 ] = __Tags[i][mult_exp];
+					g_iMultiplicador[id][ 1 ] = __Tags[i][multi_aps];
+					break;
+				}
+			}
+		}	
 	}
 }
 
@@ -2201,6 +2214,8 @@ public logevent_round_end()
 	
 	for (id = 1; id <= g_maxplayers; id++)
 	{
+		g_iJumpClass2[id] = 0;
+		g_iJumpClass[id] = 0;
 		// Not connected
 		if (!g_isconnected[id])
 			continue;
@@ -3342,23 +3357,10 @@ public client_putinserver(id)
 	// Cache player's name
 	get_user_name(id, g_playername[id], charsmax(g_playername[]))
 
-	gSzTag[id][0] = EOS;
+	g_szTag[id][0] = EOS;
 
 	g_iMultiplicador[id][ 0 ] = 1;
 	g_iMultiplicador[id][ 1 ] = 1;
-
-	new i;
-	for( i = 0 ; i < sizeof __Tags ; ++i )
-	{
-		if( has_all_flags( id , __Tags[i][SZFLAG]))
-		{
-			//copy( gSzTag[id] , 31 , __Tags[i][SZTAG] );
-
-			g_iMultiplicador[id][ 0 ] = __Tags[i][mult_exp];
-			g_iMultiplicador[id][ 1 ] = __Tags[i][multi_aps];
-			break;
-		}
-	}
 
 	g_bAutoSeleccion[id] = false;
 	g_iCategoria[id] = 0;
@@ -7045,6 +7047,8 @@ zombieme(id, infector, nemesis, silentmode, rewards)
 	g_iNoJump[id] = 0;
 	g_iFisher[id] = 0;
 	g_iGhost[id] = 0;
+	g_iJumpClass2[id] = 0;
+	g_iJumpClass[id] = 0;
 	// Way to go...
 	g_class[id] = ZOMBIE;
 	g_nvisionenabled[id] = false
@@ -7378,6 +7382,8 @@ humanme(id, survivor, silentmode)
 	g_iNoJump[id] = 0;
 	g_iFisher[id] = 0;
 	g_iGhost[id] = 0;
+	g_iJumpClass2[id] = 0;
+	g_iJumpClass[id] = 0;
 	g_iNoFire[ id ] = g_iNoFrost[ id ] = g_iNoPipe[ id ] = 0;
 	// Remove survivor's aura (bugfix)
 	set_pev(id, pev_effects, pev(id, pev_effects) &~ EF_BRIGHTLIGHT)
@@ -13193,7 +13199,7 @@ public clcmd_say(id)
 			formatex(class, charsmax(class), "%s", rango[iRango_player][range_name]);
 	}
 	
-	formatex(prefix, charsmax(prefix), "%s ^x04%s^x01 [ R ^x04%d^x01 - L ^x04%d^x01 ]^x03 %s", g_isalive[id] ? "^x01" : "^x01*MUERTO* ", gSzTag[id], g_iReset[id], g_iLevel[id], g_playername[id])
+	formatex(prefix, charsmax(prefix), "%s ^x04%s^x01 [ R ^x04%d^x01 - L ^x04%d^x01 ]^x03 %s", g_isalive[id] ? "^x01" : "^x01*MUERTO* ", g_szTag[id], g_iReset[id], g_iLevel[id], g_playername[id])
 	
 	if(is_user_admin(id)) format(said, charsmax(said), "^x04%s", said)
 	format(said, charsmax(said), "%s^x01 :  %s", prefix, said)

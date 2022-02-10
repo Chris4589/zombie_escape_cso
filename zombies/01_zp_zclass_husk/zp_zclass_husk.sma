@@ -45,7 +45,7 @@ public plugin_init()
 	cvar_firespeed = register_cvar("zp_husk_fire_speed", "700")
 	cvar_firecooldown = register_cvar("zp_husk_fire_cooldown", "30.0")
 	cvar_firedamage = register_cvar("zp_husk_fire_damage", "2")
-	cvar_fireduration = register_cvar("zp_husk_fire_duration", "5")
+	cvar_fireduration = register_cvar("zp_husk_fire_duration", "3")
 	cvar_fireslowdown = register_cvar("zp_husk_fire_slowdown", "0.5")
 	cvar_fireradius = register_cvar("zp_husk_fire_radius", "220.0")
 	cvar_firesurvivor = register_cvar("zp_husk_fire_survivor", "1")
@@ -63,7 +63,7 @@ public plugin_init()
 public plugin_precache()
 {
 	g_Husk = zp_register_class(CLASS_ZOMBIE, zclass_name, zclass_info, zclass_model, zclass_clawmodel, 
-		15, 0, ADMIN_BAN, zclass_health, 0, zclass_speed, zclass_gravity, zclass_knockback)
+		25, 0, ADMIN_BAN, zclass_health, 0, zclass_speed, zclass_gravity, zclass_knockback)
 	
 	engfunc(EngFunc_PrecacheModel, fire_model)
 	
@@ -72,10 +72,10 @@ public plugin_precache()
 	g_flameSpr = engfunc(EngFunc_PrecacheModel, "sprites/flame.spr")
 	g_exploSpr = engfunc(EngFunc_PrecacheModel, "sprites/zerogxplode.spr")
 	
-	engfunc(EngFunc_PrecacheSound, "zombie_plague/husk_pre_fire.wav")
-	engfunc(EngFunc_PrecacheSound, "zombie_plague/husk_wind_down.wav")
-	engfunc(EngFunc_PrecacheSound, "zombie_plague/husk_fireball_fire.wav")
-	engfunc(EngFunc_PrecacheSound, "zombie_plague/husk_fireball_loop.wav")
+	//engfunc(EngFunc_PrecacheSound, "zombie_plague/husk_pre_fire.wav")
+	//engfunc(EngFunc_PrecacheSound, "zombie_plague/husk_wind_down.wav")
+	//engfunc(EngFunc_PrecacheSound, "zombie_plague/husk_fireball_fire.wav")
+	//engfunc(EngFunc_PrecacheSound, "zombie_plague/husk_fireball_loop.wav")
 	engfunc(EngFunc_PrecacheSound, "zombie_plague/husk_fireball_explode.wav")
 }
 public zp_extra_item_selected(player, itemid)
@@ -92,7 +92,7 @@ public event_RoundStart(){
 public zp_user_infected_post(id, infector)
 {
 	g_bHusk[id] = false;//7 n 10
-	if (zp_get_user_zombie_class(id) == g_Husk && NINJA <= zp_get_class(id) <= LAST_ZOMBIE)
+	if (zp_get_user_zombie_class(id) == g_Husk && zp_get_class(id) >= NEMESIS)
 	{
 		g_iLastFire[id] = 0.0
 		
@@ -125,7 +125,7 @@ public fw_PlayerPreThink(id)
 			write_byte(0)
 			message_end()
 			
-			emit_sound(id, CHAN_ITEM, "zombie_plague/husk_pre_fire.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
+			//emit_sound(id, CHAN_ITEM, "zombie_plague/husk_pre_fire.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
 			
 			set_task(1.0, "MakeFire", id)
 		}
@@ -136,7 +136,7 @@ public fw_PlayerPreThink(id)
 			{
 				print_chatColor(id, "\g[ZP]\n To throw a \gFireBall\n you hold down the \g^"R^"\n.")
 				g_iLastFire[id] = 0.0
-				emit_sound(id, CHAN_ITEM, "zombie_plague/husk_wind_down.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
+				//emit_sound(id, CHAN_ITEM, "zombie_plague/husk_wind_down.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
 			}
 			
 			message_begin(MSG_ONE, get_user_msgid("BarTime"), _, id)
@@ -225,8 +225,8 @@ public MakeFire(id)
 	
 	set_task(0.2, "effect_fire", NewEnt, _, _, "b") 
 	
-	emit_sound(id, CHAN_ITEM, "zombie_plague/husk_fireball_fire.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM)
-	emit_sound(NewEnt, CHAN_ITEM, "zombie_plague/husk_fireball_loop.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM)
+	//emit_sound(id, CHAN_ITEM, "zombie_plague/husk_fireball_fire.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM)
+	//emit_sound(NewEnt, CHAN_ITEM, "zombie_plague/husk_fireball_loop.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM)
 }
 
 public effect_fire(entity)

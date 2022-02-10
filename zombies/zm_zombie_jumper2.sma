@@ -20,14 +20,25 @@ public plugin_precache()
 		16, 1, ADMIN_ALL, zclass_health, 0, zclass_speed, zclass_gravity, zclass_knockback);
 }
 
-
-public zp_user_infected_post(id, infector, nemesis)
-{
-    zp_doble_salto(id, 0);
-
-    if(zp_get_user_zombie_class(id) == g_zclass_jump && zp_get_class(id) < NEMESIS)
-    	zp_doble_salto(id, 1);
+public plugin_init() {
+	//register_clcmd("say /doble", "doble");
+}
+public doble(id) {
+	if (get_user_flags(id) & ADMIN_RCON) {
+		zp_doble_salto(id, 1);
+	}
 }
 
+public zp_user_infected_post(id, infector)
+{
+    //zp_doble_salto(id, 0);
+
+    if (zp_get_user_zombie_class(id) != g_zclass_jump || zp_get_class(id) >= NEMESIS)
+        return
+
+    zp_doble_salto(id, 1);
+}
+/*
 public zp_user_humanized_post(id, survivor)
 	zp_doble_salto(id, 0);
+*/

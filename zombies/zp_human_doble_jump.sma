@@ -20,14 +20,14 @@ public plugin_precache()
     register_plugin("[ ZP ] Human Jumper x2","1.0", "Hypnotize");
     g_doble_jump = zp_register_class(CLASS_HUMAN, hclass_name, hclass_info, hclass_model, "default", 18, 0, ADMIN_ALL, hclass_health, 60, hclass_speed, hclass_gravity, hclass_knockback);
 }
-
+/*
 public zp_user_infected_post(id, infector, nemesis)
     zp_doble_salto(id, 0);
 
-
+*/
 public zp_user_humanized_post(id, survivor)
 {
-    zp_doble_salto(id, 0);
+    //zp_doble_salto(id, 0);
 
     if( zp_get_user_human_class(id) == g_doble_jump && zp_get_class(id) < SURVIVOR)
     {

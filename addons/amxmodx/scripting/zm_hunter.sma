@@ -29,12 +29,13 @@ to jump you have to press Ctrl + E and look where you want to jump.
 new const zclass_name[] = "Hunter Zombie"
 new const zclass_info[] = "Control + E y saltas"
 new const zclass_model[] = "hunterv2_zp"
+new const zclass_clawmodel[] = "v_knife_zombie_hunter.mdl";
 const zclass_health = 3000
 const zclass_speed = 300
 const Float:zclass_gravity = 0.6
 const Float:zclass_knockback = 1.0
 
-new const leap_sound[4][] = { "left_4_dead2/hunter_jump.wav", "left_4_dead2/hunter_jump1.wav", "left_4_dead2/hunter_jump2.wav", "left_4_dead2/hunter_jump3.wav" }
+new const leap_sound[1][] = { "left_4_dead2/hunter_jump.wav"}
 
 /*================================================================================
 Customization ends here!
@@ -61,7 +62,8 @@ new cvar_force, cvar_cooldown
 public plugin_precache()
 {
     // Register the new class and store ID for reference
-    g_hunter = zp_register_zombie_class(CLASS_ZOMBIE, zclass_name, zclass_info, zclass_model, 16, zclass_health, zclass_speed, zclass_gravity, zclass_knockback)
+    
+    g_hunter = zp_register_class(CLASS_ZOMBIE, zclass_name, zclass_info, zclass_model, zclass_clawmodel, 16, 0, ADMIN_ALL, zclass_health, 0, zclass_speed, zclass_gravity, zclass_knockback)
     
     // Sound
     static i
@@ -73,7 +75,7 @@ public zp_user_infected_post(id, infector)
     // It's the selected zombie class
     if(zp_get_user_zombie_class(id) == g_hunter)
     {
-        if(zp_get_class(id) > ZOMBIE)
+        if(zp_get_class(id) > NEMESIS)
             return
         
         // Message
@@ -89,7 +91,7 @@ public plugin_init()
     register_forward(FM_PlayerPreThink, "fw_PlayerPreThink") 
 
     // Cvars
-    cvar_force = register_cvar("zp_hunter_jump_force", "520") 
+    cvar_force = register_cvar("zp_hunter_jump_force", "720") 
     cvar_cooldown = register_cvar("zp_hunter_jump_cooldown", "20")
 
     static szCvar[30]
@@ -111,7 +113,7 @@ public fw_PlayerPreThink(id)
     if(!is_user_alive(id) || !zp_get_user_zombie(id))
         return
 
-    if(zp_get_class(id) > ZOMBIE)
+    if(zp_get_class(id) >= NEMESIS)
         return
     
     if(is_user_connected(id))
@@ -139,7 +141,7 @@ allowed_hunterjump(id)
     if (!zp_get_user_zombie(id))
         return false
     
-    if (zp_get_user_zombie_class(id) != g_hunter)
+    if (zp_get_user_zombie_class(id) != g_hunter || zp_get_class(id) >= NEMESIS)
         return false
     
     if (!((pev(id, pev_flags) & FL_ONGROUND) && (pev(id, pev_flags) & FL_DUCKING)))

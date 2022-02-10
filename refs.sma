@@ -50,7 +50,8 @@ public advacc_guardado_login_success( id )
 }
 
 public plugin_init() {
-	register_concmd("amx_ref", "cmdRef", _, "amx_ref <id_ref>")
+	register_plugin("ref amx", "1.0", "Hypnotize");
+	register_concmd("amx_ref", "cmdRef", _, "amx_ref <id_ref>");
 
 	MySQL_Init();
 }
@@ -65,7 +66,9 @@ public client_disconnected(id)
 public client_putinserver(id)
 {
 	g_iStatus[id] = NO_LOGUEADO;
+	g_bInvite[id] = 0;
 }
+
 public cmdRef(id, level, cid) { 
 	if (g_bInvite[ id ] || !is_user_connected(id) || g_iStatus[ id ] != LOGUEADO) {
 		console_print(id, "Ya usaste este comando crack");
@@ -97,8 +100,8 @@ public cmdRef(id, level, cid) {
 
 	new iData[ 2 ], szQuery[ 512 ]; 
 
-	iData[ 1 ] = id; 
-	iData[ 0 ] = SQL_REF;
+	iData[ 1 ] = SQL_REF; 
+	iData[ 0 ] = id;
 
 	formatex( szQuery, 511, "UPDATE %s SET ref = ref+1 WHERE id_cuenta='%d'", szTable, idRef );
 	SQL_ThreadQuery( g_hTuple, "DataHandler", szQuery, iData, 2 );
@@ -173,17 +176,18 @@ public DataHandler( failstate, Handle:Query, error[ ], error2, data[ ], datasize
 		}
 		case SQL_REF:
 		{
-			if( failstate < TQUERY_SUCCESS )
-				console_print( id, "%L", LANG_PLAYER, "SAVE_ERROR");
-			else{
+			if( failstate < TQUERY_SUCCESS ) {
+				console_print( id, "error al tratar de referenciar");
+			}
+			else {
 				g_bInvite[ id ] = 1;
 
-				new iData[ 2 ], szQuery[ 512 ]; 
+				new iData[ 2 ], szQuery[ MAX_MENU_LENGTH ]; 
 
 				iData[ 1 ] = id; 
 				iData[ 0 ] = SQL_SAVE_DATA;
 
-				formatex( szQuery, 511, "UPDATE %s SET bRef = '%d' WHERE id_cuenta='%d'", 
+				formatex( szQuery, charsmax(szQuery), "UPDATE %s SET bRef = '%d' WHERE id_cuenta='%d'", 
 					szTable, g_bInvite[ id ], g_id[id] );
 				SQL_ThreadQuery( g_hTuple, "DataHandler", szQuery, iData, 2 );
 			}
@@ -191,9 +195,9 @@ public DataHandler( failstate, Handle:Query, error[ ], error2, data[ ], datasize
 		case SQL_SAVE_DATA:
 		{
 			if( failstate < TQUERY_SUCCESS )
-				console_print( id, "%L", LANG_PLAYER, "SAVE_ERROR");
+				console_print( id, "err ref");
 			else
-				console_print( id, "%L", LANG_PLAYER, "SAVE_SUCCESS");
+				console_print( id, "se guardo");
 		}
 	}
 }
