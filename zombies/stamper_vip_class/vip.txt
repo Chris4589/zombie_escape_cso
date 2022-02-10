@@ -1,0 +1,30 @@
+<html>
+<head>
+<style type="text/css">
+body	{
+	background-color: #000000;
+	font-family:Verdana,Tahoma;
+		}
+.style1 {color: #FFCC33}
+.style2 {color: #00FF00}
+.style3 {color: #FF0000}
+</style>
+	<meta http-equiv="Content-Type" content="text/html; charset=windows-1257">
+<title>V.I.P</title></head>
+<font size="2" color="#e0a518"><b></b></font><center>
+  <p><span class="style1">V.I.P privilegies</span></p>
+  <hr>
+  <p align="left"><span class="style2">- Free anti-infection armour every round.</span></p>
+  <p align="left" class="style2">- Extra ammo packs for killing, infecting, damage.</p>
+  <p align="left" class="style2">- Extra health for infecting.</p>
+  <p align="left" class="style2">- You will be shown as vip in score bar.</p>
+  <p align="left" class="style2">- Vips damage increased.</p>
+  <p align="left" class="style2">- Mutli Jump.</p>
+  <p align="left" class="style2">- Shown in /vip list.</p>
+  <p align="left" class="style2">- Message pop up when you connect to server.</p>
+  <p align="left" class="style2">- Other awsome vips features.</p>
+  <hr>
+  Contacts(<img src="http://educon20.wikispaces.com/file/view/skype.png/32238313/skype.png" alt="Skype" width="16" height="16" longdesc="http://educon20.wikispaces.com/file/view/skype.png/32238313/skype.png">): <span class="style3">Your_skype_ID</span></p>
+  </center>
+</body>
+</html>

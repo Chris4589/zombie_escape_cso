@@ -1,0 +1,18 @@
+register_logevent("event_round_start", 2, "1=Round_Start")
+
+
+public event_round_start(){
+	for(new i=1; i<= get_maxplayers(); ++i)
+}
+engclient_cmd(id, weapon_cannon);
+
+
+
+dual krisis
+https://zombie-mod.ru/cstrike/cstrike-zpe/cstrike-zpe-addons/13775-zp-addon-lasermine-perfect-42.html
+https://zombie-mod.ru/cstrike/cstrike-zpe/cstrike-zpe-items/11293-cso-waterpistol-version-2013.html
+https://zombie-mod.ru/cstrike/cstrike-zpe/cstrike-zpe-items/11373-cso-oicw-2013-full.html
+https://zombie-mod.ru/cstrike/11375-cso-dual-katana-version-2013-full.html
+
+
+https://zombie-mod.ru/cstrike/cstrike-zpe/cstrike-zpe-zmclasses/11684-zp-zombie-class-collection.html

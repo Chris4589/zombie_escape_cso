@@ -1,0 +1,43 @@
+[en]
+COULDNT = Imposible agarrar a ese player crack.
+ALREADY = Alguien te la agarro primero.
+
+[es]
+COULDNT = No puedas agarrar a ese jugador.
+ALREADY = Alguien ya esta agarrando eso.
+
+[sv]
+COULDNT = Kan inte ta tag i den spelaren.
+ALREADY = Nagon annan haller i den redan.
+
+[nl]
+COULDNT = Kon die speler niet vasthouden.
+ALREADY = Iemand anders houdt dat al vast.
+
+[ls]
+COULDNT = c0u1d n07 gr48 7h47 p14y3r.
+ALREADY = $0m30n3 31$3 !$ 41r34dy gr488!ng 7h47.
+
+[da]
+COULDNT = Kunne ikke tage fat i spilleren.
+ALREADY = Nogen har allerede fat i spilleren.
+
+[fi]
+COULDNT = Tarttuminen pelaajaan epaonnistui.
+ALREADY = Joku muu on jo tarttunut tuohon.
+
+[de]
+COULDNT = Spieler kann nicht gegrabbt werden.
+ALREADY = Spieler wird bereits gegrabbed.
+
+[bp]
+COULDNT = Nao foi possivel arrastar esse jogador.
+ALREADY = Alguem jah estah arrastando esse.
+
+[rus]
+COULDNT = Ne mogu vzjat' jetogo igroka.
+ALREADY = Uzhe kto to derzhit jeto.
+
+[fr]
+COULDNT = Vous ne pouvez pas saisir ce joueur.
+ALREADY = Un autre joueur l'a deja saisi.

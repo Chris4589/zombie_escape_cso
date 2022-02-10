@@ -1,0 +1,1 @@
++port 27015 +maxplayers 32 -pingboost 2 num_edcits 1000 zone 2024 -heapsize 250000

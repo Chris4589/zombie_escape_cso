@@ -1,0 +1,39 @@
+cso_player hm
+jax zm
+old_nemesis
+ze_alien
+
+armas
+machine_cso
+v_buz
+v_chain
+v_clawvodoo
+v_cso_bubble
+v_cso_fire
+fisher_cso
+
+
+as50
+m95
+ksg12
+m14ebr
+m95
+m1887
+tar21
+tomy
+walter
+balrog3
+balrog9
+brick peace
+
+dual katana -
+ethereal
+janus11
+cso infinity
+ociw
+plasma
+gatling
+horn
+horse axe
+m32
+cannon
