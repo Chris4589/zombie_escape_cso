@@ -370,7 +370,8 @@ new const __Tags[][__TagData] =
     { "[ MODERADOR ]" , "acdefijnopqrstu", 2, 4 },
     { "[ GOLD ]" , "acdefijpqrstu", 2, 3 },
 	{ "[ SILVER ]" , "cdefijnqrstu", 2, 2 },
-	{ "[ BRONZE ]" , "cefijmqrstu", 2, 2 }
+	{ "[ BRONZE ]" , "cefijmqrstu", 2, 2 },
+	{ "[VIP]",          "mnopr",                   2, 2}
 }
 
 new g_szTag[ 33 ][ 32 ];
