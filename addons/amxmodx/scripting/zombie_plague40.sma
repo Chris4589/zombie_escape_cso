@@ -67,8 +67,8 @@ const MAX_STATS_SAVED = 64
 #include <reapi_reunion>
 
 native active_button();//para que no revivan si tocan el escape
-native get_roleUser(id, dest[], len);
-native get_flagsUser(id, dest[], len);
+//native get_roleUser(id, dest[], len);
+//native get_flagsUser(id, dest[], len);
 /*
 native get_user_coins(index);
 native set_user_coins(index, value);
@@ -986,7 +986,7 @@ public advacc_guardado_login_success( id )
 		SQL_ThreadQuery( g_hTuple, "DataHandler", szQuery, iData, 2 );
 
 
-		if( is_user_admin(id) ) {
+		/*if( is_user_admin(id) ) {
 			get_roleUser(id, g_szTag[id], charsmax(g_szTag[]));
 			get_flagsUser(id, g_szFlags[id], charsmax(g_szFlags[]));
 
@@ -999,7 +999,7 @@ public advacc_guardado_login_success( id )
 					break;
 				}
 			}
-		}	
+		}	*/
 	}
 }
 
