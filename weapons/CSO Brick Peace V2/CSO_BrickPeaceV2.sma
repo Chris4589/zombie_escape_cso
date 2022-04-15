@@ -11,8 +11,8 @@
 #define VERSION "1.0"
 #define AUTHOR "Dias Pendragon Leon"
 
-#define DAMAGE_A 35 // 60 for Zombie
-#define DAMAGE_B 450 // 300 for Zombie
+#define DAMAGE_A 40 // 60 for Zombie
+#define DAMAGE_B 650 // 300 for Zombie
 
 #define CLIP 40
 #define BPAMMO 200
@@ -138,7 +138,7 @@ public plugin_init()
 	//register_clcmd("say /get", "Get_BlockAR")
 	register_clcmd(weapon_blockar, "HookWeapon")
 	
-	g_item = zp_arma( "BrickPeace", 8, 0, PRIMARIA, ADMIN_ALL, "" );
+	g_item = zp_arma( "BrickPeace", 12, 0, PRIMARIA, ADMIN_ALL, "" );
 }
 public event_round_start(){
 	for(new i=1; i<= get_maxplayers(); ++i)
@@ -149,8 +149,8 @@ public plugin_precache()
 	precache_model(MODEL_V)
 	precache_model(MODEL_V2)
 	precache_model(MODEL_VC)
-	/*precache_model(MODEL_P)
-	precache_model(MODEL_P2)*/
+	precache_model(MODEL_P)
+	precache_model(MODEL_P2)
 	//precache_model(MODEL_W)
 	//precache_model(MODEL_W2)
 	precache_model(MODEL_S)
@@ -610,8 +610,8 @@ public ChangeAB_Stage2(id)
 	Set_BitVar(g_TenLuaReady, id)
 	
 	set_pev(id, pev_viewmodel2, MODEL_V2)
-	/*set_pev(id, pev_weaponmodel2, MODEL_P2)
-	*/
+	set_pev(id, pev_weaponmodel2, MODEL_P2)
+
 	Set_WeaponAnim(id, ANIME2_CHANGE_AB1)
 	Set_PlayerNextAttack(id, 0.9)
 	Set_WeaponIdleTime(id, CSW_BLOCKAR, 1.0)
@@ -651,7 +651,7 @@ public ChangeBA_Stage2(id)
 	UnSet_BitVar(g_TenLuaReady, id)
 	
 	set_pev(id, pev_viewmodel2, MODEL_V)
-	//set_pev(id, pev_weaponmodel2, MODEL_P)
+	set_pev(id, pev_weaponmodel2, MODEL_P)
 	
 	Set_WeaponAnim(id, ANIME1_CHANGE_BA)
 	Set_PlayerNextAttack(id, 0.9)
@@ -757,8 +757,8 @@ public fw_Item_Deploy_Post(Ent)
 	
 	remove_task(Id+TASK_CHANGING)
 	set_pev(Id, pev_viewmodel2, Get_BitVar(g_LauncherMode, Id) ? MODEL_V2 : MODEL_V)
-	/*set_pev(Id, pev_weaponmodel2, Get_BitVar(g_LauncherMode, Id) ? MODEL_P2 : MODEL_P)
-	*/
+	set_pev(Id, pev_weaponmodel2, Get_BitVar(g_LauncherMode, Id) ? MODEL_P2 : MODEL_P)
+	
 	if(!Get_BitVar(g_LauncherMode, Id))
 	{
 		Set_WeaponAnim(Id, ANIME1_DRAW)

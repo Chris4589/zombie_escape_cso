@@ -1,7 +1,7 @@
 #include <amxmodx>
 #include <amxmisc>
 #include <engine>
-#include <zombieplague>
+#include <zp_lvl>
 
 new const hclass_name[] = "Girl Jumper" // name
 new const hclass_info[] = "Triple Salto" // description
@@ -18,7 +18,7 @@ new g_hclass_jump;
 public plugin_precache()
 {
     register_plugin("[ ZP ] Human Jumper x3","1.0", "Hypnotize");
-    g_hclass_jump = zp_register_class(CLASS_HUMAN, hclass_name, hclass_info, hclass_model, "default", 7, 1, ADMIN_IMMUNITY, hclass_health, 60, hclass_speed, hclass_gravity, hclass_knockback);
+    g_hclass_jump = zp_register_class(CLASS_HUMAN, hclass_name, hclass_info, hclass_model, "default", 5, 0, ADMIN_LEVEL_F, hclass_health, 60, hclass_speed, hclass_gravity, hclass_knockback);
 }
 /*
 public zp_user_infected_post(id, infector, nemesis)

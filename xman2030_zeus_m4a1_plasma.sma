@@ -105,7 +105,7 @@ public plugin_init() {
 	g_SPEED_ITEM = register_cvar("zp_speed_m4a1plasma", "1.0")
 	g_AMMO_ITEM = register_cvar("zp_ammo_m4a1plasma", "200")
 	//register_clcmd("get_plasma12", "FW_GIVE_ZITEM")
-	variable = zp_arma("plasmagun m4a1", 6, 2, PRIMARIA, ADMIN_ALL, "")
+	variable = zp_arma("plasmagun m4a1", 20, 1, PRIMARIA, ADMIN_ALL, "")
 	g_MaxPlayers = get_maxplayers()
 }
 

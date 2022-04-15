@@ -68,7 +68,7 @@ const MAX_STATS_SAVED = 64
 
 native active_button();//para que no revivan si tocan el escape
 native get_roleUser(id, dest[], len);
-native get_flagsUser(id, dest[], len);
+//native get_flagsUser(id, dest[], len);
 /*
 native get_user_coins(index);
 native set_user_coins(index, value);
@@ -365,12 +365,13 @@ new g_iRango[33];
 enum _:__TagData { SZTAG[32] , SZFLAG[22], mult_exp, multi_aps };
 new const __Tags[][__TagData] =
 {
-	{ "[ OWNER ]" , "abcdefghijklmnopqrstu", 2, 4 },
-    { "[ STAFF ]" , "abcdefijnopqrstu", 2, 4 },
-    { "[ MODERADOR ]" , "acdefijnopqrstu", 2, 4 },
-    { "[ GOLD ]" , "acdefijpqrstu", 2, 3 },
-	{ "[ SILVER ]" , "cdefijnqrstu", 2, 2 },
-	{ "[ BRONZE ]" , "cefijmqrstu", 2, 2 }
+	{ "[ OWNER ]" ,     "abcdefghijklmnopqrstu",  2, 4 },
+    { "[ STAFF ]" ,     "abcdefijnopqrstu",       2, 4 },
+    { "[ MODERADOR ]" , "acdefijnopqrstu",        2, 4 },
+    { "[ GOLD ]" ,      "acdefijpqrstu",          2, 3 },
+	{ "[ SILVER ]" ,    "cdefijnqrstu",           2, 2 },
+	{ "[ BRONZE ]" ,    "cefijmqrstu",            2, 2 },
+	{ "[VIP]",          "mnopr",                   2, 2}
 }
 
 new g_szTag[ 33 ][ 32 ];
@@ -636,7 +637,7 @@ new const soundSniper[] = "sound/zombie_plague/the-sword-of-promised-victory-fat
 new const szWesker[] = "zbheroex_heroine";
 new const soundWesker[] = "sound/zombie_plague/the-battle-is-to-the-strong.mp3"
 new const szHuman[] = "yuri2";
-new const szNemesis[] = "Old_Nemesis";
+new const szNemesis[] = "the_neme";
 new const szSirio[] = "aris_hasam_sirio";
 new const soundSirio[] = "sound/zombie_plague/pain-theme.mp3";
 new const ModelNinja[] = "cso_ninja";
@@ -672,6 +673,8 @@ new const sound_drogado[] = { "x/x_die1.wav" };
 new const model_grenade[] = "models/zombie_plague/v_cso_bubble.mdl";
 new const model[] = "models/zombie_plague/aura8.mdl";
 new const entclas[] = "campo_grenade_forze";
+
+new const level_up[] = "levelup.wav"
 
 /*================================================================================
  [Global Variables]
@@ -988,11 +991,11 @@ public advacc_guardado_login_success( id )
 
 		if( is_user_admin(id) ) {
 			get_roleUser(id, g_szTag[id], charsmax(g_szTag[]));
-			get_flagsUser(id, g_szFlags[id], charsmax(g_szFlags[]));
+			//get_flagsUser(id, g_szFlags[id], charsmax(g_szFlags[]));
 
 			for(new i=0; i < sizeof(__Tags); i++)
 			{
-				if(equali(g_szFlags[id], __Tags[i][SZFLAG]))
+				if(has_all_flags(id, __Tags[i][SZFLAG]))
 				{
 					g_iMultiplicador[id][ 0 ] = __Tags[i][mult_exp];
 					g_iMultiplicador[id][ 1 ] = __Tags[i][multi_aps];
@@ -1071,7 +1074,16 @@ public plugin_natives()
 	register_native("zp_damage_req", "native_damage", 1);
 	register_native("zp_set_exp", "native_exp", 1);
 	register_native("zp_get_damage", "native_getdamage", 1);
+	register_native("zp_get_level", "native_level", 1)
+	register_native("zp_get_reset", "native_reset", 1)
 }
+
+public native_level(id)
+	return g_iLevel[id];
+
+public native_reset(id)
+	return g_iReset[id];
+
 
 public native_getdamage(id) {
 	return g_iDamage[id];
@@ -1079,7 +1091,7 @@ public native_getdamage(id) {
 
 public native_exp(id, value)
 {
-	SetExp(id, value);
+	SetExp2(id, value);
 	return value;
 }
 
@@ -1521,6 +1533,7 @@ public plugin_precache()
 	engfunc(EngFunc_PrecacheSound, sound_flashlight)
 	engfunc(EngFunc_PrecacheSound, sound_buyammo)
 	engfunc(EngFunc_PrecacheSound, sound_armorhit)
+	precache_sound(level_up)
 	
 	new ent
 	
@@ -1626,7 +1639,7 @@ public plugin_init()
 	register_clcmd("say /winhumans", "bugRoundCt");
 	//register_clcmd( "sayteam /top15", "checkTop" );
 	register_clcmd("sayteam /rank", "checkRank");
-	register_clcmd("say", "clcmd_say");
+	//register_clcmd("say", "clcmd_say");
 	register_clcmd("say_team", "clcmd_say");
 	register_clcmd("say zpmenu", "clcmd_saymenu");
 	register_clcmd("say /zpmenu", "clcmd_saymenu");
@@ -11881,12 +11894,47 @@ SetExp(index, iExp)
 		++g_iLevel[index];
 	}
 
-	if(g_iLevel[index] > iLevel) zp_colored_print(index, "^x04%s ^x01Felicidades! Subiste al nivel ^x04%d", g_szPrefix, g_iLevel[index]);
+	if(g_iLevel[index] > iLevel)
+	{
+		client_cmd(0, "spk sound/levelup.wav");
+		zp_colored_print(0, "^x04%s ^x03%s ^x01Subio al Nivel ^x04%d", g_szPrefix, g_playername[index], g_iLevel[index]);
+	} 
 
 	while(g_iLevel[index] >= rango[g_iRango[index] >= charsmax(rango) ? charsmax(rango) : g_iRango[index]][range_level] && g_iRango[index] < charsmax(rango)) 
 		++g_iRango[index];
 
 	if(g_iRango[index] > iRango) zp_colored_print(index, "^x04%s ^x01Felicidades! Subiste al Rango ^x04%s", g_szPrefix, rango[g_iRango[index]][range_name]);
+
+	FuncReset(index);
+}
+
+SetExp2(index, iExp)
+{
+
+	if(!is_user_connected(index) || g_iLevel[index] > MAX_LEVEL) 
+		return;        
+
+	static iLevel; iLevel = g_iLevel[index];
+	static iRango; iRango = g_iRango[index];
+
+	g_iExp[index] += iExp
+
+	zp_colored_print(index, "^x04%s ^x01Ganaste^x04 %s ^x01de^x04 EXPERIENCIA.", g_szPrefix, iExp);
+	while(g_iExp[index] >= RequiredExp[g_iLevel[index] >= MAX_LEVEL ? MAX_LEVEL-1 : g_iLevel[index]-1] && g_iLevel[index] < MAX_LEVEL+1)
+	{ 
+		++g_iLevel[index];
+	}
+
+	if(g_iLevel[index] > iLevel)
+	{
+		client_cmd(0, "spk sound/levelup.wav");
+		zp_colored_print(0, "^x04%s ^x03%s ^x01Subio al Nivel ^x04%d", g_szPrefix, g_playername[index], g_iLevel[index]);
+	} 
+
+	while(g_iLevel[index] >= rango[g_iRango[index] >= charsmax(rango) ? charsmax(rango) : g_iRango[index]][range_level] && g_iRango[index] < charsmax(rango)) 
+		++g_iRango[index];
+
+	if(g_iRango[index] > iRango) zp_colored_print(index, "^x04%s ^x01 Felicidades! Subiste al Rango ^x04%s", g_szPrefix, rango[g_iRango[index]][range_name]);
 
 	FuncReset(index);
 }

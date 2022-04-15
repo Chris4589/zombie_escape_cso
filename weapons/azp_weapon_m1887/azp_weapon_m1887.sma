@@ -99,7 +99,7 @@ public plugin_init()
         cvar_spd_m1887 = register_cvar("zp_m1887_spd", "1.3")
 	cvar_m1887_ammo = register_cvar("zp_m1887_ammo", "64")
 	
-	g_itemid_m1887 = zp_arma("Winchester M1887", 10, 0, PRIMARIA, ADMIN_ALL, "");
+	g_itemid_m1887 = zp_arma("Winchester M1887", 8, 0, PRIMARIA, ADMIN_ALL, "");
 	g_MaxPlayers = get_maxplayers()
 	gmsgWeaponList = get_user_msgid("WeaponList")
 }

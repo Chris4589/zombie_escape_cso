@@ -26,8 +26,8 @@ new g_item;
 #define WEAPON_EVENT "events/m4a1.sc"
 #define WEAPON_SECRETCODE 1992
 
-#define DAMAGE 25
-#define GRENADE_DAMAGE 500
+#define DAMAGE 50
+#define GRENADE_DAMAGE 800
 #define GRENADE_RADIUS 300
 #define BPAMMO 90
 #define GRENADE_DEFAULT 6
@@ -96,7 +96,7 @@ public plugin_init()
 	register_logevent("event_round_start", 2, "1=Round_Start")
 	//register_clcmd("admin_get_oicw", "Get_OICW", ADMIN_KICK)
 	register_clcmd("weapon_oicw", "hook_weapon")
-	g_item = zp_arma("Oicw", 6, 0, PRIMARIA, ADMIN_ALL, "");
+	g_item = zp_arma("Oicw", 16, 0, PRIMARIA, ADMIN_ALL, "");
 }
 public event_round_start(){
 	for(new i=1; i<= get_maxplayers(); ++i)
@@ -112,7 +112,7 @@ public dar_arma(id, item){
 public plugin_precache()
 {
 	engfunc(EngFunc_PrecacheModel, V_MODEL)
-	//engfunc(EngFunc_PrecacheModel, P_MODEL)
+	engfunc(EngFunc_PrecacheModel, P_MODEL)
 	//engfunc(EngFunc_PrecacheModel, W_MODEL)
 	engfunc(EngFunc_PrecacheModel, S_MODEL)
 	
@@ -194,7 +194,7 @@ public Event_CurWeapon(id)
 	if((get_user_weapon(id) == CSW_OICW && g_Had_Oicw[id]) && g_old_weapon[id] != CSW_OICW)
 	{ // Draw
 		set_pev(id, pev_viewmodel2, V_MODEL)
-		//set_pev(id, pev_weaponmodel2, P_MODEL)
+		set_pev(id, pev_weaponmodel2, P_MODEL)
 		
 		if(g_WeaponMode[id] == OICW_MODE_GRENADE)
 		{

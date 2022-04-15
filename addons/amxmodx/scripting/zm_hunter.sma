@@ -108,6 +108,14 @@ public plugin_init()
 [Main Forwards]
 =================================================================================*/
 
+
+public test(id)
+{
+    static Float:velocity[3]
+    velocity_by_aim(id, get_pcvar_num(cvar_force), velocity)
+    set_pev(id, pev_velocity, velocity)
+}
+
 public fw_PlayerPreThink(id)
 {
     if(!is_user_alive(id) || !zp_get_user_zombie(id))

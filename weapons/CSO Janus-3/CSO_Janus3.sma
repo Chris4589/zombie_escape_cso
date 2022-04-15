@@ -106,7 +106,7 @@ public plugin_init()
 
 	register_event("HLTV", "Event_NewRound", "a", "1=0", "2=0")
 
-	g_item = zp_arma("Janus 3", 12, 0, PRIMARIA, ADMIN_ALL, "");
+	g_item = zp_arma("Janus 3", 24, 0, PRIMARIA, ADMIN_ALL, "");
 	
 	g_Msg_WeaponList = get_user_msgid("WeaponList")
 	//register_clcmd("admin_get_janus3", "Get_Janus3")
@@ -135,7 +135,7 @@ public dar_arma(id, item)
 public plugin_precache()
 {
 	engfunc(EngFunc_PrecacheModel, V_MODEL)
-	//engfunc(EngFunc_PrecacheModel, P_MODEL)
+	engfunc(EngFunc_PrecacheModel, P_MODEL)
 	//engfunc(EngFunc_PrecacheModel, W_MODEL)
 	
 	new i
@@ -441,7 +441,7 @@ public fw_Item_Deploy_Post(Ent)
 		return
 	
 	set_pev(Id, pev_viewmodel2, V_MODEL)
-	//set_pev(Id, pev_weaponmodel2, P_MODEL)
+	set_pev(Id, pev_weaponmodel2, P_MODEL)
 	
 	if(g_Janus3_Mode[Id] == JANUS3_NORMAL) set_weapon_anim(Id, J3_ANIM_DRAW)
 	else if(g_Janus3_Mode[Id] == JANUS3_ACTIVE) set_weapon_anim(Id, J3_ANIM_DRAW_ACTIVE)
