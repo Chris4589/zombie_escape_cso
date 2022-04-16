@@ -1659,6 +1659,7 @@ public plugin_init()
 	// Menus
 	register_menu("Game Menu", KEYSMENU, "menu_game")
 	register_menu("Menu Armas", KEYSMENU, "handlerMenu")
+	register_menu("Menu Clases", KEYSMENU, "HandlerClases")
 	
 	// Admin commands
 	register_concmd("zp_zombie", "cmd_zombie", ADMIN_IMMUNITY, "<target> - Turn someone into a Zombie", 0)
@@ -4928,37 +4929,29 @@ public menu_game(id, key)
 			else
 				zp_colored_print(id, "^x04%s^x01 %L", g_szPrefix, id, "CMD_NOT_EXTRAS")
 		}
-		case 2: // Zombie Classes
+		case 2: // Clases
 		{
-			// Zombie classes enabled?
-			if (get_pcvar_num(cvar_zclasses))
-				show_menu_zclass(id, CLASS_ZOMBIE)
-			else
-				zp_colored_print(id, "^x04%s^x01 %L", g_szPrefix, id, "CMD_NOT_ZCLASSES")
+			show_clases_menu(id)
 		}
-		case 3: // Zombie Human
+		case 3: // Logros
 		{
-			// Zombie classes enabled?
-			if (get_pcvar_num(cvar_zclasses))
-				show_menu_zclass(id, CLASS_HUMAN)
-			else
-				zp_colored_print(id, "^x04%s^x01 %L", g_szPrefix, id, "CMD_NOT_ZCLASSES")
+			client_print(id, print_chat, "Aqui van los logros")
 		}
-		case 4: // Herramientas
+		case 4: // Mejoras
+		{
+			client_print(id, print_chat, "Aqui van las Mejoras")
+		}
+		case 5: //Herramientas
 		{
 			cmdMenu_config(id);
 		}
-		case 5: //Premium
+		case 6: // Party
 		{
 			cmdParty(id);
 		}
-		case 6: // logros
+		case 7: //Tops
 		{
 			menuTops(id);
-		}
-		case 7:
-		{
-		
 		}
 		case 8: // Admin Menu
 		{
@@ -4972,6 +4965,52 @@ public menu_game(id, key)
 	
 	return PLUGIN_HANDLED;
 }
+
+public show_clases_menu(id)
+{
+	static menu[800], len;
+	len = 0
+
+	new g_restexp[33], g_nextlvl[33], required[33]
+
+	static lvl
+	lvl = g_iLevel[id] >= MAX_LEVEL ? MAX_LEVEL-1 : g_iLevel[id]-1;
+	g_restexp[id] = g_iExp[id];
+	g_nextlvl[id] = lvl;
+	required[id] = RequiredExp[lvl]
+	
+	// Title
+	len += formatex(menu[len], charsmax(menu) - len, "\rSeleccionar Clase^n^n")
+	
+	len += formatex(menu[len], charsmax(menu) - len, "\r[1] \wHumanos^n");
+	
+	len += formatex(menu[len], charsmax(menu) - len, "\r[2] \wZombie^n^n^n^n");
+	
+	// 0. Exit
+	len += formatex(menu[len], charsmax(menu) - len, "^n^n\r[0] \wSalir")
+	
+	show_menu(id, KEYSMENU, menu, -1, "Menu Clases")
+}
+
+public HandlerClases(id, key)
+{
+	switch (key)
+	{
+		case 0: // Buy Weapons
+		{
+			show_menu_zclass(id, CLASS_HUMAN)
+		}
+		case 1: // Extra Items
+		{
+			show_menu_zclass(id, CLASS_ZOMBIE)
+			
+		}
+
+	}
+	
+	return PLUGIN_HANDLED;
+}
+
 
 public menuTops(id)
 {
