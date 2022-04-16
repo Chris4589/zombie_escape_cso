@@ -1,7 +1,7 @@
 #include <amxmodx>
 #include <fakemeta_util>
 #include <hamsandwich>
-#include <zombieplague>
+#include <zp_lvl>
 
 #define PDATA_SAFE 2
 #define MAX_CLIENTS 32

@@ -4,7 +4,7 @@
 #include <fakemeta>
 #include <fakemeta_util>
 #include <hamsandwich>
-#include <zombieplague>
+#include <zp_lvl>
 
 #define PLUGIN "[ZD] Zombie Class: Night Stalker"
 #define VERSION "1.0"
