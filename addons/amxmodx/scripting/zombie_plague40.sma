@@ -626,6 +626,8 @@ enum
 	BUSCAR_META,
 	BEST_RECORD
 }
+
+
 /*================================================================================
  [Recursos]
 =================================================================================*/
@@ -745,6 +747,34 @@ enum
 	CLASS_ZOMBIE = 0, 
 	CLASS_HUMAN 
 };
+
+/*
+	mejoras
+*/
+
+new g_habilidad[33][CLASS_HUMAN+1][6] // Variable de Habilidad
+new g_puntos[33][CLASS_HUMAN+1] // puntos de zombie y humano
+new g_gastados[33][CLASS_HUMAN+1] // Gastados de human y zm
+
+enum habilities {
+	hability_name[40],
+	hability_max
+}
+
+new const habilityZombie[][habilities] = {
+	{"Daño", 10},
+	{"Vida", 10},
+	{"Velocidad", 10},
+	{"Gravedad", 14}
+}
+
+new const habilityHuman[][habilities] = {
+	{"Daño", 10}, 
+	{"Vida", 10},
+	{"Armor", 10},
+	{"Velocidad", 10},
+	{"Gravedad", 10}
+}
 
 new g_iSelected[33][MAX_ARMS];
 new g_iCategoria[33];
@@ -935,6 +965,17 @@ new Float:g_zombie_knockback[33] // zombie class knockback
 new g_zombie_classname[33][32], g_human_classname[33][32] // zombie class name
 #define is_user_valid_connected(%1) (1 <= %1 <= g_maxplayers && g_isconnected[%1])
 #define is_user_valid_alive(%1) (1 <= %1 <= g_maxplayers && g_isalive[%1])
+
+#define ammount_cost(%1)        (%1 * 3) + 1 
+#define ammount_hdamage(%1)         (%1 + 1) * 0.1 
+#define ammount_hspeed(%1)         (%1 * 15) 
+#define ammount_hhealth(%1)         (%1 * 10)
+#define ammount_harmor(%1)         (%1 * 5)
+#define ammount_hgravity(%1)     ((%1 * 0.01) * 3)
+#define ammount_zdamage(%1)         (%1 + 3) * 0.3
+#define ammount_zspeed(%1)         (%1 * 15)
+#define ammount_zhealth(%1)         (%1 * 2000) 
+#define ammount_zgravity(%1)     ((%1 * 0.01) * 3)
 
 // Cached CVARs
 new g_cached_zombiesilent, Float:g_cached_humanspd, Float:g_cached_nemspd,
@@ -2514,9 +2555,9 @@ public fw_PlayerSpawn_Post(id)
 			static buffer[200];
 			g_human_spd[id] = float(ArrayGetCell(g_zclass_spd, g_humanclass[id]))
 			ArrayGetString(g_zclass_name, g_humanclass[id], g_human_classname[id], charsmax(g_human_classname[]))
-			set_user_health(id, ArrayGetCell(g_zclass_hp, g_humanclass[id]))
-			set_user_armor(id, ArrayGetCell(g_zclass_chaleco, g_humanclass[id]));
-			set_pev(id, pev_gravity, Float:ArrayGetCell(g_zclass_grav, g_humanclass[id]))
+			set_user_health(id, ArrayGetCell(g_zclass_hp, g_humanclass[id]) + ammount_hhealth(g_habilidad[id][CLASS_HUMAN][1]))
+			set_user_armor(id, ArrayGetCell(g_zclass_chaleco, g_humanclass[id]) + ammount_harmor(g_habilidad[id][CLASS_HUMAN][2]));
+			set_pev(id, pev_gravity, Float:ArrayGetCell(g_zclass_grav, g_humanclass[id]) - ammount_hgravity(g_habilidad[id][CLASS_HUMAN][4]))
 			ArrayGetString(g_zclass_model, g_humanclass[id], buffer, charsmax(buffer))
 			cs_set_user_model(id, buffer)
 
@@ -2525,9 +2566,9 @@ public fw_PlayerSpawn_Post(id)
 		else
 		{
 			// Set health and gravity
-			set_user_health(id, get_pcvar_num(cvar_humanhp))
-			set_user_armor(id, 20);
-			set_pev(id, pev_gravity, get_pcvar_float(cvar_humangravity))
+			set_user_health(id, get_pcvar_num(cvar_humanhp) + ammount_hhealth(g_habilidad[id][CLASS_HUMAN][1]))
+			set_user_armor(id, ammount_harmor(g_habilidad[id][CLASS_HUMAN][2]));
+			set_pev(id, pev_gravity, get_pcvar_float(cvar_humangravity) - ammount_hgravity(g_habilidad[id][CLASS_HUMAN][4]))
 			formatex(g_playermodel[id], charsmax(g_playermodel[]), "%s", szHuman);
 			cs_set_user_model(id, szHuman)
 		}
@@ -2814,6 +2855,7 @@ public fw_TakeDamage(victim, inflictor, attacker, Float:damage, damage_type)
 		// Reward ammo packs
 		if (g_class[attacker] < SURVIVOR)
 		{
+			damage *= ammount_hdamage(g_habilidad[attacker][CLASS_HUMAN][0]);
 			// Store damage dealt
 			g_damagedealt[attacker] += floatround(damage)
 			if(is_user_connected(victim) && g_PartyData[attacker][In_Party])
@@ -2860,9 +2902,9 @@ public fw_TakeDamage(victim, inflictor, attacker, Float:damage, damage_type)
 		
 		return HAM_IGNORED;
 	}
-	
-	/*if(!get_pcvar_num(cvar_modes))
-        return HAM_IGNORED*/
+	if (ZOMBIE <= g_class[attacker] <= LAST_ZOMBIE) {
+		SetHamParamFloat(4, damage *= ammount_zdamage(g_habilidad[attacker][CLASS_ZOMBIE][0]))
+	}
         
 	// Attacker is zombie...
 	if (g_class[victim] >= SNIPER) 
@@ -2989,7 +3031,7 @@ set_player_maxspeed(id)
 			else if (g_class[id] == ALIEN)
 				set_pev(id, pev_maxspeed, cvar_alienspd)
 			else
-				set_pev(id, pev_maxspeed, g_zombie_spd[id])
+				set_pev(id, pev_maxspeed, g_zombie_spd[id] + float(ammount_zspeed(g_habilidad[id][CLASS_ZOMBIE][2])))
 		}
 		else
 		{
@@ -3006,9 +3048,14 @@ set_player_maxspeed(id)
 			else
 			{
 				if(g_humanclass[id] != ZCLASS_NONE)
-					set_pev(id, pev_maxspeed, g_human_spd[id])
+					set_pev(id, pev_maxspeed, g_human_spd[id] + float(ammount_hspeed(g_habilidad[id][CLASS_HUMAN][3])))
 				else
-					set_pev(id, pev_maxspeed, g_cached_humanspd)
+					set_pev(id, pev_maxspeed, g_cached_humanspd + float(ammount_hspeed(g_habilidad[id][CLASS_HUMAN][3])))
+			
+			console_print(id, "spd %f", g_human_spd[id])
+			console_print(id, "mm %f", float(ammount_hspeed(g_habilidad[id][CLASS_HUMAN][3])))
+
+			console_print(id, "++ %f", g_human_spd[id] + float(ammount_hspeed(g_habilidad[id][CLASS_HUMAN][3])))
 			}
 
 			if(g_has_speed_boost[id])
@@ -3351,7 +3398,9 @@ public client_putinserver(id)
 {
 	// Plugin disabled?
 	if (!g_pluginenabled) return;
-	
+
+	g_puntos[id][CLASS_HUMAN] = 10000;
+	g_puntos[id][CLASS_ZOMBIE] = 10000;
 	// Player joined
 	g_isconnected[id] = true
 	g_iStatus[id] = NO_LOGUEADO;
@@ -4939,7 +4988,7 @@ public menu_game(id, key)
 		}
 		case 4: // Mejoras
 		{
-			client_print(id, print_chat, "Aqui van las Mejoras")
+			menu_habilities(id);
 		}
 		case 5: //Herramientas
 		{
@@ -4963,6 +5012,133 @@ public menu_game(id, key)
 		}
 	}
 	
+	return PLUGIN_HANDLED;
+}
+
+public menu_habilities(id) {
+	if (!is_user_connected(id)) {
+		return PLUGIN_HANDLED;
+	}
+	new menu = menu_create("\yMejoras^n", "callbackMejoras");
+
+	menu_additem(menu, "\wZombies")
+	menu_additem(menu, "\wHumans")
+	menu_display(id, menu, 0);
+	return PLUGIN_HANDLED;
+}
+
+public callbackMejoras(id, menu, item) {
+	if (item == MENU_EXIT)
+	{
+		menu_destroy(menu);
+		return PLUGIN_HANDLED;
+	}
+	switch(item)
+	{
+		case 0: habilities_zombie(id);
+		case 1: habilities_human(id);
+	}
+	menu_destroy(menu);
+	return PLUGIN_HANDLED;
+}
+
+public habilities_zombie(id) {
+	if (!is_user_connected(id)) {
+		return PLUGIN_HANDLED;
+	}
+	new menu = menu_create("\yMejoras Zombies^n", "callbackHabZ");
+	static item[999];
+	for (new i = 0; i < sizeof(habilityZombie); i += 1) {
+		if (g_habilidad[id][CLASS_ZOMBIE][i] < habilityZombie[i][hability_max]) // Definimos la habilidad Humana
+        {
+            if (g_puntos[id][CLASS_ZOMBIE] >= ammount_cost(g_habilidad[id][CLASS_ZOMBIE][i]))
+                formatex(item, sizeof item - 1, "\w %s \r[\w%d-%d\r][\w%s punto%s\r]", habilityZombie[i][hability_name], g_habilidad[id][CLASS_ZOMBIE][i], habilityZombie[i][hability_max], add_point(ammount_cost(g_habilidad[id][CLASS_ZOMBIE][i])), ammount_cost(g_habilidad[id][CLASS_ZOMBIE][i]) == 1 ? "" : "s")/*si tiene puntos le deja mejorar */
+            else
+                formatex(item, sizeof item - 1, "\d %s \r[\d%d-%d\r][\d%s punto%s\r]", habilityZombie[i][hability_name], g_habilidad[id][CLASS_ZOMBIE][i], habilityZombie[i][hability_max], add_point(ammount_cost(g_habilidad[id][CLASS_ZOMBIE][i])), ammount_cost(g_habilidad[id][CLASS_ZOMBIE][i]) == 1 ? "" : "s")/*si no tiene puntos no le dejara mejorar*/
+        }
+        else {
+        	formatex(item, sizeof item - 1, "\d %s \r[\dMAX\r]", habilityZombie[i][hability_name])
+        }
+        menu_additem(menu, item);
+	}
+	menu_display(id, menu, 0);
+	return PLUGIN_HANDLED;
+}
+
+public callbackHabZ(id, menu, Key) {
+	if (Key == MENU_EXIT)
+	{
+		menu_destroy(menu);
+		return PLUGIN_HANDLED;
+	}
+	if (g_habilidad[id][CLASS_ZOMBIE][Key] < habilityZombie[Key][hability_max])
+	{
+	    if (g_puntos[id][CLASS_ZOMBIE] >= ammount_cost(g_habilidad[id][CLASS_ZOMBIE][Key]))
+	    {
+	        g_puntos[id][CLASS_ZOMBIE] -= ammount_cost(g_habilidad[id][CLASS_ZOMBIE][Key]);
+	        g_gastados[id][CLASS_ZOMBIE] += ammount_cost(g_habilidad[id][CLASS_ZOMBIE][Key]);
+	        g_habilidad[id][CLASS_ZOMBIE][Key] += 1;
+	        habilities_zombie(id);
+	    }
+	    else
+	    {
+	        habilities_zombie(id);
+	    }
+	}
+	else
+	{
+	    habilities_zombie(id)
+	}
+	return PLUGIN_HANDLED;
+}
+
+public habilities_human(id) {
+	if (!is_user_connected(id)) {
+		return PLUGIN_HANDLED;
+	}
+	new menu = menu_create("\yMejoras Humanos^n", "callbackHabH");
+	static item[999];
+	for (new i = 0; i < sizeof(habilityHuman); i += 1) {
+		if (g_habilidad[id][CLASS_HUMAN][i] < habilityHuman[i][hability_max]) // Definimos la habilidad Humana
+        {
+            if (g_puntos[id][CLASS_HUMAN] >= ammount_cost(g_habilidad[id][CLASS_HUMAN][i]))
+                formatex(item, sizeof item - 1, "\w %s \r[\w%d-%d\r][\w%s punto%s\r]", habilityHuman[i][hability_name], g_habilidad[id][CLASS_HUMAN][i], habilityHuman[i][hability_max], add_point(ammount_cost(g_habilidad[id][CLASS_HUMAN][i])), ammount_cost(g_habilidad[id][CLASS_HUMAN][i]) == 1 ? "" : "s")/*si tiene puntos le deja mejorar */
+            else
+                formatex(item, sizeof item - 1, "\d %s \r[\d%d-%d\r][\d%s punto%s\r]", habilityHuman[i][hability_name], g_habilidad[id][CLASS_HUMAN][i], habilityHuman[i][hability_max], add_point(ammount_cost(g_habilidad[id][CLASS_HUMAN][i])), ammount_cost(g_habilidad[id][CLASS_HUMAN][i]) == 1 ? "" : "s")/*si no tiene puntos no le dejara mejorar*/
+        }
+        else {
+        	formatex(item, sizeof item - 1, "\d %s \r[\dMAX\r]", habilityHuman[i][hability_name])
+        }
+        menu_additem(menu, item);
+	}
+	menu_display(id, menu, 0);
+	return PLUGIN_HANDLED;
+}
+
+public callbackHabH(id, menu, Key) {
+	if (Key == MENU_EXIT)
+	{
+		menu_destroy(menu);
+		return PLUGIN_HANDLED;
+	}
+	if (g_habilidad[id][CLASS_HUMAN][Key] < habilityHuman[Key][hability_max])
+	{
+	    if (g_puntos[id][CLASS_HUMAN] >= ammount_cost(g_habilidad[id][CLASS_HUMAN][Key]))
+	    {
+	        g_puntos[id][CLASS_HUMAN] -= ammount_cost(g_habilidad[id][CLASS_HUMAN][Key]);
+	        g_gastados[id][CLASS_HUMAN] += ammount_cost(g_habilidad[id][CLASS_HUMAN][Key]);
+	        g_habilidad[id][CLASS_HUMAN][Key] += 1;
+	        habilities_human(id);
+	    }
+	    else
+	    {
+	        habilities_human(id);
+	    }
+	}
+	else
+	{
+	    habilities_human(id)
+	}
 	return PLUGIN_HANDLED;
 }
 
@@ -7208,9 +7384,9 @@ zombieme(id, infector, nemesis, silentmode, rewards)
 			g_class[id] = FIRST_ZOMBIE;
 			
 			// Set health and gravity, unless frozen
-			set_user_health(id, floatround(float(ArrayGetCell(g_zclass_hp, g_zombieclass[id])) * get_pcvar_float(cvar_zombiefirsthp)))
-			if (!g_frozen[id]) set_pev(id, pev_gravity, Float:ArrayGetCell(g_zclass_grav, g_zombieclass[id]))
-			else g_frozen_gravity[id] = Float:ArrayGetCell(g_zclass_grav, g_zombieclass[id])
+			set_user_health(id, floatround(float(ArrayGetCell(g_zclass_hp, g_zombieclass[id])) * get_pcvar_float(cvar_zombiefirsthp)) + ammount_zhealth(g_habilidad[id][CLASS_ZOMBIE][1]))
+			if (!g_frozen[id]) set_pev(id, pev_gravity, Float:ArrayGetCell(g_zclass_grav, g_zombieclass[id])- ammount_zgravity(g_habilidad[id][CLASS_ZOMBIE][3]))
+			else g_frozen_gravity[id] = Float:ArrayGetCell(g_zclass_grav, g_zombieclass[id]) - ammount_zgravity(g_habilidad[id][CLASS_ZOMBIE][3])
 
 			ExecuteHamB(Ham_Player_ResetMaxSpeed, id)
 			
@@ -7223,9 +7399,9 @@ zombieme(id, infector, nemesis, silentmode, rewards)
 			// Infected by someone
 			
 			// Set health and gravity, unless frozen
-			set_user_health(id, ArrayGetCell(g_zclass_hp, g_zombieclass[id]))
-			if (!g_frozen[id]) set_pev(id, pev_gravity, Float:ArrayGetCell(g_zclass_grav, g_zombieclass[id]))
-			else g_frozen_gravity[id] = Float:ArrayGetCell(g_zclass_grav, g_zombieclass[id])
+			set_user_health(id, ArrayGetCell(g_zclass_hp, g_zombieclass[id]) + ammount_zhealth(g_habilidad[id][CLASS_ZOMBIE][1]))
+			if (!g_frozen[id]) set_pev(id, pev_gravity, Float:ArrayGetCell(g_zclass_grav, g_zombieclass[id])- ammount_zgravity(g_habilidad[id][CLASS_ZOMBIE][3]))
+			else g_frozen_gravity[id] = Float:ArrayGetCell(g_zclass_grav, g_zombieclass[id]) - ammount_zgravity(g_habilidad[id][CLASS_ZOMBIE][3])
 
 			ExecuteHamB(Ham_Player_ResetMaxSpeed, id)
 			
@@ -7247,9 +7423,9 @@ zombieme(id, infector, nemesis, silentmode, rewards)
 		// Silent mode, no HUD messages, no infection sounds
 		
 		// Set health and gravity, unless frozen
-		set_user_health(id, ArrayGetCell(g_zclass_hp, g_zombieclass[id]))
-		if (!g_frozen[id]) set_pev(id, pev_gravity, Float:ArrayGetCell(g_zclass_grav, g_zombieclass[id]))
-		else g_frozen_gravity[id] = Float:ArrayGetCell(g_zclass_grav, g_zombieclass[id])
+		set_user_health(id, ArrayGetCell(g_zclass_hp, g_zombieclass[id]) + ammount_zhealth(g_habilidad[id][CLASS_ZOMBIE][1]))
+		if (!g_frozen[id]) set_pev(id, pev_gravity, Float:ArrayGetCell(g_zclass_grav, g_zombieclass[id])- ammount_zgravity(g_habilidad[id][CLASS_ZOMBIE][3]))
+		else g_frozen_gravity[id] = Float:ArrayGetCell(g_zclass_grav, g_zombieclass[id]) - ammount_zgravity(g_habilidad[id][CLASS_ZOMBIE][3])
 
 		ExecuteHamB(Ham_Player_ResetMaxSpeed, id)
 	}
@@ -13414,3 +13590,24 @@ public my_id(id) {
 	client_print( id, print_chat, "%s TU ID DE CUENTA ES %d.", g_szPrefix, g_id[ id ]);
 	return PLUGIN_HANDLED;
 }
+
+stock add_point(number)
+{ 
+    new count, i, str[29], str2[35], len
+    num_to_str(number, str, charsmax(str))
+    len = strlen(str)
+    
+    for (i = 0; i < len; i++)
+    {
+        if (i != 0 && ((len - i) %3 == 0))
+        {
+            add(str2, charsmax(str2), ".", 1)
+            count++
+            add(str2[i+count], 1, str[i], 1)
+        }
+        else
+            add(str2[i+count], 1, str[i], 1)
+    }
+
+    return str2;
+} 
