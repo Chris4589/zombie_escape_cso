@@ -4331,54 +4331,63 @@ public handlerMenu_config(id, menu, item)
 // Game Menu
 show_menu_game(id)
 {
-	static menu[250], len;
+	static menu[800], len;
 	len = 0
+
+	new g_restexp[33], g_nextlvl[33], required[33]
+
+	static lvl
+	lvl = g_iLevel[id] >= MAX_LEVEL ? MAX_LEVEL-1 : g_iLevel[id]-1;
+	g_restexp[id] = g_iExp[id];
+	g_nextlvl[id] = lvl;
+	required[id] = RequiredExp[lvl]
 	
 	// Title
-	len += formatex(menu[len], charsmax(menu) - len, "\wM E N U  \rP R I N C I P A L^n^n")
+	len += formatex(menu[len], charsmax(menu) - len, (fmt("\y|============================|^n\
+		\w------- \rZ O M B I E  E S C A P E \w---------^n\
+		\ TE FALTAN \r%d \wEXP PARA EL NIVEL \r%d ^n\
+	\y|============================|^n^n", (required[id] - g_restexp[id]), (lvl + 2))))
 	
 	// 1. Buy weapons
 	if (get_pcvar_num(cvar_buycustom) && g_class[id] < SURVIVOR)
-		len += formatex(menu[len], charsmax(menu) - len, "\r1. \wARMAMENTO^n");
+		len += formatex(menu[len], charsmax(menu) - len, "\r[1] \wArmamento^n");
 	else
-		len += formatex(menu[len], charsmax(menu) - len, "\r1. \dARMAMENTO^n");
+		len += formatex(menu[len], charsmax(menu) - len, "\r[1] \dArmamento^n");
 	
 	// 2. Extra items
 	if (get_pcvar_num(cvar_extraitems) && g_isalive[id])
-		len += formatex(menu[len], charsmax(menu) - len, "\r2. \wTIENDA^n");
+		len += formatex(menu[len], charsmax(menu) - len, "\r[2] \wTienda^n");
 	else
-		len += formatex(menu[len], charsmax(menu) - len, "\d2. TIENDA^n")
+		len += formatex(menu[len], charsmax(menu) - len, "\d[2] \dTienda^n")
 	
 	// 3. Zombie class
 	if (get_pcvar_num(cvar_zclasses))
-		len += formatex(menu[len], charsmax(menu) - len, "\r3. \wCLASES DE ZOMBIE^n")
-	else
-		len += formatex(menu[len], charsmax(menu) - len, "\d3. CLASES DE ZOMBIE^n")
+		len += formatex(menu[len], charsmax(menu) - len, "\r[3] \wClases^n")
 
-	if (get_pcvar_num(cvar_zclasses))
-		len += formatex(menu[len], charsmax(menu) - len, "\r4. \wCLASES DE HUMANO^n")
-	else
-		len += formatex(menu[len], charsmax(menu) - len, "\d4. CLASES DE HUMANO^n")
+
+	len += formatex(menu[len], charsmax(menu) - len, "\r[4] \wLogros^n")
+
+	len += formatex(menu[len], charsmax(menu) - len, "\r[5] \wMejoras^n")
 	
-	len += formatex(menu[len], charsmax(menu) - len, "\r5. \wHERRAMIENTAS^n");
+	len += formatex(menu[len], charsmax(menu) - len, "\r[6] \wHerramientas^n");
 	
 	// 5. Help
-	len += formatex(menu[len], charsmax(menu) - len, "\r6. \rPARTY^n")
+	len += formatex(menu[len], charsmax(menu) - len, "\r[7] \wParty^n")
 	//6
 	//len += formatex(menu[len], charsmax(menu) - len, "\r6. \yLogros^n")
 	//7
-	len += formatex(menu[len], charsmax(menu) - len, "\r7. \wESTADISTICAS / TOP15^n")
+	len += formatex(menu[len], charsmax(menu) - len, "\r[8] \wTops^n")
 
 	//8
 
 	// 9. Admin menu
 	if (is_user_admin(id))
-		len += formatex(menu[len], charsmax(menu) - len, "\r9. \wMENU DE ADMIN^n")
+		len += formatex(menu[len], charsmax(menu) - len, "\r[9] \wAdmin Menu^n")
 	else
-		len += formatex(menu[len], charsmax(menu) - len, "\d9. MENU DE ADMIN^n")
+		len += formatex(menu[len], charsmax(menu) - len, "\r[9] \dAdmin Menu^n")
 	
 	// 0. Exit
-	len += formatex(menu[len], charsmax(menu) - len, "^n^n\r0. \wSALIR")
+	len += formatex(menu[len], charsmax(menu) - len, "^n^n\r[0] \wSALIR")
 	
 	show_menu(id, KEYSMENU, menu, -1, "Game Menu")
 }
