@@ -1,6 +1,17 @@
-ZOMBIE ESCAPE BY HYPNOTIZE
+# ZOMBIE ESCAPE BY HYPNOTIZE
 
---------------------------
+## modificaciones por
+
+* Hypnotize
+* Randro
+
+---
+
+## NOTA
+ahora se debe usar el include zombie_escape_v1 en lugar de zombie_plague por cada compilacion
+
+---
+## pendientes 
 Ordenamiento de Humanos:
 	Mayor nivel: mas speed, gravedad, chaleco y hp
 
@@ -22,6 +33,7 @@ Mejoras con niveles:
 		-Aumentar Daño Chain grenade
 		-Aumentar Gravedad
 		
+Mejorar estetica de menues
 
 Misiones:
 	-casi resuelto
@@ -32,3 +44,7 @@ Mostrar tiempo restante de habilidades zombies y humanos
 				-Ejemplo: HUD: gomitar[20 secs], gomitar[G]
 
 Rehacer sistema de cuentas
+
+PD: si se resuelve algo se pondra asi
+
+Menu - randro
