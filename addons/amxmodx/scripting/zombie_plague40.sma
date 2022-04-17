@@ -900,6 +900,26 @@ new Array:g_zclass_grav // gravity
 new Array:g_zclass_kb // knockback
 new g_zclass_i // loaded zombie classes counter
 
+enum _:e_ClassInfo
+{
+	ClassesName[120],
+	ClassesDescription[220],
+	ClassesLevel,
+	ClassesReset,
+	ClassesAdmin,
+	ClassesType,
+	ClassesModel[120],
+	ClassesKnife[120],
+	ClassesHP,
+	ClassesArmor,
+	ClassesSpeed,
+	Float:ClassesGrav,
+	Float:ClassesKnockback,
+	ClassesId
+};
+
+new ClasesInfo[e_ClassInfo], Array:g_ArrayClass;
+
 // Customization vars
 new sprite_grenade_trail[64], sprite_grenade_ring[64], sprite_grenade_fire[64],
 sprite_grenade_smoke[64], sprite_grenade_glass[64], Array:sound_win_zombies,
@@ -1234,6 +1254,7 @@ public plugin_precache()
 	g_aLevel = ArrayCreate();
 	g_aReset = ArrayCreate();*/
 	g_aArray = ArrayCreate(e_WeaponsInfo);
+	g_ArrayClass = ArrayCreate(e_ClassInfo);
 	/*g_iCat = ArrayCreate();
 	g_iTipo = ArrayCreate();*/
 
