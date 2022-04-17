@@ -12611,16 +12611,17 @@ public get_grenades(id, item)
 		cs_set_user_bpammo(id, CSW_SMOKEGRENADE, SMOKE);
 	}		
 }
-public register_arma(plugin, params)
-{
-	if (get_param(4) == PRIMARIA) {
-		++g_Prim;
-	}
-	if (get_param(4) == SECUNDARIA) {
-		++g_Sec;
-	}
-	if (get_param(4) == KNIFE) {
-		++g_Knife;
+public register_arma(plugin, params) {
+	switch (get_param(4)) {
+	    case PRIMARIA: {
+	    	++g_Prim;
+	    }
+	    case SECUNDARIA: {
+	    	++g_Sec;
+	    }
+	    case KNIFE: {
+	    	++g_Knife;
+	    }
 	}
 
 	get_string(1, weaponOrder[Weapon_Name], charsmax(weaponOrder[Weapon_Name]));
