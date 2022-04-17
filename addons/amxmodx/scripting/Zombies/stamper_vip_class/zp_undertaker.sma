@@ -2,7 +2,7 @@
 #include <fakemeta>
 #include <fakemeta_util>
 #include <hamsandwich> 
-#include <zombieplague> 
+#include <zombie_escape_v1> 
 #include <xs> 
 
 #define PLUGIN "Undertaker"
@@ -50,6 +50,8 @@ anim_midslash1,
 anim_midslash2,
 }
 const DMG_HEGRENADE = (1<<24)
+
+new fw_archivement_stamper
 public plugin_init() 
 {
         register_forward(FM_EmitSound, "fw_EmitSound")
@@ -83,11 +85,13 @@ public plugin_init()
 	cvar_exdamage = register_cvar("zp_undertaker_exdamage","0.35") //Р№вЂњРѓРµВ¤вЂћРµТђС–Р·в‚¬вЂ Р·вЂљС‘Р¶вЂ”В¶Р·С™вЂћРґСВ¤РµВ®С–(Р·вЂќСџРµвЂР…*Р¶вЂўВ°Р¶РЊВ®)
 	cvar_bot_use_skill = register_cvar("zp_undertaker_bot_use_skill", "150") //BOTРґР…С—Р·вЂќРЃР¶Р‰Р‚РёС“Р…Р·С™вЂћРёВ·СњР·В¦В»
 	cvar_exhit = register_cvar("zp_undertaker_hit_ex", "5") //Р№вЂњРѓРµВ¤вЂћРµТђС–РµРЏвЂ”Р№вЂЎРЊРµв‚¬Р‚Р·С™вЂћР¶СљР‚РµВ¤В§Р¶вЂќВ»РµвЂЎВ»Р¶В¬РЋР¶вЂўВ°
+
+	fw_archivement_stamper = CreateMultiForward("archivement_stamper", ET_STOP, FP_CELL)
 }
 
 public plugin_precache()
 {
-	g_zclass_undertaker = zp_register_class(CLASS_ZOMBIE, zclass_name, zclass_info, zclass_model, zclass_clawmodel, 22, 0, ADMIN_IMMUNITY, 
+	g_zclass_undertaker = zp_register_class(CLASS_ZOMBIE, zclass_name, zclass_info, zclass_model, zclass_clawmodel, 22, 0, ADMIN_ALL, 
 		zclass_health, 0, zclass_speed, zclass_gravity, zclass_knockback)
 	engfunc(EngFunc_PrecacheModel,zclass_hemodel)
 	engfunc(EngFunc_PrecacheModel,SKILLMODEL)
@@ -368,9 +372,11 @@ public settheent(taskid)
 	new Float:range = get_distance_f(entorigin, iorigin)
 	if(range <= float(get_pcvar_num(cvar_exrange)) && is_user_alive(i) && !zp_get_user_zombie(i) && !setmaxspeed[id])
 	{
-	setmaxspeed[i] = true
-	makespr(i)
-	set_task(get_pcvar_float(cvar_speedtime), "overspeedtime", i+TASK_SPEEDTIME)
+		setmaxspeed[i] = true
+		makespr(i)
+		set_task(get_pcvar_float(cvar_speedtime), "overspeedtime", i+TASK_SPEEDTIME)
+		new ret;
+		ExecuteForward(fw_archivement_stamper, ret, id)
 	}
 	}
 	engfunc(EngFunc_MessageBegin, MSG_PVS, SVC_TEMPENTITY, entorigin, 0)
