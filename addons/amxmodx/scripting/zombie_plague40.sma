@@ -736,8 +736,9 @@ new g_iBalasEspeciales[33];
 new Float:g_fRecord[33], g_touched[33], Float:g_fTiempo[33], Float:g_currencyTime[33];
 new g_iMsgTextMsg, g_iMsgSendAudio;
 //armas
-new Array:g_szName, Array:g_aLevel, Array:g_aReset, Array:g_iCat, Array:g_iTipo, Array:g_szTipo, 
-fw_Item_Selected, gTotalItems;
+new Array:g_aArray;
+//new Array:g_szName, Array:g_aLevel, Array:g_aReset, Array:g_iCat, Array:g_iTipo, Array:g_szTipo;
+new fw_Item_Selected, gTotalItems;
 new g_Prim, g_Sec, g_Knife;
 
 enum{ PRIMARIA=1, SECUNDARIA, KNIFE, MAX_ARMS };
@@ -1009,6 +1010,19 @@ enum
 	LOGUEADO
 }
 
+
+enum _:e_WeaponsInfo
+{
+    Weapon_Name[ 52 ],
+    Weapon_AdminType[40],
+    Weapon_Level,
+    Weapon_Reset,
+    Weapon_Category,
+    Weapon_Admin,
+    Weapon_Pos
+}
+new weaponOrder[ e_WeaponsInfo ];
+
 /*================================================================================
  [Natives, Precache and Init]
 =================================================================================*/
@@ -1215,12 +1229,13 @@ public plugin_precache()
 	g_zclass_grav = ArrayCreate(1, 1)
 	g_zclass_kb = ArrayCreate(1, 1)
 	
-	g_szName = ArrayCreate(50);
+	/*g_szName = ArrayCreate(50);
 	g_szTipo = ArrayCreate(42);
 	g_aLevel = ArrayCreate();
-	g_aReset = ArrayCreate();
-	g_iCat = ArrayCreate();
-	g_iTipo = ArrayCreate();
+	g_aReset = ArrayCreate();*/
+	g_aArray = ArrayCreate(e_WeaponsInfo);
+	/*g_iCat = ArrayCreate();
+	g_iTipo = ArrayCreate();*/
 
 	// Allow registering stuff now
 	g_arrays_created = true
@@ -12181,8 +12196,8 @@ public cmd_Menu_guns(id)
 	if( g_bAutoSeleccion[id] || g_bAnterior[id] || g_class[id] >= SURVIVOR )
 		return PLUGIN_HANDLED;
 
+	//ArraySortEx( g_aArray, "orderWeapons" );
 	new szItem[ 40 ];
-
 	new menu[1024], len;
 
 	len = 0;
@@ -12190,21 +12205,27 @@ public cmd_Menu_guns(id)
 	len += formatex(menu[len], sizeof menu - 1 - len, "\rArmamento^n^n");
 	//error
 	if (g_Prim > 0) {
-		ArrayGetString(g_szName, g_iSelected[id][PRIMARIA], szItem, charsmax(szItem) );
+		// ArrayGetString(g_szName, g_iSelected[id][PRIMARIA], szItem, charsmax(szItem) );
+		ArrayGetArray(g_aArray, g_iSelected[id][PRIMARIA], weaponOrder);
+		copy(szItem, charsmax(szItem), weaponOrder[Weapon_Name]);
 		len += formatex(menu[len], sizeof menu - 1 - len, "\r1. \wPrimary [\y%s\w]^n", g_iSelected[id][PRIMARIA] <= -1 ? "None" : szItem);
 	} else {
 		len += formatex(menu[len], sizeof menu - 1 - len, "\r1. \wNo hay armas primarias Cargadas..^n");
 	}
 
 	if (g_Sec > 0) {
-		ArrayGetString(g_szName, g_iSelected[id][SECUNDARIA], szItem, charsmax(szItem) );
+		// ArrayGetString(g_szName, g_iSelected[id][SECUNDARIA], szItem, charsmax(szItem) );
+		ArrayGetArray(g_aArray, g_iSelected[id][SECUNDARIA], weaponOrder);
+		copy(szItem, charsmax(szItem), weaponOrder[Weapon_Name]);
 		len += formatex(menu[len], sizeof menu - 1 - len, "\r2. \wSecundary [\y%s\w]^n", g_iSelected[id][SECUNDARIA] <= -1 ? "None" : szItem);
 	} else {
 		len += formatex(menu[len], sizeof menu - 1 - len, "\r2. \wNo hay armas secundarias Cargadas..^n");
 	}
 
 	if (g_Knife > 0) {
-		ArrayGetString(g_szName,g_iSelected[id][KNIFE], szItem, charsmax(szItem) );
+		// ArrayGetString(g_szName,g_iSelected[id][KNIFE], szItem, charsmax(szItem) );
+		ArrayGetArray(g_aArray, g_iSelected[id][KNIFE], weaponOrder);
+		copy(szItem, charsmax(szItem), weaponOrder[Weapon_Name]);
 		len += formatex(menu[len], sizeof menu - 1 - len, "\r3. \wKnifes [\y%s\w]^n", g_iSelected[id][KNIFE] <= -1 ? "None" : szItem);
 	} else {
 		len += formatex(menu[len], sizeof menu - 1 - len, "\r3. \wNo hay Knifes Cargados..^n");
@@ -12273,24 +12294,37 @@ public handlerMenu(id, item)
 	return PLUGIN_HANDLED;
 }
 
+public orderWeapons(Array:g_aArray, elem1[], elem2[]) {
+	new iTemp1 = (elem1[ Weapon_Reset ] * MAX_LEVEL) + elem1[ Weapon_Level ];
+	new iTemp2 = (elem2[ Weapon_Reset ] * MAX_LEVEL) + elem2[ Weapon_Level ];
 
+	if( iTemp1 > iTemp2 )
+	    return 1;
+
+	if( iTemp1 < iTemp2 )
+	    return -1;
+
+	return 0;
+}
 
 public menu_armas( id, item )
 {
+	//ArraySortEx( g_aArray, "orderWeapons" )
+
 	new menu = menu_create( "Menu Armas", "handler_skins" );
-	static Item[ 30 ], g_isLen[80], szItem[120], admin, szAdmin[32], level, reset, cat;
+	static Item[ 30 ], g_isLen[80], admin, level, reset, cat;
 	
 	for( new i = 0; i < gTotalItems; i++ )
 	{
+		ArrayGetArray( g_aArray, i, weaponOrder );
 		formatex( Item, charsmax( Item ), "%d", i );
-		ArrayGetString(g_szName, i, szItem, charsmax(szItem) );
-		ArrayGetString(g_szTipo, i, szAdmin, charsmax(szAdmin) );
-		cat = ArrayGetCell( g_iCat, i );
-		admin = ArrayGetCell( g_iTipo, i );
-		reset = ArrayGetCell( g_aReset, i );
-		level = ArrayGetCell( g_aLevel, i );
+		cat = weaponOrder[Weapon_Category];
+		admin = weaponOrder[Weapon_Admin];
+		reset = weaponOrder[Weapon_Reset];
+		level = weaponOrder[Weapon_Level];
 			
-		
+		console_print(id, "%s | [ L:%d-R:%d ]", weaponOrder[Weapon_Name], level, reset)
+
 		if( item != cat ) 
 			continue;
 		
@@ -12298,11 +12332,11 @@ public menu_armas( id, item )
 		{
 			if( g_iLevel[id] >= level && g_iReset[id] == reset || g_iReset[id] > reset || g_bHappyTime && reset <= 0)
 			{
-				formatex(g_isLen, charsmax(g_isLen), "%s", szItem);
+				formatex(g_isLen, charsmax(g_isLen), "%s", weaponOrder[Weapon_Name]);
 			}
 			else
 			{
-				formatex(g_isLen, charsmax(g_isLen), "\d%s | \y[ \rL:%d\y-\rR:%d \y]", szItem, level, reset);
+				formatex(g_isLen, charsmax(g_isLen), "\d%s | \y[ \rL:%d\y-\rR:%d \y]", weaponOrder[Weapon_Name], level, reset);
 			}
 		}
 		else
@@ -12311,16 +12345,16 @@ public menu_armas( id, item )
 			{
 				if( g_iLevel[id] >= level && g_iReset[id] == reset || g_iReset[id] > reset || g_bHappyTime && reset <= 0 )
 				{
-					formatex(g_isLen, charsmax(g_isLen), "%s | \y[ \rL:%d\y-\rR:%d \y]", szItem, level, reset);
+					formatex(g_isLen, charsmax(g_isLen), "%s | \y[ \rL:%d\y-\rR:%d \y]", weaponOrder[Weapon_Name], level, reset);
 				}
 				else
 				{
-					formatex(g_isLen, charsmax(g_isLen), "\d%s | \y[ \rL:%d\y-\rR:%d \y]", szItem, level, reset);
+					formatex(g_isLen, charsmax(g_isLen), "\d%s | \y[ \rL:%d\y-\rR:%d \y]", weaponOrder[Weapon_Name], level, reset);
 				}
 			}
 			else
 			{
-				formatex(g_isLen, charsmax(g_isLen), "\d%s | ADMIN: \y[ \rL:%d\y-\rR:%d \y]", szItem, level, reset);
+				formatex(g_isLen, charsmax(g_isLen), "\d%s | ADMIN: \y[ \rL:%d\y-\rR:%d \y]", weaponOrder[Weapon_Name], level, reset);
 			}
 		}
 		menu_additem(menu, g_isLen, Item);
@@ -12341,14 +12375,16 @@ public handler_skins( id, menu, item )
 	menu_item_getinfo( menu, item, item_access, szData,charsmax( szData ), Item, charsmax(Item), item_callback );
 	
 	new reset, level, item2 = str_to_num( szData );
+	// ArraySortEx( g_aArray, "orderWeapons" );
+	ArrayGetArray( g_aArray, item2, weaponOrder );
 	
-	new admin = ArrayGetCell( g_iTipo, item2 );
+	new admin = weaponOrder[Weapon_Admin];//ArrayGetCell( g_iTipo, item2 );
 
-	new szItem[32]; ArrayGetString(g_szName, item2, szItem, charsmax(szItem) );
-	new szAdmin[32]; ArrayGetString(g_szTipo, item2, szAdmin, charsmax(szAdmin) );
-	new cat = ArrayGetCell( g_iCat, item2 );
-	reset = ArrayGetCell( g_aReset, item2 );
-	level = ArrayGetCell( g_aLevel, item2 );
+	new szItem[32]; copy(szItem, charsmax(szItem), weaponOrder[Weapon_Name]);//ArrayGetString(g_szName, item2, szItem, charsmax(szItem) );
+	new szAdmin[32]; copy(szAdmin, charsmax(szAdmin), weaponOrder[Weapon_AdminType]);//ArrayGetString(g_szTipo, item2, szAdmin, charsmax(szAdmin) );
+	new cat = weaponOrder[Weapon_Category];//ArrayGetCell( g_iCat, item2 );
+	reset = weaponOrder[Weapon_Reset]; // ArrayGetCell( g_aReset, item2 );
+	level = weaponOrder[Weapon_Level]; // ArrayGetCell( g_aLevel, item2 );
 	
 	if( !g_bHappyTime && g_iLevel[id] < level && g_iReset[id] == reset || g_iReset[id] < reset  )
 	{
@@ -12394,12 +12430,14 @@ public force_give_weapon(plugin, params) {
 	static szItem[120], cat;
 
 	new szNombre[32]; get_string(2, szNombre, charsmax(szNombre));
-
+	//ArraySortEx( g_aArray, "orderWeapons" );
 	for( new i = 0; i < gTotalItems; i++ )
 	{
-		ArrayGetString(g_szName, i, szItem, charsmax(szItem) );
+		// ArrayGetString(g_szName, i, szItem, charsmax(szItem) );
+		ArrayGetArray(g_aArray, i, weaponOrder);
+		copy(szItem, charsmax(szItem), weaponOrder[Weapon_Name]);
 		if (equali(szNombre, szItem)) {
-			cat = ArrayGetCell( g_iCat, i );
+			cat = weaponOrder[Weapon_Category]; //ArrayGetCell( g_iCat, i );
 
 			getWeapons(get_param(1), i, cat);
 			break;
@@ -12412,15 +12450,17 @@ public getWeapons(id, aItem, cat) {
 	if(!is_user_alive(id) || !is_user_connected(id) || g_class[id] >= SURVIVOR)
 		return;
 
-	new ret;
-	ExecuteForward(fw_Item_Selected, ret, id, aItem);
+	new ret; ArrayGetArray(g_aArray, aItem, weaponOrder);
+	
+	ExecuteForward(fw_Item_Selected, ret, id, weaponOrder[Weapon_Pos]);
 	
 	if ( ret == PLUGIN_HANDLED )
 		client_print(id, print_chat, "No puedes comprarlo ahora.");
 	else
 	{
 		new szItemName[32];
-		ArrayGetString(g_szName, aItem, szItemName, charsmax(szItemName));
+		// ArrayGetString(g_szName, aItem, szItemName, charsmax(szItemName));
+		copy(szItemName, charsmax(szItemName), weaponOrder[Weapon_Name]);
 		zp_colored_print(id, "Has comprado: ^x04%s^x01", szItemName);
 	}
 }
@@ -12432,15 +12472,16 @@ public obtenerArmas(id, aItem, cat)
 	g_iCategoria[id] = cat;
 	g_iSelected[id][cat] = aItem;
 	
-	new ret;
-	ExecuteForward(fw_Item_Selected, ret, id, aItem);
+	new ret; ArrayGetArray(g_aArray, aItem, weaponOrder);
+	ExecuteForward(fw_Item_Selected, ret, id, weaponOrder[Weapon_Pos]);
 	
 	if ( ret == PLUGIN_HANDLED )
 		client_print(id, print_chat, "No puedes comprarlo ahora.");
 	else
 	{
 		new szItemName[32];
-		ArrayGetString(g_szName, aItem, szItemName, charsmax(szItemName));
+		// ArrayGetString(g_szName, aItem, szItemName, charsmax(szItemName));
+		copy(szItemName, charsmax(szItemName), weaponOrder[Weapon_Name]);
 		zp_colored_print(id, "Has comprado: ^x04%s^x01", szItemName);
 	}
 }
@@ -12572,13 +12613,6 @@ public get_grenades(id, item)
 }
 public register_arma(plugin, params)
 {
-	new szNombre[32]; get_string(1, szNombre, charsmax(szNombre));
-	ArrayPushString(g_szName, szNombre);
-	//enum{ PRIMARIA=1, SECUNDARIA, KNIFE, MAX_ARMS };
-	ArrayPushCell(g_aLevel, get_param(2));
-	ArrayPushCell(g_aReset, get_param(3));
-	ArrayPushCell(g_iCat, get_param(4));
-
 	if (get_param(4) == PRIMARIA) {
 		++g_Prim;
 	}
@@ -12589,9 +12623,17 @@ public register_arma(plugin, params)
 		++g_Knife;
 	}
 
-	ArrayPushCell(g_iTipo, get_param(5));
-	new szTip[32]; get_string(6, szTip, charsmax(szTip));
-	ArrayPushString(g_szTipo, szTip);
+	get_string(1, weaponOrder[Weapon_Name], charsmax(weaponOrder[Weapon_Name]));
+	weaponOrder[Weapon_Level] = get_param(2);
+	weaponOrder[Weapon_Reset] = get_param(3);
+	weaponOrder[Weapon_Category] = get_param(4);
+	weaponOrder[Weapon_Admin] = get_param(5);
+	weaponOrder[Weapon_Pos] = gTotalItems;
+	get_string(6, weaponOrder[Weapon_AdminType], charsmax(weaponOrder[Weapon_AdminType]));
+
+	ArrayPushArray(g_aArray, weaponOrder);
+
+	ArraySortEx(g_aArray, "orderWeapons");
 
 	++gTotalItems;
 	
@@ -13476,13 +13518,16 @@ public FwdHamShotgunReload( const iWeapon )
 }
 public get_rdnWeapon(id, cat)
 {
+	//ArraySortEx( g_aArray, "orderWeapons" );
 	static i, num;
 	for( i = 0; i < gTotalItems; i++ )
 	{
 		if(!is_user_connected(id))
 			continue;
+
+		ArrayGetArray(g_aArray, i, weaponOrder);
 			
-		if(ArrayGetCell(g_iCat, i) == cat)
+		if(weaponOrder[Weapon_Category] == cat)
 		{
 			num = i;
 			break;
