@@ -2,7 +2,7 @@
 #include <fun>
 #include <fakemeta>
 #include <hamsandwich>
-#include <zombieplague>
+#include <zombie_escape_v1>
 #include <engine>
 
 #define PLUGIN "[ZP] Class - Ghost"
@@ -34,7 +34,7 @@ new const sound_ghost_stealth[] = "zombie_plague/zp_fz_translucent.wav" //stealt
 new const sound_ghost_stealth_end[] = "zombie_plague/ghos111.wav" //end stealth sound
 // ----------------------------------- //
 
-
+new g_ghost_active[33], fw_archivement_ghost;
 
 public plugin_init()
 {	
@@ -47,6 +47,7 @@ public plugin_init()
 	RegisterHam(Ham_TakeDamage, "player", "fw_TakeDamage")
 	register_logevent("roundStart", 2, "1=Round_Start")
 	g_maxplayers = get_maxplayers()
+	fw_archivement_ghost = CreateMultiForward("archivement_lusty", ET_STOP, FP_CELL)
 }
 
 public plugin_precache()
@@ -85,6 +86,7 @@ public use_ability_one(id)
 			
 			set_task(1.0, "ShowHUD", id, _, _, "a",i_cooldown_time[id])
 			set_task(1.0, "ShowHUDstealthes", id, _, _, "a",i_stealth_time_hud[id])
+			g_ghost_active[id] = 1;
 		}
 	}
 }
@@ -121,6 +123,7 @@ public ghost_make_visible(id)
 		zp_set_ghost(id, 0);
 		//set_user_rendering(id, kRenderFxHologram, 0, 0, 0, kRenderTransAlpha, 125)
 		emit_sound(id, CHAN_STREAM, sound_ghost_stealth_end, 1.0, ATTN_NORM, 0, PITCH_NORM)
+		g_ghost_active[id] = 0;
 	}
 }
 
@@ -145,6 +148,7 @@ public zp_user_infected_post(id, infector)
 	{
 		zp_set_ghost(id, 0);
 		//set_user_rendering(id, kRenderFxHologram, 0, 0, 0, kRenderTransAlpha, 125)
+		g_ghost_active[id] = 0;
 		
 		new text[100]
 		new note_cooldown = floatround(g_stealth_cooldown_standart)
@@ -170,6 +174,12 @@ public zp_user_infected_post(id, infector)
 		g_stealth_time[infector] = g_stealth_time[infector] + 1;
 		infections_hud(infector)
 	}
+	if(g_ghost_active[infector])
+	{
+		new ret
+		ExecuteForward(fw_archivement_ghost, ret, infector)
+	}
+		
 }
 
 public infections_hud(id)
@@ -191,6 +201,7 @@ public zp_user_humanized_post(id)
 	zp_set_ghost(id, 0);
 	//set_user_rendering(id, kRenderFxNone, 0, 0, 0, kRenderTransAlpha, 255)
 	remove_task(id)
+	g_ghost_active[id] = 0;
 }
 
 public zp_user_unfrozen(id)
@@ -199,6 +210,7 @@ public zp_user_unfrozen(id)
 	{
 		zp_set_ghost(id, 0);
 		//set_user_rendering(id, kRenderFxHologram, 0, 0, 0, kRenderTransAlpha, 125)
+		g_ghost_active[id] = 0;
 	}
 }
 

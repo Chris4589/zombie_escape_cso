@@ -64,6 +64,7 @@ forward archivement_frozen(id)
 forward archivement_stamper(id)
 forward archivement_banshee(id)
 forward archivement_lusty(id)
+forward archivement_menu(id)
 
 
 
@@ -205,6 +206,8 @@ new const chain_grenade[] = "grenade"
 
 new g_button[33], g_kills[33], g_infect[33], g_frozen[33], g_chain[33], g_stamper[33], g_banshee[33], g_lusty[33]
 
+
+
 public plugin_init()
 {
 	register_plugin("Logros", "0.1", "Randro")
@@ -216,7 +219,7 @@ public plugin_init()
 	register_clcmd("say /logros", "menu_logros")
 	//register_clcmd("say v", 	"logros_test")
 
-	g_maxplayers = get_maxplayers()
+	g_maxplayers = get_maxplayers()	
 
 	MySQL_Init()
 }
@@ -227,55 +230,48 @@ public plugin_precache()
 	precache_sound(logro_finish)
 }
 
-public plugin_natives()
-{
-	register_native("ze_button", "native_button", 1)
-	register_native("zp_infect", "native_infect", 1)
-	register_native("ze_frozen", "native_frozen", 1)
-	register_native("ze_stamper", "native_stamper", 1)
-	register_native("ze_banshee", "native_banshee", 1)
-	register_native("ze_lusty", "native_lusty", 1)
-}
-
 
 /*****************************************************************************
 ----------------------------[Native Logros]------------------------------------
 *****************************************************************************/
 public archivement_butom(id)
 {
-	if(zp_get_class(id) >= ZOMBIE) return;
+	//if(zp_get_class(id) >= ZOMBIE) return;
 	
 	g_button[id]++
 	check_button(id)
 }
 public zp_user_infected_post(id, infector, nemesis)
 {
-	if(getUsers() <= MIN_PLAYERS) return;
+	//if(getUsers() <= MIN_PLAYERS) return;
+	if(!infector)
+		return;
+
 	g_infect[infector]++
 	chequear_infect(infector)
 }
 
 public archivement_frozen(id)
 {
-	if(getUsers() <= MIN_PLAYERS) return;
+	//if(getUsers() <= MIN_PLAYERS) return;
 	g_frozen[id]++
 	chequear_frozen(id)
 }
 public archivement_stamper(id)
 {
-	if(getUsers() <= MIN_PLAYERS) return;
+	//if(getUsers() <= MIN_PLAYERS) return;
 	g_stamper[id]++
 	chequear_stamper(id)
 }
 public archivement_banshee(id)
 {
-	if(getUsers() <= MIN_PLAYERS) return;
+	//if(getUsers() <= MIN_PLAYERS) return;
 	g_banshee[id]++
 	chequear_banshee(id)
 }
 public archivement_lusty(id)
 {
-	if(getUsers() <= MIN_PLAYERS) return;
+	//if(getUsers() <= MIN_PLAYERS) return;
 	g_lusty[id]++
 	chequear_lusty(id)
 }
@@ -520,6 +516,9 @@ public chequear_lusty(id)
 /*****************************************************************************
 ----------------------------[MENU LOGROS]------------------------------------
 *****************************************************************************/
+
+public archivement_menu(id)
+	menu_logros(id)
 public menu_logros(id)
 {
 
