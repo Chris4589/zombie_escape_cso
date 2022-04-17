@@ -3051,11 +3051,6 @@ set_player_maxspeed(id)
 					set_pev(id, pev_maxspeed, g_human_spd[id] + float(ammount_hspeed(g_habilidad[id][CLASS_HUMAN][3])))
 				else
 					set_pev(id, pev_maxspeed, g_cached_humanspd + float(ammount_hspeed(g_habilidad[id][CLASS_HUMAN][3])))
-			
-			console_print(id, "spd %f", g_human_spd[id])
-			console_print(id, "mm %f", float(ammount_hspeed(g_habilidad[id][CLASS_HUMAN][3])))
-
-			console_print(id, "++ %f", g_human_spd[id] + float(ammount_hspeed(g_habilidad[id][CLASS_HUMAN][3])))
 			}
 
 			if(g_has_speed_boost[id])
