@@ -8,22 +8,24 @@
 ---
 
 ## NOTA
-ahora se debe usar el include zombie_escape_v1 en lugar de zombie_plague por cada compilacion
+***ahora se debe usar el include zombie_escape_v1 en lugar de zombie_plague por cada compilacion***
 
 ---
 ## pendientes 
-Ordenamiento de Humanos:
-	Mayor nivel: mas speed, gravedad, chaleco y hp
+Ordenamiento de Humanos: (***ordenamiento completo - chris***)
+	Mayor nivel: mas speed, gravedad, chaleco y hp (***PENDIENTE***)
+
+Ordenamiento Armas (***ordenamiento completo - chris***)
 
 Nemesis Bazooka:
 	No dar X basucas, Dar 1 Bazuca cada X segundo (se recargan) ***---RECHAZADO***
 
-Menu de mejoras ***---AGREGADO - CHRIS***
-	DMG
-	SPD
-	HP
-	ARMOR
-	GRAV
+Menu de mejoras (***AGREGADO - CHRIS***)
+	DMG (***AGREGADO - CHRIS***)
+	SPD (***AGREGADO - CHRIS***)
+	HP (***AGREGADO - CHRIS***)
+	ARMOR (***AGREGADO - CHRIS***)
+	GRAV (***AGREGADO - CHRIS***)
 
 Clases de zombie, hm, neme y survi (Mejoras con niveles):
 	Nemesis:
