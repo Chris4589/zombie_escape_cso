@@ -431,6 +431,10 @@ new g_iDamage[33], g_iExp[33], g_iLevel[33], g_iReset[33];
 new cvar_exp, g_iDefaultDamage; 
 new g_temExp[ 33 ], g_tempDamage[ 33 ], g_tempApps[33];
 
+
+new fw_archivement_menu
+new fw_archivement_frozen
+
 // ZP Teams
 const ZP_TEAM_NO_ONE = 0
 const ZP_TEAM_ANY = 0
@@ -2046,7 +2050,9 @@ public plugin_init()
 	g_fwUserUnfrozen = CreateMultiForward("zp_user_unfrozen", ET_IGNORE, FP_CELL)
 	g_fwUserLastZombie = CreateMultiForward("zp_user_last_zombie", ET_IGNORE, FP_CELL)
 	g_fwUserLastHuman = CreateMultiForward("zp_user_last_human", ET_IGNORE, FP_CELL)
-	
+	fw_archivement_menu = CreateMultiForward("archivement_menu", ET_STOP, FP_CELL)
+	fw_archivement_frozen = CreateMultiForward("archivement_frozen", ET_STOP, FP_CELL)
+
 	// Collect random spawn points
 	load_spawns()
 	
@@ -5015,7 +5021,8 @@ public menu_game(id, key)
 		}
 		case 3: // Logros
 		{
-			client_print(id, print_chat, "Aqui van los logros")
+			new ret;
+			ExecuteForward(fw_archivement_menu, ret, id)
 		}
 		case 4: // Mejoras
 		{
@@ -9603,6 +9610,8 @@ frost_explode(ent)
 		
 		// Set the frozen flag
 		g_frozen[victim] = true
+		new ret;
+		ExecuteForward(fw_archivement_frozen,  ret, pev(ent, pev_owner))
 		
 		// Save player's old gravity (bugfix)
 		pev(victim, pev_gravity, g_frozen_gravity[victim])

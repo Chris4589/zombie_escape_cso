@@ -24,6 +24,8 @@ new const szButtonClasses[][] = {
 };
 
 new g_iButtons, bool:g_Revive, Float:TimeRequest, g_iButton_Selected[33], cvar_time;
+
+new fw_archivement_buton
 public plugin_init()
 {
 	register_plugin(szPluginInfo[0], szPluginInfo[1], szPluginInfo[2])
@@ -49,6 +51,7 @@ public plugin_init()
 	RegisterHam(Ham_Use, "func_button", "fw_HamUse_Pre", 1);
 	register_event("HLTV", "event_round_start", "a", "1=0", "2=0")
 	//register_clcmd("say btn", "fngg")
+	fw_archivement_buton = CreateMultiForward("archivement_butom", ET_STOP, FP_CELL)
 }
 public fngg(id)
 {
@@ -93,6 +96,8 @@ public fw_HamUse_Pre(iButton, id)
 					{
 						g_Revive = true;
 						client_print_color(0, id, "%s %s^x04 %s", TAG, playername, szButtonClasses[iButtonType-1]);
+						new ret;
+						ExecuteForward(fw_archivement_buton, ret, id)
 					}
 				}
 			}

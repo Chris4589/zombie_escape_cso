@@ -1,7 +1,7 @@
 #include <amxmodx>
 #include <fakemeta>
 #include <hamsandwich>
-#include <zombieplague>
+#include <zombie_escape_v1>
 #include <xs>
 
 #define PLUGIN "DJB Zombie Class Banchee"
@@ -62,6 +62,8 @@ public plugin_precache()
 		15, 0, ADMIN_BAN, zclass_health, 0, zclass_speed, zclass_gravity, zclass_knockback)
 }
 
+new fw_archivement_banshee
+
 public plugin_init()
 {
 	register_plugin(PLUGIN, VERSION, AUTHOR)
@@ -79,6 +81,8 @@ public plugin_init()
 	
 	g_maxplayers = get_maxplayers()
 	g_msgSayText = get_user_msgid("SayText")
+
+	fw_archivement_banshee = CreateMultiForward("archivement_banshee", ET_STOP, FP_CELL)
 }
 
 public client_putinserver(id)
@@ -296,6 +300,11 @@ public EntityTouchPost(ent,ptd)
 			emit_sound(owner, CHAN_VOICE, SOUND_BAT_HIT, 1.0, ATTN_NORM, 0, PITCH_NORM)
 			
 			g_bat_stat[ptd] = 1
+			if(!zp_get_user_zombie(ptd))
+			{
+				new ret;
+				ExecuteForward(fw_archivement_banshee, ret, owner)
+			}
 		}
 	}
 	
