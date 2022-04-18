@@ -12,8 +12,6 @@
 
 ---
 ## pendientes 
-Ordenamiento de Humanos: (***ordenamiento completo - chris***)
-	Mayor nivel: mas speed, gravedad, chaleco y hp (***PENDIENTE***)
 
 Ordenamiento Armas (***ordenamiento completo - chris***)
 
