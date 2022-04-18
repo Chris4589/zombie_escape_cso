@@ -10801,15 +10801,21 @@ public native_get_user_last_human(id)
 // Native: zp_get_user_zombie_class
 public native_get_user_human_class(id)
 {
-	ArrayGetArray(g_ArrayClass, g_humanclass[id], ClasesInfo);
-	return ClasesInfo[ClassesId];
+	if (g_humanclass[id] != ZCLASS_NONE) {
+		ArrayGetArray(g_ArrayClass, g_humanclass[id], ClasesInfo);
+		return ClasesInfo[ClassesId];
+	}
+	return 0;
 }
 
 // Native: zp_get_user_zombie_class
 public native_get_user_zombie_class(id)
 {
-	ArrayGetArray(g_ArrayClass, g_zombieclass[id], ClasesInfo);
-	return ClasesInfo[ClassesId];
+	if (g_humanclass[id] != ZCLASS_NONE) {
+		ArrayGetArray(g_ArrayClass, g_zombieclass[id], ClasesInfo);
+		return ClasesInfo[ClassesId];
+	}
+	return 0;
 }
 
 // Native: zp_get_user_next_class
