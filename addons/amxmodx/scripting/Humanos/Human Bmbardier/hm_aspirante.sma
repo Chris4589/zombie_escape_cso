@@ -2,12 +2,11 @@
 #include <amxmisc>
 #include <cstrike>
 #include <fun>
-#include <zombieplague>
-#include <zp43_armas>
+#include <zombie_escape_v1>
 
-new const hclass_name[] = "Carl bombardier" // name
-new const hclass_info[] = "+Chain" // description
-new const hclass_model[] = "cso_hostage" // model
+new const hclass_name[] = "Cheto" // name
+new const hclass_info[] = "Chain++" // description
+new const hclass_model[] = "ze_cheto" // model
 
 const hclass_health = 300 // health
 const hclass_speed = 310 // speed
