@@ -4,7 +4,7 @@
 #include <fakemeta>
 #include <hamsandwich>
 #include <xs>
-#include <zombieplague>
+#include <zombie_escape_v1>
 
 #if AMXX_VERSION_NUM > 182
 #define client_disconnect client_disconnected
@@ -171,6 +171,18 @@ g_iCvar_DefaultRockets[2], g_iCvar_APCost[2], g_iCvar_RocketAPCost[2]
 #define is_user_valid_alive(%1) 	(1 <= %1 <= g_iMaxPlayers && g_bIsAlive[%1])
 #define is_user_valid_connected(%1) 	(1 <= %1 <= g_iMaxPlayers && g_bIsConnected[%1])
 
+new g_classNemesis
+
+new const zclass_name[] = { "Zombie Nemesis" } 
+new const zclass_info[] = { "Throw a 1 misil" } 
+new const zclass_model[] = { "ZOMBIE_NEMESIS" } 
+new const zclass_clawmodel[] = { "default" }
+const zclass_health = 1700
+const zclass_speed = 200
+const Float:zclass_gravity = 0.7 
+const Float:zclass_knockback = 1.0 
+
+
 /*================================================================================
  [Init, Precache and CFG]
 =================================================================================*/
@@ -256,10 +268,13 @@ public plugin_init()
 	g_msgScreenFade = get_user_msgid("ScreenFade")
 	g_msgScreenShake = get_user_msgid("ScreenShake")
 	g_msgTextMsg = get_user_msgid("TextMsg")
+
 }
 
 public plugin_precache()
 {
+	g_classNemesis = zp_register_class(CLASS_NEMESIS, zclass_name, zclass_info, zclass_model, zclass_clawmodel, 
+		25, 0, ADMIN_BAN, zclass_health, 0, zclass_speed, zclass_gravity, zclass_knockback)
 	// Models
 	precache_model(nrl_rocketmodel)
 	precache_model(nrl_gun_viewmodel)
@@ -308,7 +323,7 @@ public zp_user_infected_post(id, infector)
 		if(g_bCvar_Enabled) 
 		{
 			// Check cvar
-			if(g_bCvar_GiveFree) // Free
+			if(zp_get_user_nemesis_class(id) == g_classNemesis) // Free
 			{
 				// Give gun
 				set_user_nrlauncher(id, 1)
@@ -1198,7 +1213,7 @@ stock set_user_nrlauncher(id, active)
 	{
 		g_bHasNRL[id] = true
 		g_bHoldingNRL[id] = false
-		g_iRocketAmount[id] = get_nrl_defrockets(id)
+		g_iRocketAmount[id] = active
 		
 		message_begin(MSG_ONE_UNRELIABLE, g_msgAmmoPickup, _, id)
 		write_byte(AMMOID_HEGRENADE) // ammo id

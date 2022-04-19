@@ -651,7 +651,6 @@ new const KnifeNinja[] = "models/zombie_plague/v_ninja_knife.mdl";
 new const ModelAlien[] = "ze_alien";
 new const KnifeAlien[] = "models/zombie_plague/avh_alienclaws.mdl"; 
 new const SoundAlien[] = "sound/zombie_plague/the-sword-of-promised-victory-fate-zero-ver.mp3";
-new const ModelAlien2[] = "ze_alien_mini";
 
 new const soundMutilador[] = { "zombie_plague/survivor1.wav" } 
 
@@ -728,8 +727,6 @@ new g_nodamage[33] // has spawn protection/zombie madness
 new g_respawn_as_zombie[33] // should respawn as zombie
 new g_nvision[33] // has night vision
 new g_nvisionenabled[33] // has night vision turned on
-new g_zombieclass[33], g_humanclass[33] // zombie class
-new g_zombieclassnext[33], g_humanclassnext[33] // zombie class for next infection
 new g_ammopacks[33] // ammo pack count
 new g_damagedealt[33] // damage dealt to zombies (used to calculate ammo packs reward)
 new Float:g_lastleaptime[33] // time leap was last used
@@ -750,9 +747,14 @@ enum{ PRIMARIA=1, SECUNDARIA, KNIFE, MAX_ARMS };
 enum 
 { 
 	CLASS_ZOMBIE = 0, 
-	CLASS_HUMAN 
+	CLASS_HUMAN,
+	CLASS_NEMESIS,
+	CLASS_SURVIVOR,
+	MAX_CLASS
 };
 
+new nextClass[33][MAX_CLASS];
+new g_has_class[33][MAX_CLASS]
 /*
 	mejoras
 */
@@ -1118,6 +1120,8 @@ public plugin_natives()
 	register_native("zp_get_user_last_zombie", "native_get_user_last_zombie", 1)
 	register_native("zp_get_user_last_human", "native_get_user_last_human", 1)
 	register_native("zp_get_user_zombie_class", "native_get_user_zombie_class", 1)
+	register_native("zp_get_user_nemesis_class", "native_get_user_nemesis_class", 1)
+
 	register_native("zp_get_user_human_class", "native_get_user_human_class", 1)
 	register_native("zp_get_user_next_class", "native_get_user_next_class", 1)
 	register_native("zp_set_user_zombie_class", "native_set_user_zombie_class", 1)
@@ -1306,7 +1310,6 @@ public plugin_precache()
 	precache_player_model(szHuman);
 	precache_player_model(szSirio);
 	precache_player_model(ModelAlien);
-	precache_player_model(ModelAlien2);
 	precache_player_model(ModelNinja);
 	precache_model("models/rpgrocket.mdl");
 
@@ -2548,7 +2551,7 @@ public fw_PlayerSpawn_Post(id)
 		return;
 	
 	// Player spawned
-	g_humanclass[id] = g_humanclassnext[id];
+	g_has_class[id][CLASS_HUMAN] = nextClass[id][CLASS_HUMAN];
 	g_isalive[id] = true
 	
 	// Remove previous tasks
@@ -2595,9 +2598,9 @@ public fw_PlayerSpawn_Post(id)
 	}
 	if( g_class[id] < ZOMBIE )
 	{
-		if (g_humanclass[id] != ZCLASS_NONE)
+		if (g_has_class[id][CLASS_HUMAN] != ZCLASS_NONE)
 		{
-			ArrayGetArray(g_ArrayClass, g_humanclass[id], ClasesInfo);
+			ArrayGetArray(g_ArrayClass, g_has_class[id][CLASS_HUMAN], ClasesInfo);
 			//static buffer[200];
 			g_human_spd[id] = float(ClasesInfo[ClassesSpeed]);
 			copy(g_human_classname[id], charsmax(g_human_classname[]), ClasesInfo[ClassesName])
@@ -3073,7 +3076,7 @@ set_player_maxspeed(id)
 		if (g_class[id] >= ZOMBIE)
 		{
 			if (g_class[id] >= NEMESIS)
-				set_pev(id, pev_maxspeed, g_cached_nemspd)
+				set_pev(id, pev_maxspeed, g_zombie_spd[id]);
 			else if (g_class[id] == ALIEN)
 				set_pev(id, pev_maxspeed, cvar_alienspd)
 			else
@@ -3093,7 +3096,7 @@ set_player_maxspeed(id)
 				set_pev(id, pev_maxspeed, g_cached_survspd)
 			else
 			{
-				if(g_humanclass[id] != ZCLASS_NONE)
+				if(g_has_class[id][CLASS_HUMAN] != ZCLASS_NONE)
 					set_pev(id, pev_maxspeed, g_human_spd[id] + float(ammount_hspeed(g_habilidad[id][CLASS_HUMAN][3])))
 				else
 					set_pev(id, pev_maxspeed, g_cached_humanspd + float(ammount_hspeed(g_habilidad[id][CLASS_HUMAN][3])))
@@ -4615,7 +4618,21 @@ public show_menu_zclass(id, type)
 	static menuid, menu[128], class, buffer[32], buffer2[32], Item[30];
 	
 	// Title
-	formatex(menu, charsmax(menu), "\rClases %s", type == CLASS_ZOMBIE ? "Zombies" : "Humanas");
+	switch(type)
+	{
+		case CLASS_ZOMBIE:
+		{
+			formatex(menu, charsmax(menu), "\rClases Zombies");
+		}
+		case CLASS_HUMAN:
+		{
+			formatex(menu, charsmax(menu), "\rClases Humanas");
+		}
+		case CLASS_NEMESIS:
+		{
+			formatex(menu, charsmax(menu), "\rClases Nemesis");
+		}
+	}
 	menuid = menu_create(menu, "menu_zclass")
 	
 	// Class List
@@ -4636,23 +4653,11 @@ public show_menu_zclass(id, type)
 		{
 			if( g_iLevel[id] >= ClasesInfo[ClassesLevel] && g_iReset[id] >= ClasesInfo[ClassesReset] || g_iReset[id] > ClasesInfo[ClassesReset])
 			{
-				if(type == CLASS_ZOMBIE)
-				{
-					// Add to menu
-					if (class == g_zombieclassnext[id])
-						formatex(menu, charsmax(menu), "\d%s %s", buffer, buffer2)
-					else
-						formatex(menu, charsmax(menu), "%s \r%s", buffer, buffer2)
-				}
+				// Add to menu
+				if (class == nextClass[id][type])
+					formatex(menu, charsmax(menu), "\d%s %s", buffer, buffer2)
 				else
-				{
-					// Add to menu
-					if (class == g_humanclassnext[id])
-						formatex(menu, charsmax(menu), "\d%s %s", buffer, buffer2)
-					else
-						formatex(menu, charsmax(menu), "%s \r%s", buffer, buffer2)
-				}
-				
+					formatex(menu, charsmax(menu), "%s \r%s", buffer, buffer2)
 			}
 			else
 			{
@@ -4665,22 +4670,11 @@ public show_menu_zclass(id, type)
 			{
 				if( g_iLevel[id] >= ClasesInfo[ClassesLevel] && g_iReset[id] >= ClasesInfo[ClassesReset] || g_iReset[id] > ClasesInfo[ClassesReset])
 				{
-					if(type == CLASS_ZOMBIE)
-					{
-						// Add to menu
-						if (class == g_zombieclassnext[id])
-							formatex(menu, charsmax(menu), "\d%s %s", buffer, buffer2)
-						else
-							formatex(menu, charsmax(menu), "%s \r%s", buffer, buffer2)
-					}
+					// Add to menu
+					if (class == nextClass[id][type])
+						formatex(menu, charsmax(menu), "\d%s %s", buffer, buffer2)
 					else
-					{
-						// Add to menu
-						if (class == g_humanclassnext[id])
-							formatex(menu, charsmax(menu), "\d%s %s", buffer, buffer2)
-						else
-							formatex(menu, charsmax(menu), "%s \r%s", buffer, buffer2)
-					}
+						formatex(menu, charsmax(menu), "%s \r%s", buffer, buffer2)
 					
 				}
 				else
@@ -5208,8 +5202,9 @@ public show_clases_menu(id)
 	
 	len += formatex(menu[len], charsmax(menu) - len, "\r[1] \wHumanos^n");
 	
-	len += formatex(menu[len], charsmax(menu) - len, "\r[2] \wZombie^n^n^n^n");
-	
+	len += formatex(menu[len], charsmax(menu) - len, "\r[2] \wZombie^n");
+
+	len += formatex(menu[len], charsmax(menu) - len, "\r[3] \wNemesis^n^n^n^n");
 	// 0. Exit
 	len += formatex(menu[len], charsmax(menu) - len, "^n^n\r[0] \wSalir")
 	
@@ -5227,7 +5222,10 @@ public HandlerClases(id, key)
 		case 1: // Extra Items
 		{
 			show_menu_zclass(id, CLASS_ZOMBIE)
-			
+		}
+		case 2: // Extra Items
+		{
+			show_menu_zclass(id, CLASS_NEMESIS);
 		}
 
 	}
@@ -5582,33 +5580,36 @@ public menu_zclass(id, menuid, item)
 
 	ArrayGetArray(g_ArrayClass, classid, ClasesInfo);
 
+	switch(ClasesInfo[ClassesType])
+	{
+		case CLASS_ZOMBIE:
+		{
+			copy(Item, charsmax(Item), "Zombie");
+		}
+		case CLASS_HUMAN:
+		{
+			copy(Item, charsmax(Item), "Humano");
+		}
+		case CLASS_NEMESIS:
+		{
+			copy(Item, charsmax(Item), "Nemesis");
+		}
+	}
+
 	if(ClasesInfo[ClassesAdmin] == ADMIN_ALL)
 	{
 		// Store selection for the next infection
-		if(ClasesInfo[ClassesType] == CLASS_ZOMBIE)
+		if (g_iLevel[id] < ClasesInfo[ClassesLevel] && g_iReset[id] == ClasesInfo[ClassesReset] || g_iReset[id] < ClasesInfo[ClassesReset])
 		{
-			//if( g_iLevel[id] < level && g_iReset[id] == reset || g_iReset[id] < reset  )
-			if (g_iLevel[id] < ClasesInfo[ClassesLevel] && g_iReset[id] == ClasesInfo[ClassesReset] || g_iReset[id] < ClasesInfo[ClassesReset])
-			{
-				show_menu_zclass(id, CLASS_ZOMBIE)
-				return PLUGIN_HANDLED;
-			}
-			g_zombieclassnext[id] = classid;	
+			show_menu_zclass(id, ClasesInfo[ClassesType])
+			return PLUGIN_HANDLED;
 		}
-		else
-		{
-			if (g_iLevel[id] < ClasesInfo[ClassesLevel] && g_iReset[id] == ClasesInfo[ClassesReset] || g_iReset[id] < ClasesInfo[ClassesReset])
-			{
-				show_menu_zclass(id, CLASS_HUMAN)
-				return PLUGIN_HANDLED;
-			}
-			g_humanclassnext[id] = classid;
-		} 
+		nextClass[id][ClasesInfo[ClassesType]] = classid;
 		static name[32];
 		copy(name, charsmax(name), ClasesInfo[ClassesName])
 		
 		// Show selected zombie class info and stats
-		zp_colored_print(id, "^x04%s^x01 %s: %s", g_szPrefix, ClasesInfo[ClassesType] == CLASS_ZOMBIE ? "Zombie" : "Human", name);
+		zp_colored_print(id, "^x04%s^x01 %s: %s", g_szPrefix, Item, name);
 		zp_colored_print(id, "^x04%s^x01 %L: %d %L: %d %L: %d %L: %d%%", g_szPrefix, id, "ZOMBIE_ATTRIB1", ClasesInfo[ClassesHP], id, "ZOMBIE_ATTRIB2",ClasesInfo[ClassesSpeed],
 		id, "ZOMBIE_ATTRIB3", floatround(Float:ClasesInfo[ClassesGrav] * 800.0), id, "ZOMBIE_ATTRIB4", floatround(Float:ClasesInfo[ClassesKnockback] * 100.0))
 		
@@ -5617,29 +5618,17 @@ public menu_zclass(id, menuid, item)
 	{
 		if(admin & ClasesInfo[ClassesAdmin])
 		{
-			if(ClasesInfo[ClassesType] == CLASS_ZOMBIE)
+			if (g_iLevel[id] < ClasesInfo[ClassesLevel] && g_iReset[id] == ClasesInfo[ClassesReset] || g_iReset[id] < ClasesInfo[ClassesReset])
 			{
-				if (g_iLevel[id] < ClasesInfo[ClassesLevel] && g_iReset[id] == ClasesInfo[ClassesReset] || g_iReset[id] < ClasesInfo[ClassesReset])
-				{
-					show_menu_zclass(id, CLASS_ZOMBIE)
-					return PLUGIN_HANDLED;
-				}
-				g_zombieclassnext[id] = classid;
+				show_menu_zclass(id, ClasesInfo[ClassesType])
+				return PLUGIN_HANDLED;
 			}
-			else
-			{
-				if (g_iLevel[id] < ClasesInfo[ClassesLevel] && g_iReset[id] == ClasesInfo[ClassesReset] || g_iReset[id] < ClasesInfo[ClassesReset])
-				{
-					show_menu_zclass(id, CLASS_HUMAN)
-					return PLUGIN_HANDLED;
-				}
-				g_humanclassnext[id] = classid;
-			} 
+			nextClass[id][ClasesInfo[ClassesType]] = classid;
 			static name[32];
 			copy(name, charsmax(name), ClasesInfo[ClassesName])
 			
 			// Show selected zombie class info and stats
-			zp_colored_print(id, "^x04%s^x01 %s: %s", g_szPrefix, ClasesInfo[ClassesType] == CLASS_ZOMBIE ? "Zombie" : "Human", name);
+			zp_colored_print(id, "^x04%s^x01 %s: %s", g_szPrefix, Item, name);
 			zp_colored_print(id, "^x04%s^x01 %L: %d %L: %d %L: %d %L: %d%%", g_szPrefix, id, "ZOMBIE_ATTRIB1", ClasesInfo[ClassesHP], id, "ZOMBIE_ATTRIB2", ClasesInfo[ClassesSpeed],
 			id, "ZOMBIE_ATTRIB3", floatround(Float:ClasesInfo[ClassesGrav] * 800.0), id, "ZOMBIE_ATTRIB4", floatround(Float:ClasesInfo[ClassesKnockback] * 100.0))
 			
@@ -7307,13 +7296,13 @@ zombieme(id, infector, nemesis, silentmode, rewards)
 	ExecuteForward(g_fwUserInfected_pre, g_fwDummyResult, id, infector, nemesis)
 	
 	// Show zombie class menu if they haven't chosen any (e.g. just connected)
-	if (g_zombieclassnext[id] == ZCLASS_NONE && get_pcvar_num(cvar_zclasses))
+	if (nextClass[id][CLASS_ZOMBIE] == ZCLASS_NONE && get_pcvar_num(cvar_zclasses))
 		show_menu_zclass(id, CLASS_ZOMBIE);
 	
 	// Set selected zombie class
-	g_zombieclass[id] = g_zombieclassnext[id]
+	g_has_class[id][CLASS_ZOMBIE] = nextClass[id][CLASS_ZOMBIE];
 	// If no class selected yet, use the first (default) one
-	if (g_zombieclass[id] == ZCLASS_NONE) g_zombieclass[id] = 0
+	if (g_has_class[id][CLASS_ZOMBIE] == ZCLASS_NONE) g_has_class[id][CLASS_ZOMBIE] = 0
 	
 	g_iBalasEspeciales[id] = 0;
 	g_bBalas[id] = 0;
@@ -7364,7 +7353,7 @@ zombieme(id, infector, nemesis, silentmode, rewards)
 	}
 	
 	// Cache speed, knockback, and name for player's class
-	ArrayGetArray(g_ArrayClass, g_zombieclass[id], ClasesInfo);
+	ArrayGetArray(g_ArrayClass, g_has_class[id][CLASS_ZOMBIE], ClasesInfo);
 	g_zombie_spd[id] = float(ClasesInfo[ClassesSpeed]);
 	g_zombie_knockback[id] = Float:ClasesInfo[ClassesKnockback];
 	copy(g_zombie_classname[id], charsmax(g_zombie_classname[]), ClasesInfo[ClassesName]);
@@ -7375,27 +7364,28 @@ zombieme(id, infector, nemesis, silentmode, rewards)
 	{
 		if (nemesis == 1)
 		{
+			g_has_class[id][CLASS_NEMESIS] = nextClass[id][CLASS_NEMESIS];
 			do_random_spawn(id, 1);
 			// Nemesis
 			g_class[id] = NEMESIS;
 			
 			// Set health [0 = auto]
-			if (get_pcvar_num(cvar_nemhp) == 0)
+			if (g_has_class[id][CLASS_NEMESIS] == ZCLASS_NONE)
 			{
-				ArrayGetArray(g_ArrayClass, 0, ClasesInfo);
-				if (get_pcvar_num(cvar_nembasehp) == 0)
-					set_user_health(id, ClasesInfo[ClassesHP] * fnGetAlive())
-				else
-					set_user_health(id, get_pcvar_num(cvar_nembasehp) * fnGetAlive())
-			}
-			else
-				set_user_health(id, get_pcvar_num(cvar_nemhp))
-			
-			// Set gravity, unless frozen
-			if (!g_frozen[id]) set_pev(id, pev_gravity, get_pcvar_float(cvar_nemgravity))
-			else g_frozen_gravity[id] = get_pcvar_float(cvar_nemgravity)
+				set_user_health(id, get_pcvar_num(cvar_nembasehp) * fnGetAlive());
 
-			ExecuteHamB(Ham_Player_ResetMaxSpeed, id)
+				if (!g_frozen[id]) set_pev(id, pev_gravity, get_pcvar_float(cvar_nemgravity))
+				else g_frozen_gravity[id] = get_pcvar_float(cvar_nemgravity)
+			} else {
+				ArrayGetArray(g_ArrayClass, g_has_class[id][CLASS_NEMESIS], ClasesInfo);
+				set_user_health(id, ClasesInfo[ClassesHP]);
+
+				// Set gravity, unless frozen
+				if (!g_frozen[id]) set_pev(id, pev_gravity, Float:ClasesInfo[ClassesGrav])
+				else g_frozen_gravity[id] = Float:ClasesInfo[ClassesGrav];
+			}
+
+			ExecuteHamB(Ham_Player_ResetMaxSpeed, id);
 
 		}
 		else if (nemesis == 2)
@@ -7623,11 +7613,8 @@ humanme(id, survivor, silentmode)
 	ExecuteForward(g_fwUserHumanized_pre, g_fwDummyResult, id, survivor)
 
 	// Show zombie class menu if they haven't chosen any (e.g. just connected)
-	/*if (g_humanclassnext[id] == ZCLASS_NONE && get_pcvar_num(cvar_zclasses))
-		show_menu_zclass(id, CLASS_HUMAN);
-	*/
 	// Set selected zombie class
-	g_humanclass[id] = g_humanclassnext[id]
+	g_has_class[id][CLASS_HUMAN] = nextClass[id][CLASS_HUMAN];
 	// If no class selected yet, use the first (default) one
 	//if (g_humanclass[id] == ZCLASS_NONE) g_humanclass[id] = 0
 
@@ -7642,9 +7629,9 @@ humanme(id, survivor, silentmode)
 	off(id);
 
 	// Cache speed, knockback, and name for player's class
-	if (g_humanclass[id] != ZCLASS_NONE)
+	if (g_has_class[id][CLASS_HUMAN] != ZCLASS_NONE)
 	{
-		ArrayGetArray(g_ArrayClass, g_humanclass[id], ClasesInfo);
+		ArrayGetArray(g_ArrayClass, g_has_class[id][CLASS_HUMAN], ClasesInfo);
 		g_human_spd[id] = float(ClasesInfo[ClassesSpeed]);
 		copy(g_human_classname[id], charsmax(g_human_classname[]), ClasesInfo[ClassesName]);
 	}
@@ -7776,9 +7763,9 @@ humanme(id, survivor, silentmode)
 	else
 	{
 		// Human taking an antidote
-		if (g_humanclass[id] != ZCLASS_NONE)
+		if (g_has_class[id][CLASS_HUMAN] != ZCLASS_NONE)
 		{
-			ArrayGetArray(g_ArrayClass, g_humanclass[id], ClasesInfo);
+			ArrayGetArray(g_ArrayClass, g_has_class[id][CLASS_HUMAN], ClasesInfo);
 			set_user_health(id, ClasesInfo[ClassesHP]);
 			set_user_armor(id, ClasesInfo[ClassesArmor]);
 			if (!g_frozen[id]) set_pev(id, pev_gravity, Float:ClasesInfo[ClassesGrav]);
@@ -7857,9 +7844,9 @@ humanme(id, survivor, silentmode)
 	}
 	else
 	{
-		if (g_humanclass[id] != ZCLASS_NONE)
+		if (g_has_class[id][CLASS_HUMAN] != ZCLASS_NONE)
 		{
-			ArrayGetArray(g_ArrayClass, g_humanclass[id], ClasesInfo);
+			ArrayGetArray(g_ArrayClass, g_has_class[id][CLASS_HUMAN], ClasesInfo);
 			copy(buffer, charsmax(buffer), ClasesInfo[ClassesModel]);
 			cs_set_user_model(id, buffer)
 		}
@@ -9653,7 +9640,7 @@ frost_explode(ent)
 public freeze_player(victim)
 {
 	// Only effect alive unfrozen zombies
-	if (!is_user_valid_alive(victim) || g_class[victim] < ZOMBIE || g_frozen[victim] || g_nodamage[victim])
+	if (!is_user_valid_alive(victim) || g_iNoFrost[victim] || g_class[victim] < ZOMBIE || g_frozen[victim] || g_nodamage[victim])
 		return;
 
 	static sound[64];
@@ -9749,9 +9736,15 @@ public remove_freeze(id)
 	// Restore gravity
 	if (g_class[id] >= ZOMBIE)
 	{
-		ArrayGetArray(g_ArrayClass, g_zombieclass[id], ClasesInfo);
-		if (g_class[id] == NEMESIS)
-			set_pev(id, pev_gravity, get_pcvar_float(cvar_nemgravity))
+		ArrayGetArray(g_ArrayClass, g_has_class[id][CLASS_ZOMBIE], ClasesInfo);
+		if (g_class[id] == NEMESIS) {
+			if(g_has_class[id][CLASS_NEMESIS] != ZCLASS_NONE) {
+				ArrayGetArray(g_ArrayClass, g_has_class[id][CLASS_NEMESIS], ClasesInfo);
+				set_pev(id, pev_gravity, Float:ClasesInfo[ClassesGrav])
+			}
+			else
+				set_pev(id, pev_gravity, get_pcvar_float(cvar_nemgravity))
+		}
 		else if (g_class[id] == ALIEN)
 			set_pev(id, pev_gravity, get_pcvar_float(cvar_aliengvt))
 		else
@@ -9759,12 +9752,12 @@ public remove_freeze(id)
 	}
 	else
 	{
-		ArrayGetArray(g_ArrayClass, g_humanclass[id], ClasesInfo);
+		ArrayGetArray(g_ArrayClass, g_has_class[id][CLASS_HUMAN], ClasesInfo);
 		if (g_class[id] >= SURVIVOR)
 			set_pev(id, pev_gravity, get_pcvar_float(cvar_survgravity))
 		else
 		{
-			if(g_humanclass[id] != ZCLASS_NONE)
+			if(g_has_class[id][CLASS_HUMAN] != ZCLASS_NONE)
 				set_pev(id, pev_gravity, Float:ClasesInfo[ClassesGrav])
 			else
 				set_pev(id, pev_gravity, get_pcvar_float(cvar_humangravity))
@@ -9881,7 +9874,7 @@ replace_weapon_models(id, weaponid)
 				{
 					static knife[300];
 					
-					ArrayGetArray(g_ArrayClass, g_zombieclass[id], ClasesInfo);
+					ArrayGetArray(g_ArrayClass, g_has_class[id][CLASS_ZOMBIE], ClasesInfo);
 					if (!equali(ClasesInfo[ClassesKnife], "default")) {
 						formatex(knife, charsmax(knife), "models/zombie_plague/%s", ClasesInfo[ClassesKnife]);
 						set_pev(id, pev_viewmodel2, knife);
@@ -9971,9 +9964,11 @@ reset_vars(id, resetall)
 		else
 			g_ammopacks[id] = get_pcvar_num( cvar_startammopacks );
 
-		g_zombieclass[id] = ZCLASS_NONE
-		g_zombieclassnext[id] = ZCLASS_NONE
-		g_humanclassnext[id] = ZCLASS_NONE
+		for (new type = 0; type < MAX_CLASS; type += 1) {
+			nextClass[id][type] = ZCLASS_NONE;
+			g_has_class[id][type] = ZCLASS_NONE
+		}
+		
 		g_damagedealt[id] = 0
 		g_iNVsion[id] = g_iHud[id] =g_iDamage[id] = g_iExp[id] = g_iReset[id] = 0; 
 		g_iRango[id] = 0; 
@@ -10076,7 +10071,7 @@ public ShowHUD(taskid)
 			formatex(class, charsmax(class), "Ninja (Humano)")
 		else
 		{
-			if(g_humanclass[id] != ZCLASS_NONE)
+			if(g_has_class[id][CLASS_HUMAN] != ZCLASS_NONE)
 				copy(class, charsmax(class), g_human_classname[id]);
 			else
 				copy(class, charsmax(class), rango[rangee][range_name]);
@@ -10809,27 +10804,37 @@ public native_get_user_last_human(id)
 // Native: zp_get_user_zombie_class
 public native_get_user_human_class(id)
 {
-	if (g_humanclass[id] != ZCLASS_NONE) {
-		ArrayGetArray(g_ArrayClass, g_humanclass[id], ClasesInfo);
+	if (g_has_class[id][CLASS_HUMAN] != ZCLASS_NONE) {
+		ArrayGetArray(g_ArrayClass, g_has_class[id][CLASS_HUMAN], ClasesInfo);
 		return ClasesInfo[ClassesId];
 	}
-	return 0;
+	return ZCLASS_NONE;
+}
+
+// Native: zp_get_user_zombie_class
+public native_get_user_nemesis_class(id)
+{
+	if (g_has_class[id][CLASS_NEMESIS] != ZCLASS_NONE) {
+		ArrayGetArray(g_ArrayClass, g_has_class[id][CLASS_NEMESIS], ClasesInfo);
+		return ClasesInfo[ClassesId];
+	}
+	return ZCLASS_NONE;
 }
 
 // Native: zp_get_user_zombie_class
 public native_get_user_zombie_class(id)
 {
-	if (g_humanclass[id] != ZCLASS_NONE) {
-		ArrayGetArray(g_ArrayClass, g_zombieclass[id], ClasesInfo);
+	if (g_has_class[id][CLASS_ZOMBIE] != ZCLASS_NONE) {
+		ArrayGetArray(g_ArrayClass, g_has_class[id][CLASS_ZOMBIE], ClasesInfo);
 		return ClasesInfo[ClassesId];
 	}
-	return 0;
+	return ZCLASS_NONE;
 }
 
 // Native: zp_get_user_next_class
 public native_get_user_next_class(id)
 {
-	return g_zombieclassnext[id];
+	return nextClass[id][CLASS_ZOMBIE];
 }
 
 // Native: zp_set_user_zombie_class
@@ -10838,7 +10843,7 @@ public native_set_user_zombie_class(id, classid)
 	if (classid < 0 || classid >= g_zclass_i)
 		return 0;
 	
-	g_zombieclassnext[id] = classid
+	nextClass[id][CLASS_ZOMBIE] = classid
 	return 1;
 }
 
@@ -10863,7 +10868,7 @@ public native_get_zombie_maxhealth(id)
 	
 	if (g_class[id] == ZOMBIE && g_class[id] < NEMESIS)
 	{
-		ArrayGetArray(g_ArrayClass, g_zombieclass[id], ClasesInfo);
+		ArrayGetArray(g_ArrayClass, g_has_class[id][CLASS_ZOMBIE], ClasesInfo);
 		if (g_class[id] == FIRST_ZOMBIE)
 			return floatround(float(ClasesInfo[ClassesHP]) * get_pcvar_float(cvar_zombiefirsthp));
 		else
@@ -11207,18 +11212,14 @@ public native_register_zombie_class(const type, const name[], const info[], cons
 	ClasesInfo[ClassesKnockback] = knockback;
 	ClasesInfo[ClassesId] = g_zclass_i;
 
-	static buffer[300], knife[300];
-	copy(buffer, charsmax(buffer), ClasesInfo[ClassesModel]);
-	precache_player_model(buffer);
+	precache_player_model(ClasesInfo[ClassesModel]);
 
-	copy(buffer, charsmax(buffer), ClasesInfo[ClassesKnife]);
-	if(!equal(buffer, "default"))
+	if(!equal(ClasesInfo[ClassesKnife], "default"))
 	{
-		formatex(knife, charsmax(knife), "models/zombie_plague/%s", buffer);
+		new knife[120];
+		formatex(knife, charsmax(knife), "models/zombie_plague/%s", ClasesInfo[ClassesKnife]);
 		precache_model(knife);
 	}
-
-	console_print(0, "id %d name %s", ClasesInfo[ClassesId], ClasesInfo[ClassesName])
 
 	ArrayPushArray(g_ArrayClass, ClasesInfo);
 
@@ -13540,7 +13541,7 @@ public clcmd_say(id)
 	if(g_class[id] >= ZOMBIE) formatex(class, charsmax(class), "%s", g_zombie_classname[id])
 	else
 	{
-		if(g_humanclass[id] != ZCLASS_NONE)
+		if(g_has_class[id][CLASS_HUMAN] != ZCLASS_NONE)
 			formatex(class, charsmax(class), "%s", g_human_classname[id]);
 		else
 			formatex(class, charsmax(class), "%s", rango[iRango_player][range_name]);

@@ -103,7 +103,10 @@ enum
 enum 
 { 
 	CLASS_ZOMBIE = 0, 
-	CLASS_HUMAN 
+	CLASS_HUMAN,
+	CLASS_NEMESIS,
+	CLASS_SURVIVOR,
+	MAX_CLASS
 };
 /* Winner teams for zp_round_ended() */
 enum
@@ -147,6 +150,8 @@ native zp_get_user_survivor(id)
  * @return		True if it is, false otherwise.
  */
 native zp_get_user_first_zombie(id)
+
+native zp_get_user_nemesis_class(id)
 
 /**
  * Returns whether a player is the last zombie.
