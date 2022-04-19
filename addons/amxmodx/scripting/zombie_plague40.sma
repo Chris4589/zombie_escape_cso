@@ -709,7 +709,7 @@ new g_iJumpClass[33], g_iJumpClass2[33];
 new g_iNoJump[33]
 new g_iNoDroga[33];
 new g_iJumpingNadeCount[ 33 ]
-new g_iExplote[33], g_iFisher[33], g_iGhost[33];
+new g_iExplote[33], g_iFisher[33], g_iGhost[33], g_iDrop[33];
 new g_steamBonus[33]
 new g_bBalas[33], g_iSkinsEnable[33];
 new g_bMask[33];
@@ -1103,6 +1103,7 @@ public plugin_natives()
 	register_native("zp_set_nopipe", "set_nopipe", 1);
 	register_native("zp_set_fisher", "handler_fisher", 1);
 	register_native("zp_set_ghost", "handler_ghost", 1);
+	register_native("zp_set_drop", "handler_drop", 1);
 	// Player specific natives
 	register_native("zp_get_user_zombie", "native_get_user_zombie", 1)
 	register_native("zp_get_user_nemesis", "native_get_user_nemesis", 1)
@@ -3347,7 +3348,9 @@ public fw_TouchWeapon(weapon, id)
 		return HAM_IGNORED;
 	
 	// Dont pickup weapons if zombie or survivor (+PODBot MM fix)
-	if (g_class[id] >= SURVIVOR)
+	if(g_iDrop[id] && g_class[id] < SURVIVOR)
+		return HAM_IGNORED
+	else if(g_class[id] >= SURVIVOR)
 		return HAM_SUPERCEDE;
 	
 	return HAM_SUPERCEDE;//HAM_IGNORED
@@ -4205,7 +4208,9 @@ public clcmd_nightvision(id)
 public clcmd_drop(id)
 {
 	// Survivor should stick with its weapon
-	if (g_class[id] >= HUMAN && g_class[id] < ZOMBIE)
+	if(g_iDrop[id] && g_class[id] < SURVIVOR)
+		return PLUGIN_CONTINUE;
+	else if (g_class[id] >= HUMAN && g_class[id] < ZOMBIE)
 		return PLUGIN_HANDLED;
 	
 	return PLUGIN_CONTINUE;
@@ -4286,7 +4291,7 @@ public clcmd_changeteam(id)
 =================================================================================*/
 public menuNVision(id)
 {
-	new menu = menu_create("\yNVision Colores", "handler_NVsion");
+	new menu = menu_create("\rNVision Colores", "handler_NVsion");
 
 	for(new i = 0; i < sizeof(g_ColorNVsion); ++i )
 		menu_additem(menu, g_ColorNVsion[i][nvisionName]);
@@ -4307,7 +4312,7 @@ public handler_NVsion(id, menu, item)
 }
 public menuHud(id)
 {
-	new menu = menu_create("\yHud Colores", "handler_color");
+	new menu = menu_create("\rHud Colores", "handler_color");
 
 	for(new i = 0; i < sizeof(g_ColorHud); ++i )
 		menu_additem(menu, g_ColorHud[i][hudName]);
@@ -4371,7 +4376,7 @@ public handler_listar(id, menu, item)
 }
 public cmdMenu_config(id)
 {
-	new gMenu = menu_create("\yMenu Config", "handlerMenu_config")
+	new gMenu = menu_create("\rHerramientas", "handlerMenu_config")
 
 	menu_additem(gMenu, "\wDestrabar", "1")
 	menu_additem(gMenu, "\wCambiar Color Hud", "2")
@@ -4488,7 +4493,7 @@ public show_menu_extras(id)
 	static menuid, menu[128], item, team, buffer[32]
 	
 	// Title
-	formatex(menu, charsmax(menu), "%L [%L]\r", id, "MENU_EXTRA_TITLE", id, g_class[id] == ZOMBIE || g_class[id] == LAST_ZOMBIE || g_class[id] == FIRST_ZOMBIE  ? "CLASS_ZOMBIE" : g_class[id] == NEMESIS ? "CLASS_NEMESIS" : g_class[id] == SURVIVOR ? "CLASS_SURVIVOR" : "CLASS_HUMAN")
+	formatex(menu, charsmax(menu), "\r%L \w[\r%L\w]\r", id, "MENU_EXTRA_TITLE", id, g_class[id] == ZOMBIE || g_class[id] == LAST_ZOMBIE || g_class[id] == FIRST_ZOMBIE  ? "CLASS_ZOMBIE" : g_class[id] == NEMESIS ? "CLASS_NEMESIS" : g_class[id] == SURVIVOR ? "CLASS_SURVIVOR" : "CLASS_HUMAN")
 	menuid = menu_create(menu, "menu_extras")
 	
 	// Item List
@@ -4570,9 +4575,9 @@ public show_menu_extras(id)
 		if(g_iLevel[id] < ArrayGetCell(g_extraitem_level, item))
 			formatex(menu, charsmax(menu), "\d%s \r[ Nivel: %d ]", buffer, ArrayGetCell(g_extraitem_level, item))
 		else if (g_ammopacks[id] < ArrayGetCell(g_extraitem_cost, item))
-			formatex(menu, charsmax(menu), "\d%s \r%d \dammopacks", buffer, ArrayGetCell(g_extraitem_cost, item))
+			formatex(menu, charsmax(menu), "\d%s \r%d \dAps", buffer, ArrayGetCell(g_extraitem_cost, item))
 		else
-			formatex(menu, charsmax(menu), "\w%s \y%d ammopacks", buffer, ArrayGetCell(g_extraitem_cost, item))
+			formatex(menu, charsmax(menu), "\w%s \r%d Aps", buffer, ArrayGetCell(g_extraitem_cost, item))
 
 		//formatex(menu, charsmax(menu), "%s \y%d %L", buffer, ArrayGetCell(g_extraitem_cost, item), id, "AMMO_PACKS2")
 		buffer[0] = item
@@ -4610,7 +4615,7 @@ public show_menu_zclass(id, type)
 	static menuid, menu[128], class, buffer[32], buffer2[32], Item[30];
 	
 	// Title
-	formatex(menu, charsmax(menu), "Clases %s", type == CLASS_ZOMBIE ? "Zombies" : "Humanas");
+	formatex(menu, charsmax(menu), "\rClases %s", type == CLASS_ZOMBIE ? "Zombies" : "Humanas");
 	menuid = menu_create(menu, "menu_zclass")
 	
 	// Class List
@@ -4637,7 +4642,7 @@ public show_menu_zclass(id, type)
 					if (class == g_zombieclassnext[id])
 						formatex(menu, charsmax(menu), "\d%s %s", buffer, buffer2)
 					else
-						formatex(menu, charsmax(menu), "%s \y%s", buffer, buffer2)
+						formatex(menu, charsmax(menu), "%s \r%s", buffer, buffer2)
 				}
 				else
 				{
@@ -4645,7 +4650,7 @@ public show_menu_zclass(id, type)
 					if (class == g_humanclassnext[id])
 						formatex(menu, charsmax(menu), "\d%s %s", buffer, buffer2)
 					else
-						formatex(menu, charsmax(menu), "%s \y%s", buffer, buffer2)
+						formatex(menu, charsmax(menu), "%s \r%s", buffer, buffer2)
 				}
 				
 			}
@@ -4666,7 +4671,7 @@ public show_menu_zclass(id, type)
 						if (class == g_zombieclassnext[id])
 							formatex(menu, charsmax(menu), "\d%s %s", buffer, buffer2)
 						else
-							formatex(menu, charsmax(menu), "%s \y%s", buffer, buffer2)
+							formatex(menu, charsmax(menu), "%s \r%s", buffer, buffer2)
 					}
 					else
 					{
@@ -4674,7 +4679,7 @@ public show_menu_zclass(id, type)
 						if (class == g_humanclassnext[id])
 							formatex(menu, charsmax(menu), "\d%s %s", buffer, buffer2)
 						else
-							formatex(menu, charsmax(menu), "%s \y%s", buffer, buffer2)
+							formatex(menu, charsmax(menu), "%s \r%s", buffer, buffer2)
 					}
 					
 				}
@@ -10733,6 +10738,9 @@ public set_unfrozen(id, value)
 public handler_ghost(id, value)
 	g_iGhost[id] = value;
 
+public handler_drop(id, value)
+	g_iDrop[id] = value;
+
 public handler_fisher(id, value)
 	g_iFisher[id] = value;
 
@@ -12286,36 +12294,36 @@ public cmd_Menu_guns(id)
 		// ArrayGetString(g_szName, g_iSelected[id][PRIMARIA], szItem, charsmax(szItem) );
 		ArrayGetArray(g_aArray, g_iSelected[id][PRIMARIA], weaponOrder);
 		copy(szItem, charsmax(szItem), weaponOrder[Weapon_Name]);
-		len += formatex(menu[len], sizeof menu - 1 - len, "\r1. \wPrimary [\y%s\w]^n", g_iSelected[id][PRIMARIA] <= -1 ? "None" : szItem);
+		len += formatex(menu[len], sizeof menu - 1 - len, "\r[1] \wPrimary \r[%s]^n", g_iSelected[id][PRIMARIA] <= -1 ? "None" : szItem);
 	} else {
-		len += formatex(menu[len], sizeof menu - 1 - len, "\r1. \wNo hay armas primarias Cargadas..^n");
+		len += formatex(menu[len], sizeof menu - 1 - len, "\r[1] \wNo hay armas primarias Cargadas..^n");
 	}
 
 	if (g_Sec > 0) {
 		// ArrayGetString(g_szName, g_iSelected[id][SECUNDARIA], szItem, charsmax(szItem) );
 		ArrayGetArray(g_aArray, g_iSelected[id][SECUNDARIA], weaponOrder);
 		copy(szItem, charsmax(szItem), weaponOrder[Weapon_Name]);
-		len += formatex(menu[len], sizeof menu - 1 - len, "\r2. \wSecundary [\y%s\w]^n", g_iSelected[id][SECUNDARIA] <= -1 ? "None" : szItem);
+		len += formatex(menu[len], sizeof menu - 1 - len, "\r[2] \wSecundary \r[%s]^n", g_iSelected[id][SECUNDARIA] <= -1 ? "None" : szItem);
 	} else {
-		len += formatex(menu[len], sizeof menu - 1 - len, "\r2. \wNo hay armas secundarias Cargadas..^n");
+		len += formatex(menu[len], sizeof menu - 1 - len, "\r[2] \wNo hay armas secundarias Cargadas..^n");
 	}
 
 	if (g_Knife > 0) {
 		// ArrayGetString(g_szName,g_iSelected[id][KNIFE], szItem, charsmax(szItem) );
 		ArrayGetArray(g_aArray, g_iSelected[id][KNIFE], weaponOrder);
 		copy(szItem, charsmax(szItem), weaponOrder[Weapon_Name]);
-		len += formatex(menu[len], sizeof menu - 1 - len, "\r3. \wKnifes [\y%s\w]^n", g_iSelected[id][KNIFE] <= -1 ? "None" : szItem);
+		len += formatex(menu[len], sizeof menu - 1 - len, "\r[3] \wKnifes \r[%s]^n", g_iSelected[id][KNIFE] <= -1 ? "None" : szItem);
 	} else {
-		len += formatex(menu[len], sizeof menu - 1 - len, "\r3. \wNo hay Knifes Cargados..^n");
+		len += formatex(menu[len], sizeof menu - 1 - len, "\r[3] \wNo hay Knifes Cargados..^n");
 	}
 		
-	len += formatex(menu[len], sizeof menu - 1 - len, "\r4. \wGrenades [\y%s\w]^n", Granadas[g_iGranada[id]][granada_nombre]);
+	len += formatex(menu[len], sizeof menu - 1 - len, "\r[4] \wGrenades \r[%s]^n", Granadas[g_iGranada[id]][granada_nombre]);
 
 
-	len += formatex(menu[len], sizeof menu - 1 - len, "^n\r5. \rArmarse^n");
-	len += formatex(menu[len], sizeof menu - 1 - len, "\r6. \wAuto-Seleccion^n^n");
+	len += formatex(menu[len], sizeof menu - 1 - len, "^n\r[5] \wArmarse^n");
+	len += formatex(menu[len], sizeof menu - 1 - len, "\r[6] \wAuto-Seleccion^n^n");
 
-	len += formatex(menu[len], sizeof menu - 1 - len, "\r0.\wSalir");
+	len += formatex(menu[len], sizeof menu - 1 - len, "\r[0] \wSalir");
 
 	show_menu(id, KEYSMENU, menu, -1, "Menu Armas");
 	return PLUGIN_HANDLED;

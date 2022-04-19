@@ -40,7 +40,7 @@ Clases de zombie, hm, neme y survi (Mejoras con niveles):
 		-Aumentar Daño Chain grenade
 		-Aumentar Gravedad
 		
-Mejorar estetica de menues
+Mejorar estetica de menues ***HECHO - randro***
 
 Misiones:
 	-casi resuelto
