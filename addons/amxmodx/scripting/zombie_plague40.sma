@@ -3075,8 +3075,13 @@ set_player_maxspeed(id)
 	{
 		if (g_class[id] >= ZOMBIE)
 		{
-			if (g_class[id] >= NEMESIS)
-				set_pev(id, pev_maxspeed, g_zombie_spd[id]);
+			if (g_class[id] >= NEMESIS) {
+				if (g_has_class[id][CLASS_NEMESIS] != ZCLASS_NONE) {
+					set_pev(id, pev_maxspeed, g_zombie_spd[id]);
+				} else {
+					set_pev(id, pev_maxspeed, g_cached_nemspd);
+				}
+			}
 			else if (g_class[id] == ALIEN)
 				set_pev(id, pev_maxspeed, cvar_alienspd)
 			else
@@ -7301,6 +7306,7 @@ zombieme(id, infector, nemesis, silentmode, rewards)
 	
 	// Set selected zombie class
 	g_has_class[id][CLASS_ZOMBIE] = nextClass[id][CLASS_ZOMBIE];
+	g_has_class[id][CLASS_NEMESIS] = nextClass[id][CLASS_NEMESIS];
 	// If no class selected yet, use the first (default) one
 	if (g_has_class[id][CLASS_ZOMBIE] == ZCLASS_NONE) g_has_class[id][CLASS_ZOMBIE] = 0
 	
@@ -7364,7 +7370,6 @@ zombieme(id, infector, nemesis, silentmode, rewards)
 	{
 		if (nemesis == 1)
 		{
-			g_has_class[id][CLASS_NEMESIS] = nextClass[id][CLASS_NEMESIS];
 			do_random_spawn(id, 1);
 			// Nemesis
 			g_class[id] = NEMESIS;
@@ -7492,8 +7497,13 @@ zombieme(id, infector, nemesis, silentmode, rewards)
 	// Set the right model, after checking that we don't already have it
 	if (g_class[id] == NEMESIS)
 	{
-		formatex(g_playermodel[id], charsmax(g_playermodel[]), "%s", szNemesis);
-		cs_set_user_model(id, szNemesis);
+		if (g_has_class[id][CLASS_NEMESIS] != ZCLASS_NONE) {
+			ArrayGetArray(g_ArrayClass, g_has_class[id][CLASS_NEMESIS], ClasesInfo);
+			cs_set_user_model(id, ClasesInfo[ClassesModel]);
+		} else {
+			formatex(g_playermodel[id], charsmax(g_playermodel[]), "%s", szNemesis);
+			cs_set_user_model(id, szNemesis);
+		}
 	}
 	else if (g_class[id] == ALIEN)
 	{
