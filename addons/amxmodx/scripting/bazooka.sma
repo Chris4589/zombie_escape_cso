@@ -174,13 +174,35 @@ g_iCvar_DefaultRockets[2], g_iCvar_APCost[2], g_iCvar_RocketAPCost[2]
 new g_classNemesis
 
 new const zclass_name[] = { "Zombie Nemesis" } 
-new const zclass_info[] = { "Throw a 1 misil" } 
+new const zclass_info[] = { "Throw a 2 misil" } 
 new const zclass_model[] = { "ZOMBIE_NEMESIS" } 
 new const zclass_clawmodel[] = { "default" }
-const zclass_health = 1700
+const zclass_health = 2000
 const zclass_speed = 200
 const Float:zclass_gravity = 0.7 
-const Float:zclass_knockback = 1.0 
+const Float:zclass_knockback = 1.0
+
+new g_classNemesis1
+
+new const zclass_name1[] = { "Zombie Nemesis" } 
+new const zclass_info1[] = { "Throw a 4 misils" } 
+new const zclass_model1[] = { "ZOMBIE_NEMESIS" } 
+new const zclass_clawmodel1[] = { "default" }
+const zclass_health1 = 2300
+const zclass_speed1 = 210
+const Float:zclass_gravity1 = 0.7 
+const Float:zclass_knockback1 = 1.0
+
+new g_classNemesis2
+
+new const zclass_name2[] = { "Zombie Nemesis" } 
+new const zclass_info2[] = { "Throw a 6 misils" } 
+new const zclass_model2[] = { "ZOMBIE_NEMESIS" } 
+new const zclass_clawmodel2[] = { "default" }
+const zclass_health2 = 3400
+const zclass_speed2 = 220
+const Float:zclass_gravity2 = 0.65 
+const Float:zclass_knockback2 = 1.0 
 
 
 /*================================================================================
@@ -274,7 +296,13 @@ public plugin_init()
 public plugin_precache()
 {
 	g_classNemesis = zp_register_class(CLASS_NEMESIS, zclass_name, zclass_info, zclass_model, zclass_clawmodel, 
-		25, 0, ADMIN_BAN, zclass_health, 0, zclass_speed, zclass_gravity, zclass_knockback)
+		0, 0, ADMIN_BAN, zclass_health, 0, zclass_speed, zclass_gravity, zclass_knockback)
+
+	g_classNemesis1 = zp_register_class(CLASS_NEMESIS, zclass_name1, zclass_info1, zclass_model1, zclass_clawmodel1, 
+		0, 0, ADMIN_BAN, zclass_health1, 0, zclass_speed1, zclass_gravity1, zclass_knockback1)
+
+	g_classNemesis2 = zp_register_class(CLASS_NEMESIS, zclass_name2, zclass_info2, zclass_model2, zclass_clawmodel2, 
+		0, 0, ADMIN_BAN, zclass_health2, 0, zclass_speed2, zclass_gravity2, zclass_knockback2)
 	// Models
 	precache_model(nrl_rocketmodel)
 	precache_model(nrl_gun_viewmodel)
@@ -326,7 +354,17 @@ public zp_user_infected_post(id, infector)
 			if(zp_get_user_nemesis_class(id) == g_classNemesis) // Free
 			{
 				// Give gun
-				set_user_nrlauncher(id, 1)
+				set_user_nrlauncher(id, 2)
+			}
+			else if(zp_get_user_nemesis_class(id) == g_classNemesis1) // Free
+			{
+				// Give gun
+				set_user_nrlauncher(id, 4)
+			}
+			else if(zp_get_user_nemesis_class(id) == g_classNemesis2) // Free
+			{
+				// Give gun
+				set_user_nrlauncher(id, 6)
 			}
 		}
 	}

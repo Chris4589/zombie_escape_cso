@@ -1,7 +1,7 @@
 #include amxmodx
 #include fakemeta_util
 #include hamsandwich
-#include <zombieplague>
+#include <zombie_escape_v1>
 
 /* ~ [ Macroses ] ~ */
 #define ACT_RANGE_ATTACK1 28

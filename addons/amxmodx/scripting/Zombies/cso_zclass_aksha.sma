@@ -4,7 +4,7 @@
 #include fakemeta_util
 #include hamsandwich
 #include xs
-#include zombieplague
+#include zombie_escape_v1
 
 /* ~ [ Offsets ] ~ */
 // Linux extra offsets

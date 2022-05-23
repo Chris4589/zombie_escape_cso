@@ -7,9 +7,8 @@
 #include <hamsandwich>
 #include <xs>
 #include <cstrike>
-#include <zombieplague>
+#include <zombie_escape_v1>
 
-#include <zp43_armas>
 
 new variable;
 #define ZITEM_CSW_NAME CSW_AUG

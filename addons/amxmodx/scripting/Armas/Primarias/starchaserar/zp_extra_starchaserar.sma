@@ -6,8 +6,7 @@
 #include <engine>
 #include <hamsandwich>
 #include <xs>
-#include <zombieplague>
-#include <zp43_armas>
+#include <zombie_escape_v1>
 
 #define PLUGIN "Star Chaser AR"
 #define VERSION "1.0"

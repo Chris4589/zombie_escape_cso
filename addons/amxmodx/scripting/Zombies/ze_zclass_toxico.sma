@@ -3,7 +3,7 @@
 #include <engine>
 #include <fun>
 #include <hamsandwich>
-#include <zombieplague>
+#include <zombie_escape_v1>
 
 #define PLUGIN_NAME	"[ZP] ZCLASS = L4D spitter"
 #define PLUGIN_VERSION	"1.5"
