@@ -709,7 +709,6 @@ new g_iNoJump[33]
 new g_iNoDroga[33];
 new g_iJumpingNadeCount[ 33 ]
 new g_iExplote[33], g_iFisher[33], g_iGhost[33], g_iDrop[33];
-new g_steamBonus[33]
 new g_bBalas[33], g_iSkinsEnable[33];
 new g_bMask[33];
 new g_iEscapes[ 33 ];
@@ -1785,11 +1784,11 @@ public plugin_init()
 	
 	register_menucmd(register_menuid("Menu de camaras"), 1023, "setview") 
 
-	register_clcmd("say /camera", "chooseview")
-	register_clcmd("say_team /camera", "chooseview")
+	//register_clcmd("say /camera", "chooseview")
+	//register_clcmd("say_team /camera", "chooseview")
 
-	register_clcmd("say /cam", "chooseview")
-	register_clcmd("say_team /cam", "chooseview")  
+	//register_clcmd("say /cam", "chooseview")
+	//register_clcmd("say_team /cam", "chooseview")  
 	// Message hooks
 	register_message(g_msgCurWeapon, "message_cur_weapon")
 	register_message(get_user_msgid("Money"), "message_money")
@@ -2243,7 +2242,6 @@ public event_round_start()
 		g_touched[i] = false;
 		g_fTiempo[i] = get_gametime();
 		g_currencyTime[i] = 0.0;
-		g_steamBonus[i] = 1;
 		//g_iJumpClass[i] = 0;
 		g_iJumpingNadeCount[i] = 0;
 
@@ -2429,8 +2427,8 @@ public logevent_round_end()
 		   
 		    if(g_temExp[id] > 0)
 		    {
-		        g_ammopacks[id] += 15 * (g_iMultiplicador[id][ 1 ] * g_steamBonus[id]);
-		        client_print(id, print_chat, "%s Ganaste 15 Ammo Packs por ser el Numero %d de los mejores de la ronda.", g_szPrefix, Count+1);
+		        g_ammopacks[id] += 5 * g_iMultiplicador[id][ 1 ];
+		        client_print(id, print_chat, "%s Ganaste 5 Ammo Packs por ser el Numero %d de los mejores de la ronda.", g_szPrefix, Count+1);
 		    }
 		}
 
@@ -2780,7 +2778,7 @@ public fw_PlayerKilled(victim, attacker, shouldgib)
 	{
 		if(g_iLevel[attacker] <= 20) SetExp(attacker, 6);
 		else SetExp(attacker, 2);
-		g_ammopacks[attacker] += (get_pcvar_num(cvar_ammoinfect) * g_iMultiplicador[attacker][ 1 ] * g_steamBonus[attacker]);
+		g_ammopacks[attacker] += (get_pcvar_num(cvar_ammoinfect) * g_iMultiplicador[attacker][ 1 ]);
 	}
 	
 	// Human killed zombie, add up the extra frags for kill
@@ -2941,7 +2939,7 @@ public fw_TakeDamage(victim, inflictor, attacker, Float:damage, damage_type)
 					// Reward ammo packs for every [ammo damage] dealt
 					while (g_damagedealt[attacker] > get_pcvar_num(cvar_ammodamage))
 					{
-						g_ammopacks[attacker] += (1* g_iMultiplicador[attacker][ 1 ] * g_steamBonus[attacker])
+						g_ammopacks[attacker] += (1* g_iMultiplicador[attacker][ 1 ])
 						g_tempApps[attacker] += (1* g_iMultiplicador[attacker][ 1 ])
 						g_damagedealt[attacker] -= get_pcvar_num(cvar_ammodamage)
 					}
@@ -7348,7 +7346,7 @@ zombieme(id, infector, nemesis, silentmode, rewards)
 		
 		// Reward frags, deaths, health, and ammo packs
 		UpdateFrags(infector, id, get_pcvar_num(cvar_fragsinfect), 1, 1)
-		g_ammopacks[infector] += (get_pcvar_num(cvar_ammoinfect) * g_iMultiplicador[infector][ 1 ] * g_steamBonus[infector])
+		g_ammopacks[infector] += (get_pcvar_num(cvar_ammoinfect) * g_iMultiplicador[infector][ 1 ])
 		g_tempApps[infector] += (get_pcvar_num(cvar_ammoinfect) * g_iMultiplicador[infector][ 1 ])
 		set_user_health(infector, pev(infector, pev_health) + get_pcvar_num(cvar_zombiebonushp))
 
@@ -8803,7 +8801,7 @@ balance_teams()
 public welcome_msg()
 {
 	zp_colored_print(0, "^x4%s ^x1Voces activadas en ^x4Z, X, & Y.", g_szPrefix);
-	zp_colored_print(0, "^x4%s ^x1Si eres ^4STEAM ^x1 Ganas APS ^4X2", g_szPrefix);
+	//zp_colored_print(0, "^x4%s ^x1Si eres ^4STEAM ^x1 Ganas APS ^4X2", g_szPrefix);
 	// Show T-virus HUD notice
 	set_hudmessage(0, 125, 200, HUD_EVENT_X, HUD_EVENT_Y, 0, 0.0, 3.0, 2.0, 1.0, -1);
 	ShowSyncHudMsg(0, g_MsgSync, "%L", LANG_PLAYER, "NOTICE_VIRUS_FREE");
@@ -9968,10 +9966,10 @@ reset_vars(id, resetall)
 	g_bMask[id] = 0;
 	
 	if (resetall)
-	{
+	{/*
 		if( get_pcvar_num( cvar_event ) )
 			g_ammopacks[id] = 20000;
-		else
+		else*/
 			g_ammopacks[id] = get_pcvar_num( cvar_startammopacks );
 
 		for (new type = 0; type < MAX_CLASS; type += 1) {
@@ -13513,7 +13511,7 @@ public finish_combo(taskid){
 
     if(recibidos < 0) recibidos = 0;
 
-    g_ammopacks[id] += (recibidos * g_iMultiplicador[id][ 1 ] * g_steamBonus[id]);    
+    g_ammopacks[id] += (recibidos * g_iMultiplicador[id][ 1 ]);    
     g_tempApps[id] += (recibidos * g_iMultiplicador[id][ 1 ]);
     zp_colored_print(id, "^x04[PARTY]^x01 Ammopacks:^x03 %d con %d^x01 Hits en^x03 %d Personas", recibidos, g_iComboPartyHits[id], g_PartyData[ id ][ Amount_In_Party ]);
 

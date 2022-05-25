@@ -165,7 +165,7 @@ public plugin_precache()
 {
 	engfunc(EngFunc_PrecacheModel, V_BALROG_MDL);
 	//engfunc(EngFunc_PrecacheModel, P_BALROG_MDL);
-	//engfunc(EngFunc_PrecacheModel, W_BALROG_MDL);
+	engfunc(EngFunc_PrecacheModel, W_BALROG_MDL);
 
 	engfunc(EngFunc_PrecacheGeneric, "sprites/weapon_bethereal.txt");
 	engfunc(EngFunc_PrecacheGeneric, "sprites/640hud2_bethereal.spr");
@@ -323,7 +323,7 @@ public fw_SetModel(ent, const model[])
 
 	set_pev(weapon, pev_impulse, BALROG_KEY);
 
-	//engfunc(EngFunc_SetModel, ent, W_BALROG_MDL);
+	engfunc(EngFunc_SetModel, ent, W_BALROG_MDL);
 
 	return FMRES_SUPERCEDE;
 }

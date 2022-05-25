@@ -26,6 +26,7 @@
 #include <hamsandwich>
 #include <zp43_armas>
 
+native zp_weapons_force_buy(id, name[]);
 /*----------------------------------*/
 /*            DEFINES               */
 /*----------------------------------*/
