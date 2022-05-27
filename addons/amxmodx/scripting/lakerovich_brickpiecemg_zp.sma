@@ -9,8 +9,7 @@
 #include <xs>
 
 // Base Include
-#include <zombieplague>
-#include <zp43_armas>
+#include <zombie_escape_v1>
 #define PLUGIN "[CSO Like] BrickPiace Machinegun / ZP"
 #define VERSION "1.0"
 #define AUTHOR "AsepKhairulAnam / Lakerovich"

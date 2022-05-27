@@ -140,7 +140,7 @@ v1.0 (Oct 13, 2007)
 #include <amxmodx>
 #include <amxmisc>
 #include <fakemeta>
-#include <zombieplague>
+#include <zombie_escape_v1>
 
 new const VERSION[ ] = "1.2.4b1"
 new const TRKCVAR[ ] = "grab_plus_version"

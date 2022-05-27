@@ -1,7 +1,7 @@
 #include <amxmodx>
 #include <amxmisc>
 #include <hamsandwich>
-#include <zombieplague>
+#include <zombie_escape_v1>
 
 const OFFSET_WEAPONOWNER = 41
 const OFFSET_LINUX_WEAPONS = 4 // weapon offsets are only 4 steps higher on Linux
