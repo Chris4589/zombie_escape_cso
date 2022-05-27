@@ -5,7 +5,7 @@
 #include <cstrike>
 #include <hamsandwich>
 #include <fun>
-#include <zombieplague>
+#include <zombie_escape_v1>
 
 #define PLUGIN "Zombie Escape 1.1b + BOSS (Limited Edition)"
 #define VERSION "1.0"
