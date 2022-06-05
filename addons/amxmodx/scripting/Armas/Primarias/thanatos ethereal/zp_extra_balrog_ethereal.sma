@@ -59,8 +59,8 @@
 #include <cstrike>
 #include <fakemeta>
 #include <hamsandwich>
-#include <zombieplague>
-#include <zp43_armas>
+#include <zombie_escape_v1>
+
 
 /*================================================================================
  [Plugin Customization]

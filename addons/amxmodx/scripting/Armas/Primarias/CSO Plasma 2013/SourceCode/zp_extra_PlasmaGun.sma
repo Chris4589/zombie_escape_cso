@@ -4,7 +4,7 @@
 #include <fakemeta_util>
 #include <hamsandwich>
 #include <cstrike>
-#include <zombieplague>
+#include <zombie_escape_v1>
 
 #define PLUGIN "[CSO] PlasmaGun"
 #define VERSION "1.0"
@@ -84,10 +84,6 @@ new g_Had_Plasma, g_WeaponClip[33], Float:g_WeaponRecoil[33][3]
 new g_Msg_WeaponList, g_Msg_CurWeapon, g_Msg_AmmoX
 new g_MuzzleFlash_SprId, g_PlasmaExp_SprId, g_weapon_event, g_HamBot, g_MaxPlayers
 
-
-enum{ PRIMARIA=1, SECUNDARIA, KNIFE, ESPECIALES, MAX_ARMS };
-native zp_arma(const name[], level, reset, categoria, admin, const adm_tipo[]);
-forward dar_arma(id, item);
 
 new g_item;
 public plugin_init() 

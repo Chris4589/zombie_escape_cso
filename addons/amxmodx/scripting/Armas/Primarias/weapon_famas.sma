@@ -3,7 +3,7 @@
 #include <amxmodx>
 #include <fun>
 #include <cstrike>
-#include <zp43_armas>
+#include <zombie_escape_v1>
 
 new g_item;
 

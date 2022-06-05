@@ -1,7 +1,7 @@
 #include <amxmodx>
 #include <engine>
 #include <hamsandwich>
-#include <zp_lvl>
+#include <zombie_escape_v1>
 
 new const hclass1_name[] = { "Paratropper" }
 new const hclass1_info[] = { "Paracaidas con E" }

@@ -5,7 +5,7 @@
 #include <hamsandwich>
 #include <cstrike>
 #include <xs>
-#include <zombieplague>
+#include <zombie_escape_v1>
 
 #define PLUGIN "Cannon"
 #define VERSION "3.0"
@@ -64,9 +64,6 @@ new g_had_cannon[33], g_old_weapon[33], g_cannon_ammo[33], g_got_firsttime[33], 
 new g_cvar_defaultammo, g_cvar_reloadtime, g_cvar_radiusdamage, g_cvar_damage
 new g_smokepuff_id
 
-enum{ PRIMARIA=1, SECUNDARIA, KNIFE, ESPECIALES, MAX_ARMS };
-native zp_arma(const name[], level, reset, categoria, admin, const adm_tipo[]);
-forward dar_arma(id, item);
 
 public plugin_init() 
 {

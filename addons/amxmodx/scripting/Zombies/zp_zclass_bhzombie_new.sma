@@ -1,6 +1,6 @@
 #include <amxmodx>
 #include <fakemeta>
-#include <zombieplague>
+#include <zombie_escape_v1>
 
 new g_zclass_bhzombie, g_hclass_bhhuman;
 new g_hasBhop[33], bool:g_restorevel[33], Float:g_velocity[33][3]

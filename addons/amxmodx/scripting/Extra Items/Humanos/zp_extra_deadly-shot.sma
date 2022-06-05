@@ -2,7 +2,7 @@
 #include <engine>
 #include <fakemeta>
 #include <hamsandwich>
-#include <zombieplague>
+#include <zombie_escape_v1>
 
 #define TASK_HUD 5345634
 #define TASK_REMOVE 2423423

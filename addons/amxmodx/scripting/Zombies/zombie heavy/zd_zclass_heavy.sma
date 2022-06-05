@@ -4,7 +4,7 @@
 #include <fakemeta>
 #include <fakemeta_util>
 #include <hamsandwich>
-#include <zombieplague>
+#include <zombie_escape_v1>
 
 #define PLUGIN "[ZD] Zombie Class: Heavy"
 #define VERSION "1.0"

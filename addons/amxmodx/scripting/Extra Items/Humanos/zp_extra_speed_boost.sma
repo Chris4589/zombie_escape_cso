@@ -32,7 +32,7 @@
 #include <amxmodx>
 #include <fakemeta>
 #include <hamsandwich>
-#include <zombieplague>
+#include <zombie_escape_v1>
 
 const TASK_SPEED_BOOST = 100
 #define ID_SPEED_BOOST (taskid - TASK_SPEED_BOOST)

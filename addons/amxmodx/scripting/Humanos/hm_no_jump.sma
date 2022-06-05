@@ -1,5 +1,5 @@
 #include <amxmodx>
-#include <zombieplague>
+#include <zombie_escape_v1>
 
 new const hclass3_name[] = { "Cristian NJ" }
 new const hclass3_info[] = { "Anti JumpBomb" }

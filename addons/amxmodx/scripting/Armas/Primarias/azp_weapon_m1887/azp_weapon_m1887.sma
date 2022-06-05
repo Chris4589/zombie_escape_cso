@@ -5,7 +5,7 @@
 #include <hamsandwich>
 #include <xs>
 #include <cstrike>
-#include <zombieplague>
+#include <zombie_escape_v1>
 
 #define ENG_NULLENT		-1
 #define EV_INT_WEAPONKEY	EV_INT_impulse
@@ -58,9 +58,7 @@ new const WEAPONENTNAMES[][] = { "", "weapon_p228", "", "weapon_scout", "weapon_
 			"weapon_m3", "weapon_m4a1", "weapon_tmp", "weapon_g3sg1", "weapon_flashbang", "weapon_deagle", "weapon_sg552",
 			"weapon_ak47", "weapon_knife", "weapon_p90" }
 
-enum{ PRIMARIA=1, SECUNDARIA, KNIFE, ESPECIALES, MAX_ARMS };
-native zp_arma(const name[], level, reset, categoria, admin, const adm_tipo[]);
-forward dar_arma(id, item);
+
 
 public plugin_init()
 {

@@ -4,7 +4,7 @@
 #include <hamsandwich>
 #include <cstrike>
 #include <fun>
-#include <zp43_armas>
+#include <zombie_escape_v1>
 
 #define PLUGIN "[CSO] Rail Cannon (2014)"
 #define VERSION "1.0"

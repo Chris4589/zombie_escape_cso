@@ -1,6 +1,6 @@
 #include <amxmodx>
 #include <fakemeta>
-#include <zombieplague>
+#include <zombie_escape_v1>
 
 
 #define PREFIX "[ZP]"

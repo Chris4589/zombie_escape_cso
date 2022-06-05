@@ -5,11 +5,8 @@
 #include <hamsandwich>
 #include <cstrike>
 #include <xs>
-#include <zombieplague>
+#include <zombie_escape_v1>
 
-enum{ PRIMARIA=1, SECUNDARIA, KNIFE, ESPECIALES, MAX_ARMS };
-native zp_arma(const name[], level, reset, categoria, admin, const adm_tipo[]);
-forward dar_arma(id, item);
 
 new g_item;
 

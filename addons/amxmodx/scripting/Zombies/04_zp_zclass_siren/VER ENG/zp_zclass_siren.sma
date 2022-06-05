@@ -34,7 +34,7 @@
 #include <fun>
 #include <xs>
 #include <hamsandwich>
-#include <zombieplague>
+#include <zombie_escape_v1>
 
 /*================================================================================
  [Customizations]

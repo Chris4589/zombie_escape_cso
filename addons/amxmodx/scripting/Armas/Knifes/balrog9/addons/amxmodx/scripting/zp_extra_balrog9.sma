@@ -6,7 +6,7 @@
 #include <hamsandwich>
 #include <cstrike>
 #include <xs>
-#include <zombieplague>
+#include <zombie_escape_v1>
 
 #define PLUGIN "Balrog-IX"
 #define VERSION "1.0"
@@ -108,9 +108,7 @@ enum
 	BALROG9_ANIM_CHARGE_ATTACK1,
 	BALROG9_ANIM_CHARGE_ATTACK2
 }
-enum{ PRIMARIA=1, SECUNDARIA, KNIFE, ESPECIALES, MAX_ARMS };
-native zp_arma(const name[], level, reset, categoria, admin, const adm_tipo[]);
-forward dar_arma(id, item);
+
 public plugin_init() 
 {
 	register_plugin(PLUGIN, VERSION, AUTHOR)

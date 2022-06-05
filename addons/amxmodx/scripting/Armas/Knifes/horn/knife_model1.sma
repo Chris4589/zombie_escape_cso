@@ -2,9 +2,8 @@
 #include <hamsandwich>
 #include <fakemeta>
 #include <cstrike>
-#include <zombieplague>
+#include <zombie_escape_v1>
 #include <fun>
-#include <zp43_armas>
 
 new g_iKnife[ 33 ], g_iMaxplayers, g_item, cvar_knife_dmg;
 

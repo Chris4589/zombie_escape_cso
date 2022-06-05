@@ -3,7 +3,7 @@
 #include <fakemeta_util>
 #include <hamsandwich>
 #include <cstrike>
-#include <zp43_armas>
+#include <zombie_escape_v1>
 
 #define PLUGIN "[CSO] Maverick M60"
 #define VERSION "1.0"

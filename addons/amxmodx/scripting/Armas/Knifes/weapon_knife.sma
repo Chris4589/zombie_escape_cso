@@ -2,7 +2,7 @@
 
 #include <amxmodx>
 #include <reapi>
-#include <zp43_armas>
+#include <zombie_escape_v1>
 
 new g_item;
 

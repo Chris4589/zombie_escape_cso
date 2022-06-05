@@ -1,7 +1,7 @@
 #include <amxmodx>
 #include <amxmisc>
 #include <fun>
-#include <zombieplague>
+#include <zombie_escape_v1>
 
 #define PLUGIN_VERSION "1.0c"
 

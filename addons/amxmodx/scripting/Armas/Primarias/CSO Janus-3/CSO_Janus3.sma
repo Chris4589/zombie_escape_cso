@@ -3,7 +3,7 @@
 #include <fakemeta_util>
 #include <hamsandwich>
 #include <cstrike>
-#include <zp43_armas>
+#include <zombie_escape_v1>
 
 #define PLUGIN "[CSO] Weapon: JANUS-3"
 #define VERSION "1.0"

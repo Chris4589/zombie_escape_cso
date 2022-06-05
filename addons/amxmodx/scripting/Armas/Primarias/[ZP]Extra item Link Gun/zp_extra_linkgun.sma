@@ -1,8 +1,7 @@
 #include <amxmodx>
 #include <fakemeta_util>
 #include <hamsandwich>
-#include <zombieplague>
-#include <zp43_armas>
+#include <zombie_escape_v1>
 
 #define is_user_valid(%0) (0 < %0 <= 32)
 #define CustomItem(%0) (pev(%0, pev_impulse) == WEAPON_SPECIAL_CODE)

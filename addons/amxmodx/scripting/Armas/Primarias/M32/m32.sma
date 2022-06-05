@@ -6,8 +6,7 @@
 #include <hamsandwich>
 //#include <xs>
 #include <cstrike>
-#include <zombieplague>
-#include <zp43_armas>
+#include <zombie_escape_v1>
  
 #define ENG_NULLENT             -1
 #define EV_INT_WEAPONKEY        EV_INT_impulse

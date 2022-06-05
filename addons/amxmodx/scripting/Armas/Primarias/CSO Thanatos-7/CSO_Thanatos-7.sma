@@ -5,7 +5,7 @@
 #include <hamsandwich>
 #include <cstrike>
 #include <fun>
-#include <zp43_armas>
+#include <zombie_escape_v1>
 
 #define PLUGIN "[CSO] Thanatos-7"
 #define VERSION "1.0"
