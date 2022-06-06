@@ -1,5 +1,5 @@
 #include <amxmodx>
-#include <zombieplague>
+#include <zombie_escape_v1>
 
 new const zclass1_name[] = { "unfrozen zombie" }
 new const zclass1_info[] = { "No te congelan" }

@@ -6,8 +6,7 @@
 #include <cstrike>
 #include <xs>
 #include <fun>
-#include <zombieplague>
-#include <zp43_armas>
+#include <zombie_escape_v1>
 
 #define PLUGIN "Infinity Laser Fist"
 #define VERSION "Counter Strike 1.6"

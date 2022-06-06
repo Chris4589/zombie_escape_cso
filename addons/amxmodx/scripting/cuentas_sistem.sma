@@ -3,9 +3,12 @@
 #include <reapi>
 #include <sqlx>
 #include <fakemeta>
+#include <cstrike>
 #include <print_center_fx>
 
 #define use_reapi
+
+//#define experience
 
 #if !defined use_reapi
 	stock is_user_steam_2( i )
@@ -38,10 +41,44 @@
 		steam_id varchar(40) NOT NULL,
 		LastServer varchar(40) NOT NULL DEFAULT 'none',
 		Online int(2) NOT NULL DEFAULT '0',
-		coins int(20) NOT NULL DEFAULT '0'
+		coins int(20) NOT NULL DEFAULT '0',
+		tiempo float(20) NOT NULL DEFAULT '0',
+		tiempo_total float(20) NOT NULL DEFAULT '0'
 	);
 
 */
+
+
+#if defined experience
+
+enum _:exp_data
+{
+	menu_data[33],
+	exp,
+	horas
+}
+
+
+new const menu_exp[][exp_data] =
+{
+	{"1 Hora",    50,     1},
+	{"2 Horas",   110,    2},
+	{"5 Horas",   287,    5},
+	{"10 Horas",  600,   10},
+	{"20 Horas",  1250,  20},
+	{"50 Horas",  3250,  50},
+	{"100 Horas", 6750,  100} 
+}
+
+new segundos, minutos, hrs, dias;
+
+native zp_set_exp(id, value)
+
+#endif
+
+#define PREFIX "[CEA]"
+
+
 enum
 {
 	REGISTRAR_CUENTA,
@@ -50,7 +87,8 @@ enum
 	IS_REGISTER,
 	GUARDAR_DATOS,
 	TOTAL_CUENTAS,
-	SET_OFFLINE
+	SET_OFFLINE,
+	CARGAR_NICK
 };
 
 enum
@@ -61,18 +99,18 @@ enum
 	MAX_STATUS
 }
 
-//No cambiar autor por m·s que lo uses para otro modo, no seas rata, no importa si lo reescribes media ves te bases en este
+//No cambiar autor por m√°s que lo uses para otro modo, no seas rata, no importa si lo reescribes media ves te bases en este
 new const PluginName[] = "System Account";
-new const PluginVersion[] = "1.0";
+new const PluginVersion[] = "1.1";
 new const PluginAuthor[] = "Hypnotize";
-//No cambiar autor por m·s que lo uses para otro modo, no seas rata, no importa si lo reescribes media ves te bases en este
+//No cambiar autor por m√°s que lo uses para otro modo, no seas rata, no importa si lo reescribes media ves te bases en este
 
 //apartado para escribir el nombre del creador del mod
 //area modificable
-new const ModName[] = "Zombie Escape";//nombre del mod
-new const ModAuthor[] = "Hypnotize"; //ac· pones tu nombre si lo usaste para un modo tuyo
-new const ModVersion[] = "1.0b";//versiÛn del modo
-new const g_szForo[] = "soon!";
+new const ModName[] = "Zombie Plague";//nombre del mod
+new const ModAuthor[] = "Hypnotize"; //ac√° pones tu nombre si lo usaste para un modo tuyo
+new const ModVersion[] = "1.0b";//versi√≥n del modo
+new const g_szForo[] = "petardas.com";
 //apartado para escribir el nombre del creador del mod
 //area modificable
 
@@ -103,16 +141,34 @@ new server[ 30 ];
 
 new cvar_type;
 
+#define DEFAULT_DAMAGE 900
+
 new bool:happyTime, happyMultiplier, happyDamage;
 
 enum _:__HappyData { happy_hour[3], happy_damage, happy_multiplier };
 
 new const _HappyHour[][__HappyData] =
 {
-	{ "20", 400, 2 },
-	{ "22", 400, 3 },
-	{ "23", 400, 1 }
+	{ "06", 900, 2 },
+	{ "07", 900, 2 },
+	{ "14", 900, 2 },
+	{ "15", 900, 2 },
+	{ "16", 900, 2 },
+	{ "19", 900, 2 },
+	{ "20", 900, 2 },
+	{ "22", 900, 2 },
+	{ "23", 900, 2 }
+
 };
+
+
+new Float:g_PlayedTime[33];
+new Float:g_pGameTime[33];
+new Float:g_TotalTime[33];
+
+
+new szName[32]
+static Name[32], Old[32]
 
 public plugin_init()  
 {
@@ -126,9 +182,12 @@ public plugin_init()
 	register_clcmd("LOGUEAR_PASSWORD", "login_account");
 
 	register_clcmd("say /hh", "checkhapy");
+	register_clcmd("say hh", "checkhapy");
+	register_clcmd("say /register", "cl_cmdregister");
 	register_clcmd("say /horarios", "menuHorarios");
 
 	register_forward(FM_ClientUserInfoChanged, "fw_ClientUserInfoChanged");
+
 	RegisterHookChain( RG_CBasePlayer_RoundRespawn, "fw_respawn_post", true );
 
 	RegisterHookChain(RG_ShowVGUIMenu, "message_VGUImenu");
@@ -147,11 +206,64 @@ public plugin_init()
 	get_user_ip( 0, server, 29 );
 
 	Mysql_init( );
+
+	happyDamage = DEFAULT_DAMAGE
+
+	register_clcmd( "say /time", "cmdTime" );
+	//register_clcmd( "say /toptime", "top_time" );
+	#if defined experience
+	register_clcmd( "say /exp", "exp_menu" );
+	#endif
 }
 
-public checkhapy(id) {
-	client_print_color(id, print_team_blue, "La HH esta^x04 %sctivada", happyTime ? "A" : "Desa");
-	return PLUGIN_HANDLED;
+public checkhapy(id)
+{
+        new hours_hh, mins_hh, secs_hh, hora[6], hour[3], mins[3], secs[3];
+        get_time("%H %M %S", hora, 10);
+        parse(hora, hour, 2, mins, 2, secs, 2);
+
+        
+        new happyhour;
+        for(new i=0; i < sizeof _HappyHour; i++)
+        {
+
+            if(equal(_HappyHour[i][happy_hour], "00"))
+                happyhour = 24;
+            else
+                happyhour = str_to_num(_HappyHour[i][happy_hour]);
+            if(str_to_num(hour) < happyhour)
+            {
+                hours_hh = (happyhour - str_to_num(hour));
+                if(str_to_num(mins) < 60)
+					mins_hh = (60-str_to_num(mins));
+
+		if(str_to_num(secs) < 60)
+		{
+			secs_hh = (60-str_to_num(secs));
+		}
+											        
+		break;
+            }
+        }
+	new szDay[5]
+	get_time( "%a", szDay, 4 );
+	if(equal( szDay, "Sun" ))
+	{
+		happyMultiplier = 2;
+		client_print_color(0, print_team_blue, "HORA FELIZ TODO EL DIA^x04!^x01 Multiplicador: ^x04%d!", happyMultiplier);
+	}
+	else
+	{	
+		static i;
+		if(happyTime)
+		{
+			client_print_color(id, print_team_default, "^3HORA FELIZ ^4activada ^3Ganas x%d ^4Exp",_HappyHour[i][happy_multiplier])
+		}
+		else
+		{
+			client_print_color(id, print_team_default, "^4Faltan:^3 %d hora%s, %d minuto%s %d Segundos ^4para la Hora Feliz",hours_hh-1, ((hours_hh-1) != 1 ? "s":""), mins_hh, mins_hh != 1 ? "s":"", secs_hh );
+		}
+	}
 }
 
 public plugin_natives()
@@ -161,6 +273,7 @@ public plugin_natives()
 	register_native("advacc_user_logged" , "native_logged", 1);
 	//register_native("show_login_menu", "native_login", 1);
 	register_native("open_cuenta_menu", "native_login", 1);
+	register_native("is_player_load", "native_data", 1);
 	register_native("advacc_guardado_get_handle", "handler_connection", 1);
 	register_native("advacc_guardado_id", "_sm_guardado_id");
 
@@ -171,6 +284,9 @@ public plugin_natives()
 	register_native("happyDamage", "native_hhDmg", 1);
 }
 
+public native_data(id) {
+	return g_iData[id];
+}
 public native_hhDmg() {
 	return happyDamage;
 }
@@ -217,7 +333,7 @@ public EventRoundEnd() {
 
 public message_VGUImenu( const id, VGUIMenu: iMenu, const iBitsSlots, const szOldMenu[], const bool: bForceOldMenu )
 {
-	if( iMenu != VGUI_Menu_Team || g_estado[ id ] >= LOGUEADO )
+	if( iMenu != VGUI_Menu_Team || g_estado[ id ] >= LOGUEADO || !g_iData[id] && g_estado[ id ] == DESCONECTADO )
 		return HC_CONTINUE;
 
 	SetHookChainReturn(ATYPE_INTEGER, false);
@@ -226,11 +342,18 @@ public message_VGUImenu( const id, VGUIMenu: iMenu, const iBitsSlots, const szOl
 
 public message_showmenu( iMsgid, iDest, id ) 
 {
-	if( g_estado[ iMsgid ] >= LOGUEADO )
+	if( g_estado[ iMsgid ] >= LOGUEADO || !g_iData[iMsgid] && g_estado[ iMsgid ] == DESCONECTADO )
 		return HC_CONTINUE;
 
 	SetHookChainReturn(ATYPE_INTEGER, false);
 	return HC_SUPERCEDE;
+}
+
+public cl_cmdregister(id) {
+	if (g_estado[ id ] == DESCONECTADO && !g_iData[id]) {
+		g_iData[id] = 1;
+		check_register( id );
+	}
 }
 
 public show_login_menu( id ) 
@@ -240,9 +363,9 @@ public show_login_menu( id )
 
 	if(!g_iData[id])
 	{
-		client_print(id, print_chat, "Espera un momento, tus datos est·n siendo buscados..");
-		client_print(id, print_chat, "Espera un momento, tus datos est·n siendo buscados..");
-		client_print(id, print_chat, "Espera un momento, tus datos est·n siendo buscados..");
+		client_print(id, print_chat, "Espera un momento, tus datos est√°n siendo buscados..");
+		client_print(id, print_chat, "Espera un momento, tus datos est√°n siendo buscados..");
+		client_print(id, print_chat, "Espera un momento, tus datos est√°n siendo buscados..");
 		return PLUGIN_HANDLED;
 	}
 
@@ -314,7 +437,7 @@ public register_account( id )
 
 	g_iStatus_steam[ id ] = is_user_steam_2( id ) ? 1 : 0;
 
-	formatex( szQuery, charsmax( szQuery ), "INSERT INTO %s (Pj, Password, status_steam, steam_id, LastServer, Online, coins) VALUES (^"%s^", ^"%s^", %d, ^"%s^", 'none', 0, 0)", g_szTabla, g_szPlayerName[ id ], g_szPassword[ id ], g_iStatus_steam[ id ], szSteam );
+	formatex( szQuery, charsmax( szQuery ), "INSERT INTO %s (Pj, Password, status_steam, steam_id, LastServer, Online, coins, tiempo, tiempo_total) VALUES (^"%s^", ^"%s^", %d, ^"%s^", 'none', 0, 0, 0, 0)", g_szTabla, g_szPlayerName[ id ], g_szPassword[ id ], g_iStatus_steam[ id ], szSteam );
 	SQL_ThreadQuery(g_hTuple, "DataHandler", szQuery, iData, 2);
 	
 	return PLUGIN_HANDLED;
@@ -346,7 +469,7 @@ public DataHandlerServer( failstate, Handle:Query, error[ ], error2, data[ ], da
 			return;
 		}
 		case TQUERY_QUERY_FAILED:
-			log_to_file( "SQL_CUENTAS_LOG.txt", "Error en la consulta al MySQL [%i]: %s", error2, error );
+			log_to_file( "SQL_CUENTAS_LOG.txt", "Error en la consulta al MySQL ACCSYS [%i]: %s", error2, error );
 	}
 	switch( data[ 0 ] ) 
 	{
@@ -428,7 +551,17 @@ public DataHandler( failstate, Handle:Query, error[ ], error2, data[ ], datasize
 				}
 				g_points[id] = SQL_ReadResult( Query, 7 );
 
-				SQL_ReadResult( Query, 1, g_szPlayerName[ id ], charsmax( g_szPlayerName[ ] ) );					
+
+				SQL_ReadResult(Query, 8, float:g_PlayedTime[id]);
+
+				SQL_ReadResult(Query, 9, float:g_TotalTime[id]);
+
+				SQL_ReadResult( Query, 1, g_szPlayerName[ id ], charsmax( g_szPlayerName[ ] ) );
+
+				if(is_user_steam_2(id))
+				{
+					client_cmd(id, "name %s", g_szPlayerName[id])
+				}					
 				
 				new iRet; ExecuteForward(g_fwLogin, iRet, id/*, g_id[ id ]*/);
 			
@@ -436,7 +569,7 @@ public DataHandler( failstate, Handle:Query, error[ ], error2, data[ ], datasize
 			}
 			else 
 			{
-				client_print( id, print_chat, "%s Usuario o Contrase√± incorrecta.", g_szPrefijo );
+				client_print( id, print_chat, "%s Usuario o Contrase√É¬± incorrecta.", g_szPrefijo );
 				client_cmd( id, "spk buttons/button10.wav" );
 				
 				show_login_menu( id );
@@ -472,15 +605,11 @@ public DataHandler( failstate, Handle:Query, error[ ], error2, data[ ], datasize
 				g_estado[ id ] = DESCONECTADO;
 			}
 
-			g_iData[ id ] = 1;
-			/*g_iData[id] = 1;
-			set_task(0.8, "show_login_menu", id);
-			set_task(1.0, "logueo_cuenta", TIEMPO_LOGUEO+id, _, _, "b");*/
-
 			if( g_estado[ id ] == REGISTRADO )
 			{
 				if( is_user_steam_2( id ) )
 				{
+					g_iData[ id ] = 1;
 					if( g_iStatus_steam[ id ] )
 					{
 						if( equal( g_szSteamDB[ id ], g_szSteam[ id ] ) )
@@ -491,7 +620,7 @@ public DataHandler( failstate, Handle:Query, error[ ], error2, data[ ], datasize
 							iData[ 0 ] = id;
 							iData[ 1 ] = LOGUEAR_CUENTA;
 							
-							formatex( szQuery, charsmax( szQuery ), "SELECT * FROM %s WHERE Pj=^"%s^" AND steam_id=^"%s^"", g_szTabla, g_szPlayerName[ id ], g_szSteam[ id ] );
+							formatex( szQuery, charsmax( szQuery ), "SELECT * FROM %s WHERE steam_id=^"%s^"", g_szTabla, g_szSteam[ id ] );
 							SQL_ThreadQuery( g_hTuple, "DataHandler", szQuery, iData, 2 );
 							console_print( 0, "AUTOLOG");
 						}
@@ -505,15 +634,16 @@ public DataHandler( failstate, Handle:Query, error[ ], error2, data[ ], datasize
 							server_cmd("kick #%d ^"ENTRASTE CON OTRO STEAM!^"",  get_user_userid(id));
 						}
 					}
-					else
+					else if(g_iData[id])
 					{
 						set_task(0.8, "show_login_menu", id);
 						set_task(1.0, "logueo_cuenta", TIEMPO_LOGUEO+id, _, _, "b");
 						console_print( 0, "LOGIN STATUS 0");
 					}
 				}
-				else
+				else//idlan
 				{
+					g_iData[ id ] = 1;
 					if( g_iStatus_steam[ id ] )
 					{
 						//es steam entro en no steam
@@ -527,12 +657,12 @@ public DataHandler( failstate, Handle:Query, error[ ], error2, data[ ], datasize
 					{
 						set_task(0.8, "show_login_menu", id);
 						set_task(1.0, "logueo_cuenta", TIEMPO_LOGUEO+id, _, _, "b");
-						console_print( 0, "LOGIN STEAM");
+						console_print( 0, "LOGIN NO-STEAM");
 					}
 					
 				}
 			}
-			else
+			else if(g_iData[id])//no registrado
 			{
 				set_task(0.8, "show_login_menu", id);
 				set_task(1.0, "logueo_cuenta", TIEMPO_LOGUEO+id, _, _, "b");
@@ -544,6 +674,11 @@ public DataHandler( failstate, Handle:Query, error[ ], error2, data[ ], datasize
 				console_print( id, "Error en el guardado de datos." );
 			else
 			console_print( id, "Datos guardados." );
+		}
+		case CARGAR_NICK:
+		{
+			if( SQL_NumResults( Query ) ) 
+				SQL_ReadResult(Query, 1, szName, charsmax(szName))
 		}
 	}
 }
@@ -610,8 +745,8 @@ public save_data(id) {
 	iData[ 0 ] = id;
 	iData[ 1 ] = GUARDAR_DATOS;
 
-	formatex( szQuery, charsmax( szQuery ), "UPDATE %s SET Online = '%d', LastServer=^"%s^", coins = '%d' WHERE id = '%d'", 
-		g_szTabla, g_online[id], server, g_points[ id ], g_id[ id ] );
+	formatex( szQuery, charsmax( szQuery ), "UPDATE %s SET Online = '%d', LastServer=^"%s^", coins = '%d', tiempo = '%f', tiempo_total = '%f' WHERE id = '%d'", 
+		g_szTabla, g_online[id], server, g_points[ id ], g_PlayedTime[id], g_TotalTime[id], g_id[ id ] );
 	SQL_ThreadQuery(g_hTuple, "DataHandler", szQuery, iData, 2);
 }
 
@@ -643,19 +778,69 @@ public menuHorarios(index) {
 
 public fw_ClientUserInfoChanged(id, buffer) 
 {
-    if (!is_user_connected(id)) 
-    	return FMRES_IGNORED;
-    
-    static Name[32], Old[32];
-    get_user_name(id, Name, charsmax(Name));
-    get_user_info(id, "name", Old, charsmax(Old))
+	if (!is_user_connected(id)) 
+		return FMRES_IGNORED;
 
-    if (equal(Old, Name)) 
-    	return FMRES_IGNORED;
+	if(task_exists(id+1500))
+	return FMRES_SUPERCEDE
     
-    set_user_info(id, "name", g_szPlayerName[ id ]);
-    return FMRES_IGNORED;
-} 
+	get_user_name(id, Name, charsmax(Name));
+	get_user_info(id, "name", Old, charsmax(Old))
+
+	if (equal(Old, Name)) 
+ 		return FMRES_IGNORED;
+
+	new szQuery[ MAX_MOTD_LENGTH ], iData[ 2 ];
+
+	iData[ 0 ] = id;
+	iData[ 1 ] = CARGAR_NICK;
+
+	formatex( szQuery, charsmax( szQuery ), "SELECT * FROM %s WHERE Pj=^"%s^"", g_szTabla, Old);
+	SQL_ThreadQuery(g_hTuple, "DataHandler", szQuery, iData, 2);
+
+	set_task(1.0, "change_nick", id);
+
+	return FMRES_SUPERCEDE;
+  
+}
+
+public change_nick(id)
+{
+
+    if(is_user_steam_2(id) && g_iData[id])
+    {	  	
+    	if(equal(Old, szName))
+    	{
+    		chatcolor(id, "^4[%s] ^1Nick en Uso", PREFIX)
+    		set_user_info(id, "name", Name);
+    		client_cmd( id, "spk buttons/button10.wav" );
+    		set_task(0.5, "nick_change", id+1500)
+    		return FMRES_SUPERCEDE;
+    	}
+    	else 
+    	{
+			new szQuery[ MAX_MOTD_LENGTH ], iData[ 2 ];
+			iData[ 0 ] = id;
+			iData[ 1 ] = GUARDAR_DATOS;
+
+			formatex( szQuery, charsmax( szQuery ), "UPDATE %s SET Pj=^"%s^" WHERE id = '%d'", g_szTabla, Old, g_id[ id ] );
+			SQL_ThreadQuery(g_hTuple, "DataHandler", szQuery, iData, 2)
+			set_user_info(id, "name", Old);
+			chatcolor(0, "^3[%s] ^4%s ^1Cambio su nombre a ^4%s", PREFIX, Name, Old)
+			set_task(0.5, "nick_change", id+1500)
+			return FMRES_IGNORED;
+    	}		
+    }
+    else
+    {
+    	set_user_info(id, "name", g_szPlayerName[ id ]);
+    	return FMRES_IGNORED;
+    }
+    
+}
+
+public nick_change(id)
+	return
 
 public client_putinserver( id )
 {
@@ -668,9 +853,15 @@ public client_putinserver( id )
 	g_iData[id] = 0;
 	g_iTime[ id ] = 60;
 	g_online[id] = 0;
-	g_points[id] = 0;
+	g_TotalTime[id] = 0.0;
+	g_PlayedTime[id] = 0.0;
+	//g_points[id] = 0;
 	g_otherConexion[id] = 0;
+	g_pGameTime[id] = get_gametime();
 	check_register( id );
+
+	set_task(3.0, "cmdMenu", id)
+	return PLUGIN_CONTINUE;
 }
 
 public check_register( id )
@@ -680,12 +871,20 @@ public check_register( id )
 	iData[ 0 ] = id;
 	iData[ 1 ] = IS_REGISTER;
 	
-	formatex( szQuery, charsmax( szQuery ), "SELECT * FROM %s WHERE Pj = ^"%s^"", g_szTabla, g_szPlayerName[ id ]);
+	if(is_user_steam_2(id))
+	{
+		formatex( szQuery, charsmax( szQuery ), "SELECT * FROM %s WHERE steam_id = ^"%s^"", g_szTabla, g_szSteam[ id ]);
+	}
+	else
+		formatex( szQuery, charsmax( szQuery ), "SELECT * FROM %s WHERE Pj = ^"%s^"", g_szTabla, g_szPlayerName[ id ]);
+	
 	SQL_ThreadQuery(g_hTuple, "DataHandler", szQuery, iData, 2);
 }
 
 public client_disconnected(  id ) 
 {
+	g_PlayedTime[id] += get_gametime() - g_pGameTime[id];
+	g_TotalTime[id] += get_gametime() - g_pGameTime[id];
 	if( g_estado[ id ] ) 
 	{
 		if (!g_otherConexion[id]) {
@@ -698,6 +897,7 @@ public client_disconnected(  id )
 	g_szPassword[ id ][ 0 ] = EOS;
 
 	remove_task(TIEMPO_LOGUEO+id);
+	remove_task(id)
 }
 
 public offline() {
@@ -758,9 +958,155 @@ public checkHH() {
 		happyTime = true;
 		happyMultiplier = 2;
 		client_print_color(0, print_team_blue, "HORA FELIZ TODO EL DIA^x04!^x01 Multiplicador: ^x04%d!", happyMultiplier);
-		client_print_color(0, print_team_blue, "HORA FELIZ TODO EL DIA^x04!^x01 Multiplicador: ^x04%d!", happyMultiplier);
 	}
 }
 
 public plugin_end()
 	SQL_FreeHandle( g_hTuple );
+
+
+public cmdMenu(id)
+{
+	if (g_estado[ id ] != DESCONECTADO && g_iData[id])
+		return;
+
+	new gMenu = menu_create("\rCrearte una Cuenta", "handlerMenu")
+    
+	menu_additem(gMenu, "\wCrear Cuenta", "1")
+	menu_additem(gMenu, "\dEntrar como Invitado", "2")
+	menu_display(id, gMenu, 0)
+}
+
+public handlerMenu(id, menu, item)
+{
+	if (g_estado[ id ] != DESCONECTADO && g_iData[id])
+		return PLUGIN_HANDLED;
+
+	if ( item == MENU_EXIT )
+	{
+		menu_destroy(menu)
+		return PLUGIN_HANDLED;
+	}
+
+	switch(item)
+	{
+		case 0:
+		{
+			cl_cmdregister(id)
+		}
+		case 1:
+		{
+			client_print(id, print_chat, "Create una cuenta para poder guardar tu Experiencia. Escribe /register") 
+			static CsTeams:team
+			team = cs_get_user_team(id)
+			if (team == CS_TEAM_SPECTATOR || team == CS_TEAM_UNASSIGNED)
+			{
+				rg_join_team(id, TEAM_TERRORIST)
+			}
+		}
+	}
+	return PLUGIN_HANDLED;
+} 
+
+public cmdTime(id)
+{
+	new days, hours, mins, segs;
+
+	g_PlayedTime[id] += get_gametime() - g_pGameTime[id];
+	g_TotalTime[id] += get_gametime() - g_pGameTime[id];
+	g_pGameTime[id] = get_gametime();
+    
+	segs = floatround(g_TotalTime[id]);
+    
+	mins = segs/60;
+	hours = mins/60;
+	days = hours/24;
+	segs = segs-mins*60;
+	mins = mins-hours*60;
+	hours = hours-days*24;
+    
+	client_print(id, print_chat, "Haz Jugado: %i Dia%s %i Horas %i Minutos y %i segundos", days, days == 1? "":"s", hours, mins, segs);
+
+
+//client_print(id, print_chat, "Haz Jugado: %i Dia%s con %s%i:%s%i:%s%i", days, days == 1? "":"s", hours > 9? "":"0", hours, mins > 9? "":"0", mins, segs > 9? "":"0", segs);
+
+
+}
+
+
+#if defined experience
+public exp_menu(id)
+{
+
+	g_PlayedTime[id] += get_gametime() - g_pGameTime[id];
+
+	segundos = floatround(g_PlayedTime[id]);
+	minutos = segundos/60;
+	hrs = minutos/60;
+	dias = hrs/24;
+	segundos = segundos-minutos*60;
+	minutos = minutos-hrs*60;
+	hrs = hrs-dias*24;
+
+	new menu = menu_create( fmt("\r[Zombie Escape] \wTus Horas Canjeables: \r%d \wHoras", hrs), "handler_exp" )
+
+	static g_isLen[80]
+	
+
+	for(new i = 0; i < sizeof(menu_exp); i++)
+	{	
+		if(hrs >= menu_exp[i][horas])
+			formatex(g_isLen, charsmax(g_isLen), "\w%s \r- \y%d", menu_exp[i][menu_data], menu_exp[i][exp]);
+				else
+					formatex(g_isLen, charsmax(g_isLen), "\d%s - %d", menu_exp[i][menu_data], menu_exp[i][exp]);
+		
+		menu_additem(menu, g_isLen, "")
+	}
+	menu_display( id, menu);
+	return PLUGIN_HANDLED;
+}
+
+public handler_exp( id, menu, item)
+{
+	if( item == MENU_EXIT) 
+	{
+		menu_destroy( menu );
+		return PLUGIN_HANDLED;
+	}
+	
+	if(hrs >= menu_exp[item][horas])
+	{
+		g_PlayedTime[id] -= menu_exp[item][horas]*60*60;
+		zp_set_exp(id, menu_exp[item][exp])
+	}
+	else
+		client_print(id, print_chat, "No tienes Horas suficientes")
+	
+	menu_destroy(menu);
+	return PLUGIN_HANDLED;
+}
+
+#endif
+
+public top_time(id)
+	show_motd(id, "http://45.58.56.30/zombie_escape/top_tiempo.php", "Top Jugadores Viciados")
+
+stock chatcolor(id, const input[], any:...)
+{
+    static szMsg[191], msgSayText;
+    
+    if (!msgSayText)
+        msgSayText = get_user_msgid("SayText");
+
+    replace_all(szMsg, 190, "!g", "^4");
+    replace_all(szMsg, 190, "!y", "^1");
+    replace_all(szMsg, 190, "!team", "^3");
+    
+    vformat(szMsg, 190, input, 3);
+    
+    message_begin(id ? MSG_ONE_UNRELIABLE : MSG_BROADCAST, msgSayText, .player = id);
+    write_byte(id ? id : 33);
+    write_string(szMsg);
+    message_end();
+}
+
