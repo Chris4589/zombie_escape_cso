@@ -80,8 +80,8 @@ native set_user_coins(index, value);
 // Plugin Version
 new const PLUGIN_VERSION[] = "1.1b"
 
-new const g_szTop15[] = "http://45.58.56.30/zombie_escape/top15.php";
-new const g_szTopAps[] = "http://45.58.56.30/zombie_escape/topaps.php";
+new const g_szTop15[] = "http://74.91.121.96/tops/top15.php";
+new const g_szTopAps[] = "http://74.91.121.96/tops/topaps.php";
 
 // Customization file sections
 enum
@@ -361,7 +361,7 @@ new const rango[][range] =
 	{ "The Global Elite", 0, "https://i.ibb.co/WVqzsg7/18.png" }
 }
 new g_iRango[33];
-
+/*
 enum _:__TagData { SZTAG[32] , SZFLAG[22], mult_exp, multi_aps };
 new const __Tags[][__TagData] =
 {
@@ -372,10 +372,10 @@ new const __Tags[][__TagData] =
 	{ "[ SILVER ]" , "cdefijnqrstu", 2, 2 },
 	{ "[ BRONZE ]" , "cefijmqrstu", 2, 2 },
 	{ "[VIP]",          "mnopr",                   2, 2}
-}
+}*/
 
 new g_szTag[ 33 ][ 32 ];
-new g_szFlags[ 33 ][ 32 ];
+// new g_szFlags[ 33 ][ 32 ];
 new g_iMultiplicador[ 33 ][ 2 ];
 
 new const _HappyHour[][__HappyData] =
@@ -990,7 +990,9 @@ new g_currentweapon[33] // player's current weapon id
 new g_playername[33][32] // player's name
 new Float:g_zombie_spd[33], Float:g_human_spd[33] // zombie class speed
 new Float:g_zombie_knockback[33] // zombie class knockback
-new g_zombie_classname[33][32], g_human_classname[33][32], g_nemesis_classname[33][32] // zombie class name
+new g_zombie_classname[33][32],
+	g_human_classname[33][32],
+	g_nemesis_classname[33][32]; // zombie class name
 #define is_user_valid_connected(%1) (1 <= %1 <= g_maxplayers && g_isconnected[%1])
 #define is_user_valid_alive(%1) (1 <= %1 <= g_maxplayers && g_isalive[%1])
 
@@ -5101,11 +5103,10 @@ public habilities_zombie(id) {
                 formatex(item, sizeof item - 1, "\w %s \r[\w%d-%d\r][\w%s punto%s\r]", habilityZombie[i][hability_name], g_habilidad[id][CLASS_ZOMBIE][i], habilityZombie[i][hability_max], add_point(ammount_cost(g_habilidad[id][CLASS_ZOMBIE][i])), ammount_cost(g_habilidad[id][CLASS_ZOMBIE][i]) == 1 ? "" : "s")/*si tiene puntos le deja mejorar */
             else
                 formatex(item, sizeof item - 1, "\d %s \r[\d%d-%d\r][\d%s punto%s\r]", habilityZombie[i][hability_name], g_habilidad[id][CLASS_ZOMBIE][i], habilityZombie[i][hability_max], add_point(ammount_cost(g_habilidad[id][CLASS_ZOMBIE][i])), ammount_cost(g_habilidad[id][CLASS_ZOMBIE][i]) == 1 ? "" : "s")/*si no tiene puntos no le dejara mejorar*/
-        }
-        else {
-        	formatex(item, sizeof item - 1, "\d %s \r[\dMAX\r]", habilityZombie[i][hability_name])
-        }
-        menu_additem(menu, item);
+		} else {
+			formatex(item, sizeof item - 1, "\d %s \r[\dMAX\r]", habilityZombie[i][hability_name])
+		}
+		menu_additem(menu, item);
 	}
 	menu_display(id, menu, 0);
 	return PLUGIN_HANDLED;
@@ -5151,11 +5152,10 @@ public habilities_human(id) {
                 formatex(item, sizeof item - 1, "\w %s \r[\w%d-%d\r][\w%s punto%s\r]", habilityHuman[i][hability_name], g_habilidad[id][CLASS_HUMAN][i], habilityHuman[i][hability_max], add_point(ammount_cost(g_habilidad[id][CLASS_HUMAN][i])), ammount_cost(g_habilidad[id][CLASS_HUMAN][i]) == 1 ? "" : "s")/*si tiene puntos le deja mejorar */
             else
                 formatex(item, sizeof item - 1, "\d %s \r[\d%d-%d\r][\d%s punto%s\r]", habilityHuman[i][hability_name], g_habilidad[id][CLASS_HUMAN][i], habilityHuman[i][hability_max], add_point(ammount_cost(g_habilidad[id][CLASS_HUMAN][i])), ammount_cost(g_habilidad[id][CLASS_HUMAN][i]) == 1 ? "" : "s")/*si no tiene puntos no le dejara mejorar*/
-        }
-        else {
-        	formatex(item, sizeof item - 1, "\d %s \r[\dMAX\r]", habilityHuman[i][hability_name])
-        }
-        menu_additem(menu, item);
+		} else {
+			formatex(item, sizeof item - 1, "\d %s \r[\dMAX\r]", habilityHuman[i][hability_name])
+		}
+		menu_additem(menu, item);
 	}
 	menu_display(id, menu, 0);
 	return PLUGIN_HANDLED;
@@ -5264,7 +5264,7 @@ public top_handler(id, menu, item)
 		{
 			new szMapname[64], url[120];
 			get_mapname(szMapname, 63);
-			formatex(url, 119, "http://45.58.56.30/zombie_escape/toprecords.php?mapname=%s", szMapname);
+			formatex(url, 119, "http://74.91.121.96/tops/toprecords.php?mapname=%s", szMapname);
 			show_motd(id, url, "Top Records");
 		}
 	}
@@ -7368,9 +7368,10 @@ zombieme(id, infector, nemesis, silentmode, rewards)
 	g_zombie_spd[id] = float(ClasesInfo[ClassesSpeed]);
 	g_zombie_knockback[id] = Float:ClasesInfo[ClassesKnockback];
 	copy(g_zombie_classname[id], charsmax(g_zombie_classname[]), ClasesInfo[ClassesName]);
+
 	if (g_has_class[id][CLASS_NEMESIS] != ZCLASS_NONE) {
 		ArrayGetArray(g_ArrayClass, g_has_class[id][CLASS_NEMESIS], ClasesInfo);
-		copy(g_nemesis_classname[id], charsmax(g_nemesis_classname[]), ClasesInfo[ClassName]);
+		copy(g_nemesis_classname[id], charsmax(g_nemesis_classname[]), ClasesInfo[ClassesName]);
 	}
 	
 	// Set zombie attributes based on the mode
@@ -10065,10 +10066,11 @@ public ShowHUD(taskid)
 	if (g_class[id] >= ZOMBIE) // zombies
 	{
 		if (g_class[id] == NEMESIS) {
-			if(g_has_class[id][CLASS_NEMESIS] != ZCLASS_NONE)
-				copy(class, charsmax(class), g_nemesis_classname[id])
-			else
+			if (g_has_class[id][CLASS_NEMESIS] != ZCLASS_NONE) {
+				copy(class, charsmax(class), g_nemesis_classname[id]);
+			} else {
 				formatex(class, charsmax(class), "Nemesis (Zombie)")
+			}
 		}
 		else if (g_class[id] == ALIEN)
 			formatex(class, charsmax(class), "Alien (Zombie)")
@@ -13759,7 +13761,7 @@ stock add_point(number)
 } 
 
 public getClass(classid) {
-	static i, class_name[32];
+	static i;
 	new class = ZCLASS_NONE;
 	for (i = 0; i < g_zclass_i; i++)
 	{
