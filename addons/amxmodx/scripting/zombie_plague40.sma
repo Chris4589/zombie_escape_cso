@@ -990,7 +990,7 @@ new g_currentweapon[33] // player's current weapon id
 new g_playername[33][32] // player's name
 new Float:g_zombie_spd[33], Float:g_human_spd[33] // zombie class speed
 new Float:g_zombie_knockback[33] // zombie class knockback
-new g_zombie_classname[33][32], g_human_classname[33][32] // zombie class name
+new g_zombie_classname[33][32], g_human_classname[33][32], g_nemesis_classname[33][32] // zombie class name
 #define is_user_valid_connected(%1) (1 <= %1 <= g_maxplayers && g_isconnected[%1])
 #define is_user_valid_alive(%1) (1 <= %1 <= g_maxplayers && g_isalive[%1])
 
@@ -7368,6 +7368,10 @@ zombieme(id, infector, nemesis, silentmode, rewards)
 	g_zombie_spd[id] = float(ClasesInfo[ClassesSpeed]);
 	g_zombie_knockback[id] = Float:ClasesInfo[ClassesKnockback];
 	copy(g_zombie_classname[id], charsmax(g_zombie_classname[]), ClasesInfo[ClassesName]);
+	if (g_has_class[id][CLASS_NEMESIS] != ZCLASS_NONE) {
+		ArrayGetArray(g_ArrayClass, g_has_class[id][CLASS_NEMESIS], ClasesInfo);
+		copy(g_nemesis_classname[id], charsmax(g_nemesis_classname[]), ClasesInfo[ClassName]);
+	}
 	
 	// Set zombie attributes based on the mode
 	static sound[64]
@@ -10062,7 +10066,7 @@ public ShowHUD(taskid)
 	{
 		if (g_class[id] == NEMESIS) {
 			if(g_has_class[id][CLASS_NEMESIS] != ZCLASS_NONE)
-				copy(class, charsmax(class), g_zombie_classname[id])
+				copy(class, charsmax(class), g_nemesis_classname[id])
 			else
 				formatex(class, charsmax(class), "Nemesis (Zombie)")
 		}
