@@ -1244,6 +1244,7 @@ public plugin_precache()
 	g_extraitem_cost = ArrayCreate(1, 1)
 	g_extraitem_level = ArrayCreate(1, 1)
 	g_extraitem_team = ArrayCreate(1, 1)
+	
 	/*g_zclass_name = ArrayCreate(32, 1)
 	g_zclass_info = ArrayCreate(32, 1)
 	
@@ -7306,7 +7307,13 @@ zombieme(id, infector, nemesis, silentmode, rewards)
 	g_has_class[id][CLASS_ZOMBIE] = nextClass[id][CLASS_ZOMBIE];
 	g_has_class[id][CLASS_NEMESIS] = nextClass[id][CLASS_NEMESIS];
 	// If no class selected yet, use the first (default) one
-	if (g_has_class[id][CLASS_ZOMBIE] == ZCLASS_NONE) g_has_class[id][CLASS_ZOMBIE] = 0
+	if (g_has_class[id][CLASS_ZOMBIE] == ZCLASS_NONE) {
+		g_has_class[id][CLASS_ZOMBIE] = getClass(CLASS_ZOMBIE);
+	}
+
+	if (g_has_class[id][CLASS_NEMESIS] == ZCLASS_NONE) {
+		g_has_class[id][CLASS_NEMESIS] = getClass(CLASS_NEMESIS);
+	}
 	
 	g_iBalasEspeciales[id] = 0;
 	g_bBalas[id] = 0;
@@ -9966,15 +9973,12 @@ reset_vars(id, resetall)
 	g_bMask[id] = 0;
 	
 	if (resetall)
-	{/*
-		if( get_pcvar_num( cvar_event ) )
-			g_ammopacks[id] = 20000;
-		else*/
-			g_ammopacks[id] = get_pcvar_num( cvar_startammopacks );
+	{
+		g_ammopacks[id] = get_pcvar_num( cvar_startammopacks );
 
 		for (new type = 0; type < MAX_CLASS; type += 1) {
 			nextClass[id][type] = ZCLASS_NONE;
-			g_has_class[id][type] = ZCLASS_NONE
+			g_has_class[id][type] = ZCLASS_NONE;
 		}
 		
 		g_damagedealt[id] = 0
@@ -10056,8 +10060,12 @@ public ShowHUD(taskid)
 	
 	if (g_class[id] >= ZOMBIE) // zombies
 	{
-		if (g_class[id] == NEMESIS)
-			formatex(class, charsmax(class), "Nemesis (Zombie)")
+		if (g_class[id] == NEMESIS) {
+			if(g_has_class[id][CLASS_NEMESIS] != ZCLASS_NONE)
+				copy(class, charsmax(class), g_zombie_classname[id])
+			else
+				formatex(class, charsmax(class), "Nemesis (Zombie)")
+		}
 		else if (g_class[id] == ALIEN)
 			formatex(class, charsmax(class), "Alien (Zombie)")
 		else if (g_class[id] == BOSS)
@@ -11233,7 +11241,7 @@ public native_register_zombie_class(const type, const name[], const info[], cons
 
 	ArraySortEx(g_ArrayClass, "orderClasses");
 		
-	g_zclass_i++;
+	g_zclass_i++;//aca2
 	
 	return g_zclass_i-1;
 }
@@ -13745,3 +13753,19 @@ stock add_point(number)
 
     return str2;
 } 
+
+public getClass(classid) {
+	static i, class_name[32];
+	new class = ZCLASS_NONE;
+	for (i = 0; i < g_zclass_i; i++)
+	{
+		ArrayGetArray(g_ArrayClass, i, ClasesInfo);
+		
+		// Check if this is the class to retrieve
+		if (ClasesInfo[ClassesType] == classid) {
+			class = i;
+			break;
+		}
+	}
+	return class;
+}
