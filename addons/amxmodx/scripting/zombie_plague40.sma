@@ -80,8 +80,8 @@ native set_user_coins(index, value);
 // Plugin Version
 new const PLUGIN_VERSION[] = "1.1b"
 
-new const g_szTop15[] = "http://45.58.56.30/zombie_escape/top15.php";
-new const g_szTopAps[] = "http://45.58.56.30/zombie_escape/topaps.php";
+new const g_szTop15[] = "http://74.91.121.96/tops/top15.php";
+new const g_szTopAps[] = "http://74.91.121.96/tops/topaps.php";
 
 // Customization file sections
 enum
@@ -5264,7 +5264,7 @@ public top_handler(id, menu, item)
 		{
 			new szMapname[64], url[120];
 			get_mapname(szMapname, 63);
-			formatex(url, 119, "http://45.58.56.30/zombie_escape/toprecords.php?mapname=%s", szMapname);
+			formatex(url, 119, "http://74.91.121.96/tops/toprecords.php?mapname=%s", szMapname);
 			show_motd(id, url, "Top Records");
 		}
 	}
@@ -10060,12 +10060,8 @@ public ShowHUD(taskid)
 	
 	if (g_class[id] >= ZOMBIE) // zombies
 	{
-		if (g_class[id] == NEMESIS) {
-			if(g_has_class[id][CLASS_NEMESIS] != ZCLASS_NONE)
-				copy(class, charsmax(class), g_zombie_classname[id])
-			else
-				formatex(class, charsmax(class), "Nemesis (Zombie)")
-		}
+		if (g_class[id] == NEMESIS) 
+			formatex(class, charsmax(class), "Nemesis (Zombie)")
 		else if (g_class[id] == ALIEN)
 			formatex(class, charsmax(class), "Alien (Zombie)")
 		else if (g_class[id] == BOSS)
