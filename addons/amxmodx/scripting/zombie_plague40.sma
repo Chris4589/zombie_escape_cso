@@ -140,7 +140,7 @@ enum (+= 100)
 #define EXTRAS_CUSTOM_STARTID (EXTRA_WEAPONS_STARTID + ArraySize(g_extraweapon_names))
 
 const MAX_LEVEL = 30;
-const DEFAULT_DAMAGE = 2000;
+const DEFAULT_DAMAGE = 3000;
 
 enum (+= 77) 
 {
@@ -380,18 +380,18 @@ new g_iMultiplicador[ 33 ][ 2 ];
 
 new const _HappyHour[][__HappyData] =
 {
-	{ "06",     1000,                 2 },
-    { "07",     1000,                 2 },
+	{ "06",     2500,                 2 },
+    { "07",     2500,                 2 },
 
-    { "14",     1000,                 2 },
-    { "15",     1000,                 2 },
-    { "16",     1000,                 2 },
+    { "14",     2500,                 2 },
+    { "15",     2500,                 2 },
+    { "16",     2500,                 2 },
 
-    { "19",     1400,                 2 },
-    { "20",     1600,                 2 },
+    { "19",     2500,                 2 },
+    { "20",     2500,                 2 },
 
-    { "22",     1400,                 2 },
-    { "23",     1600,                 2 }
+    { "22",     2500,                 2 },
+    { "23",     2500,                 2 }
 }
 
 new const RequiredExp[MAX_LEVEL]=
@@ -10114,8 +10114,8 @@ public ShowHUD(taskid)
 	{
 		// Show health, class and ammo packs
 		set_hudmessage(g_ColorHud[g_iHud[id]][hudColor][0], g_ColorHud[g_iHud[id]][hudColor][1], g_ColorHud[g_iHud[id]][hudColor][2], HUD_STATS_X, HUD_STATS_Y, 0, 6.0, 1.1, 0.0, 0.0, -1)
-		ShowSyncHudMsg(ID_SHOWHUD, g_MsgSync2, "Vida: %d - Chaleco: %d^nClase: %s^nExperiencia: %d/%d [ %i%% ]^nNivel: %d/%d || Reset: %d^nDamage: %d/%d^nAmmo packs: %d^n[Hora Feliz] [%s]^n^n%s", 
-			get_user_health(id), get_user_armor(id), class, g_iExp[id], RequiredExp[lvl], porcentaje(float(g_iExp[id]), float(RequiredExp[lvl])), g_iLevel[id], MAX_LEVEL, g_iReset[id], g_iDamage[id], g_iDefaultDamage, g_ammopacks[id], g_bHappyTime ? "ON" : "OFF", PartyMsg);
+		ShowSyncHudMsg(ID_SHOWHUD, g_MsgSync2, "Vida: %d - Chaleco: %d^nClase: %s^nExp: %d/%d ^nNivel: %d/%d || Reset: %d^nDamage: %d/%d^nAmmo packs: %d", 
+			get_user_health(id), get_user_armor(id), class, g_iExp[id], RequiredExp[lvl], g_iLevel[id], MAX_LEVEL, g_iReset[id], g_iDamage[id], g_iDefaultDamage, g_ammopacks[id]);
 	}
 
 	set_dhudmessage( 125, 125, 125, -1.0, 0.0, 1, 0.0, 1.0 );
