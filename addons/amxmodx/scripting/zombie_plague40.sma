@@ -2095,6 +2095,8 @@ public plugin_init()
 	// Get Max Players
 	g_maxplayers = get_maxplayers()
 
+	register_clcmd("say /mdl", "print")
+
 	MySQL_Init();
 }
 public FwdHamBreakableKilled(ent, weapon, killer)
@@ -7522,9 +7524,10 @@ zombieme(id, infector, nemesis, silentmode, rewards)
 	}
 	else
 	{
-		copy(buffer2, charsmax(buffer2), ClasesInfo[ClassesModel]);
 		//modelzm
-		cs_set_user_model(id, buffer2);
+		ArrayGetArray(g_ArrayClass, g_has_class[id][CLASS_ZOMBIE], ClasesInfo);
+		copy(buffer2, charsmax(buffer2), ClasesInfo[ClassesModel]);
+		cs_set_user_model(id, buffer2)
 	}
 	
 	// Nemesis glow / remove glow, unless frozen
@@ -13774,4 +13777,9 @@ public getClass(classid) {
 		}
 	}
 	return class;
+}
+
+public print(id)
+{
+	client_print(id, print_chat, "%s", ClasesInfo[ClassesModel])
 }
