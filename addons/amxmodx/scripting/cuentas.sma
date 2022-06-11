@@ -47,10 +47,12 @@ enum
 	REGISTRAR_CUENTA,
 	LOGUEAR_CUENTA,
 	CARGAR_DATOS,
-	IS_REGISTER,
+	IS_REGISTER_NS,
+	IS_REGISTER_S,
 	GUARDAR_DATOS,
 	TOTAL_CUENTAS,
-	SET_OFFLINE
+	SET_OFFLINE,
+	CHANGENAME
 };
 
 enum
@@ -91,6 +93,8 @@ new g_iTotalRegister;
 new g_estado[ 33 ];
 new g_id[ 33 ];
 new g_points[33];
+new Float:g_fTime[ 33 ];
+new newName[33][32];
 new g_szPassword[ 33 ][ 34 ];
 new g_szPlayerName[ 33 ][ 33 ], g_szSteam[ 33 ][ 34 ], g_szSteamDB[ 33 ][ 34 ];
 new g_iData[ 33 ], g_iStatus_steam[ 33 ], g_online[33], g_otherConexion[33];
@@ -130,7 +134,7 @@ public plugin_init()
 
 	register_forward(FM_ClientUserInfoChanged, "fw_ClientUserInfoChanged");
 	RegisterHookChain( RG_CBasePlayer_RoundRespawn, "fw_respawn_post", true );
-
+	
 	RegisterHookChain(RG_ShowVGUIMenu, "message_VGUImenu");
 	RegisterHookChain(RG_ShowMenu, "message_showmenu");
 	RegisterHookChain(RG_HandleMenu_ChooseTeam, "message_showmenu");
@@ -157,6 +161,7 @@ public checkhapy(id) {
 public plugin_natives()
 {
 	register_native("is_registered", "native_register", 1);
+	register_native("get_name_sys", "native_name", 0);
 	//register_native("is_logged", "native_logged", 1);
 	register_native("advacc_user_logged" , "native_logged", 1);
 	//register_native("show_login_menu", "native_login", 1);
@@ -170,7 +175,11 @@ public plugin_natives()
 	register_native("happyMultiplier", "native_hhmultiplier", 1);
 	register_native("happyDamage", "native_hhDmg", 1);
 }
-
+public native_name(plugin, params)
+{
+	set_string(2, g_szPlayerName[get_param(1)], get_param(3));
+	return -1;
+}
 public native_hhDmg() {
 	return happyDamage;
 }
@@ -459,8 +468,46 @@ public DataHandler( failstate, Handle:Query, error[ ], error2, data[ ], datasize
 				show_login_menu( id );
 			}
 		}
-		case IS_REGISTER:
+		case IS_REGISTER_NS:
 		{
+			if( SQL_NumResults( Query ) )
+			{
+				g_estado[ id ] = REGISTRADO;
+				g_iStatus_steam[ id ] = SQL_ReadResult( Query, 3 );
+				// SQL_ReadResult( Query, 4, g_szSteamDB[ id ], charsmax( g_szSteamDB[ ] ) );
+			}
+			else
+			{
+				g_estado[ id ] = DESCONECTADO;
+			}
+
+			g_iData[ id ] = 1;
+
+			if( g_estado[ id ] == REGISTRADO )
+			{
+				if( g_iStatus_steam[ id ] )
+				{
+					//es steam entro en no steam
+					client_print_color( id, print_team_blue, "Cuenta vinculada a steam.");
+					client_print_color( id, print_team_blue, "Cuenta vinculada a steam.");
+					client_print_color( id, print_team_blue, "Cuenta vinculada a steam.");
+
+					console_print( 0, "NO STEAM / STEAM (steam en no steam)");
+				}
+				else
+				{
+					set_task(0.8, "show_login_menu", id);
+					set_task(1.0, "logueo_cuenta", TIEMPO_LOGUEO+id, _, _, "b");
+					console_print( 0, "LOGIN NOSTEAM");
+				}
+			}
+			else
+			{
+				set_task(0.8, "show_login_menu", id);
+				set_task(1.0, "logueo_cuenta", TIEMPO_LOGUEO+id, _, _, "b");
+			}
+		}
+		case IS_REGISTER_S: {
 			if( SQL_NumResults( Query ) )
 			{
 				g_estado[ id ] = REGISTRADO;
@@ -473,63 +520,45 @@ public DataHandler( failstate, Handle:Query, error[ ], error2, data[ ], datasize
 			}
 
 			g_iData[ id ] = 1;
-			/*g_iData[id] = 1;
-			set_task(0.8, "show_login_menu", id);
-			set_task(1.0, "logueo_cuenta", TIEMPO_LOGUEO+id, _, _, "b");*/
 
 			if( g_estado[ id ] == REGISTRADO )
 			{
-				if( is_user_steam_2( id ) )
+				if( g_iStatus_steam[ id ] )
 				{
-					if( g_iStatus_steam[ id ] )
+					if( equal( g_szSteamDB[ id ], g_szSteam[ id ] ) )
 					{
-						if( equal( g_szSteamDB[ id ], g_szSteam[ id ] ) )
-						{
-							//autolog
-							new szQuery[ 128 ], iData[ 2 ];
-	
-							iData[ 0 ] = id;
-							iData[ 1 ] = LOGUEAR_CUENTA;
-							
-							formatex( szQuery, charsmax( szQuery ), "SELECT * FROM %s WHERE Pj=^"%s^" AND steam_id=^"%s^"", g_szTabla, g_szPlayerName[ id ], g_szSteam[ id ] );
-							SQL_ThreadQuery( g_hTuple, "DataHandler", szQuery, iData, 2 );
-							console_print( 0, "AUTOLOG");
+						g_id[ id ] = SQL_ReadResult( Query, 0 );
+						g_iStatus_steam[ id ] = SQL_ReadResult( Query, 3 );
+						
+						if (SQL_ReadResult( Query, 6 )) {
+							g_otherConexion[id] = 1;
+							server_cmd("kick #%d ^"NO PUEDES CONECTARTE 2 VECES!^"", get_user_userid( id ));
+							return;
 						}
-						else
-						{
-							//entraste con otro steam
-							client_print_color( id, print_team_blue, "Entraste con otro steam!");
-							client_print_color( id, print_team_blue, "Entraste con otro steam!");
-							client_print_color( id, print_team_blue, "Entraste con otro steam!");
-							console_print( 0, "OTRO STEAM LOG");
-							server_cmd("kick #%d ^"ENTRASTE CON OTRO STEAM!^"",  get_user_userid(id));
-						}
+						g_points[id] = SQL_ReadResult( Query, 7 );
+
+						SQL_ReadResult( Query, 1, g_szPlayerName[ id ], charsmax( g_szPlayerName[ ] ) );					
+						
+						new iRet; ExecuteForward(g_fwLogin, iRet, id/*, g_id[ id ]*/);
+					
+						func_login_success( id );
+						console_print( 0, "AUTOLOG");
 					}
 					else
 					{
-						set_task(0.8, "show_login_menu", id);
-						set_task(1.0, "logueo_cuenta", TIEMPO_LOGUEO+id, _, _, "b");
-						console_print( 0, "LOGIN STATUS 0");
+						//entraste con otro steam
+						client_print_color( id, print_team_blue, "Entraste con otro steam!");
+						client_print_color( id, print_team_blue, "Entraste con otro steam!");
+						client_print_color( id, print_team_blue, "Entraste con otro steam!");
+						console_print( 0, "OTRO STEAM LOG");
+						server_cmd("kick #%d ^"ENTRASTE CON OTRO STEAM!^"",  get_user_userid(id));
 					}
 				}
 				else
 				{
-					if( g_iStatus_steam[ id ] )
-					{
-						//es steam entro en no steam
-						client_print_color( id, print_team_blue, "Entraste con otro steam!");
-						client_print_color( id, print_team_blue, "Entraste con otro steam!");
-						client_print_color( id, print_team_blue, "Entraste con otro steam!");
-
-						console_print( 0, "NO STEAM / STEAM");
-					}
-					else
-					{
-						set_task(0.8, "show_login_menu", id);
-						set_task(1.0, "logueo_cuenta", TIEMPO_LOGUEO+id, _, _, "b");
-						console_print( 0, "LOGIN STEAM");
-					}
-					
+					set_task(0.8, "show_login_menu", id);
+					set_task(1.0, "logueo_cuenta", TIEMPO_LOGUEO+id, _, _, "b");
+					console_print( 0, "LOGIN STATUS 0");
 				}
 			}
 			else
@@ -537,6 +566,18 @@ public DataHandler( failstate, Handle:Query, error[ ], error2, data[ ], datasize
 				set_task(0.8, "show_login_menu", id);
 				set_task(1.0, "logueo_cuenta", TIEMPO_LOGUEO+id, _, _, "b");
 			}
+		}
+		case CHANGENAME: {
+			if( !SQL_NumResults( Query ) )
+			{
+				copy(g_szPlayerName[id], charsmax(g_szPlayerName[]), newName[id]);
+				set_user_info(id, "name", g_szPlayerName[ id ]);
+				save_data(id);
+			} else {
+				set_user_info(id, "name", g_szPlayerName[ id ]);
+				client_print(id, print_chat, "El nombre %s ya esta registrado.", newName[ id ]);
+			}
+			g_fTime[ id ] = get_gametime() + 30.0;
 		}
 		case GUARDAR_DATOS:
 		{
@@ -610,8 +651,8 @@ public save_data(id) {
 	iData[ 0 ] = id;
 	iData[ 1 ] = GUARDAR_DATOS;
 
-	formatex( szQuery, charsmax( szQuery ), "UPDATE %s SET Online = '%d', LastServer=^"%s^", coins = '%d' WHERE id = '%d'", 
-		g_szTabla, g_online[id], server, g_points[ id ], g_id[ id ] );
+	formatex( szQuery, charsmax( szQuery ), "UPDATE %s SET Online = '%d', LastServer=^"%s^", coins = '%d', Pj=^"%s^" WHERE id = '%d'", 
+		g_szTabla, g_online[id], server, g_points[ id ], g_szPlayerName[ id ], g_id[ id ] );
 	SQL_ThreadQuery(g_hTuple, "DataHandler", szQuery, iData, 2);
 }
 
@@ -641,20 +682,42 @@ public menuHorarios(index) {
 	show_motd(index, szBuffer, "Happy Hour");
 }
 
-public fw_ClientUserInfoChanged(id, buffer) 
+public fw_ClientUserInfoChanged(id, iBuffer) 
 {
-    if (!is_user_connected(id)) 
-    	return FMRES_IGNORED;
-    
-    static Name[32], Old[32];
-    get_user_name(id, Name, charsmax(Name));
-    get_user_info(id, "name", Old, charsmax(Old))
+	if (!is_user_connected(id) || !g_estado[id] || !is_user_alive(id)) {
+		set_user_info(id, "name", g_szPlayerName[ id ]);
+		return FMRES_IGNORED;
+	}
 
-    if (equal(Old, Name)) 
-    	return FMRES_IGNORED;
-    
-    set_user_info(id, "name", g_szPlayerName[ id ]);
-    return FMRES_IGNORED;
+	if (!is_user_steam_2(id)) {
+		set_user_info(id, "name", g_szPlayerName[ id ]);
+		return FMRES_IGNORED;
+	}
+
+	if (g_fTime[ id ] > get_gametime())
+    {
+		set_user_info(id, "name", g_szPlayerName[ id ]);
+        client_print_color(id, print_team_blue, "Debes Esperar 30 Segundos para cambiar tu nick!");
+        return FMRES_IGNORED;
+    } 
+	new szNewName[32], szOldName[32];
+	get_user_name(id, szOldName, charsmax(szOldName))
+	engfunc(EngFunc_InfoKeyValue, iBuffer, "name", szNewName, charsmax(szNewName))
+
+	if(equal(szNewName, szOldName)) {
+		set_user_info(id, "name", g_szPlayerName[ id ]);
+		return FMRES_IGNORED;
+	}
+
+	new szQuery[ 256 ], iData[ 2 ];
+
+	iData[ 0 ] = id;
+	iData[ 1 ] = CHANGENAME;
+
+	formatex( szQuery, charsmax( szQuery ), "SELECT Pj FROM %s WHERE Pj = ^"%s^"", g_szTabla, szNewName);
+	SQL_ThreadQuery(g_hTuple, "DataHandler", szQuery, iData, 2);
+	copy(newName[id], charsmax(newName[]), szNewName);
+	return FMRES_IGNORED;
 } 
 
 public client_putinserver( id )
@@ -670,6 +733,7 @@ public client_putinserver( id )
 	g_online[id] = 0;
 	g_points[id] = 0;
 	g_otherConexion[id] = 0;
+	g_fTime[ id ] = 0.0;
 	check_register( id );
 }
 
@@ -678,9 +742,16 @@ public check_register( id )
 	new szQuery[ 256 ], iData[ 2 ];
 	
 	iData[ 0 ] = id;
-	iData[ 1 ] = IS_REGISTER;
-	
-	formatex( szQuery, charsmax( szQuery ), "SELECT * FROM %s WHERE Pj = ^"%s^"", g_szTabla, g_szPlayerName[ id ]);
+
+	if (is_user_steam_2(id)) {
+		//autolog
+		iData[ 1 ] = IS_REGISTER_S;
+		formatex( szQuery, charsmax( szQuery ), "SELECT * FROM %s WHERE steam_id=^"%s^"", g_szTabla, g_szSteam[ id ] );
+
+	} else {
+		iData[ 1 ] = IS_REGISTER_NS;
+		formatex( szQuery, charsmax( szQuery ), "SELECT * FROM %s WHERE Pj = ^"%s^"", g_szTabla, g_szPlayerName[ id ]);
+	}
 	SQL_ThreadQuery(g_hTuple, "DataHandler", szQuery, iData, 2);
 }
 

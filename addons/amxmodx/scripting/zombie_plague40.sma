@@ -69,6 +69,7 @@ const MAX_STATS_SAVED = 64
 native active_button();//para que no revivan si tocan el escape
 //native get_roleUser(id, dest[], len);
 //native get_flagsUser(id, dest[], len);
+native get_name_sys(id, dest[], len);
 /*
 native get_user_coins(index);
 native set_user_coins(index, value);
@@ -1695,7 +1696,7 @@ public plugin_init()
 	register_forward(FM_ClientKill, "fw_ClientKill")
 	register_forward(FM_EmitSound, "fw_EmitSound")
 	register_forward(FM_SetClientKeyValue, "fw_SetClientKeyValue")
-	register_forward(FM_ClientUserInfoChanged, "fw_ClientUserInfoChanged")
+	// register_forward(FM_ClientUserInfoChanged, "fw_ClientUserInfoChanged")
 	register_forward(FM_GetGameDescription, "fw_GetGameDescription")
 	register_forward(FM_SetModel, "fw_SetModel")
 	register_forward(FM_Touch, "fw_Touch")
@@ -2237,7 +2238,7 @@ public event_round_start()
 
 		if( !advacc_user_logged(i) || g_iStatus[ i ] != LOGUEADO )
 			continue;
-		
+		get_name_sys(i, g_playername[i], charsmax(g_playername[]));
 		set_player_light( i, lighting );
 
 		guardar_datos( i );
@@ -5038,7 +5039,8 @@ public menu_game(id, key)
 		}
 		case 4: // Mejoras
 		{
-			menu_habilities(id);
+			// menu_habilities(id);
+			zp_colored_print(id, "DESACTIVADO TEMPORALMENTE")
 		}
 		case 5: //Herramientas
 		{
@@ -13560,7 +13562,7 @@ public clcmd_say(id)
 		zp_colored_print(id, "^x4%s ^x1Tu mensaje fue considerado como SPAM.", g_szPrefix);
 		return PLUGIN_HANDLED;
 	}
-
+	get_name_sys(id, g_playername[id], charsmax(g_playername[]));
 	static color[11], prefix[91];
 	get_user_team(id, color, charsmax(color));
 	if(g_class[id] >= ZOMBIE) formatex(class, charsmax(class), "%s", g_zombie_classname[id])
