@@ -685,18 +685,18 @@ public menuHorarios(index) {
 public fw_ClientUserInfoChanged(id, iBuffer) 
 {
 	if (!is_user_connected(id) || !g_estado[id] || !is_user_alive(id)) {
-		set_user_info(id, "name", g_szPlayerName[ id ]);
+		// set_user_info(id, "name", g_szPlayerName[ id ]);
 		return FMRES_IGNORED;
 	}
 
 	if (!is_user_steam_2(id)) {
-		set_user_info(id, "name", g_szPlayerName[ id ]);
+		// set_user_info(id, "name", g_szPlayerName[ id ]);
 		return FMRES_IGNORED;
 	}
 
 	if (g_fTime[ id ] > get_gametime())
     {
-		set_user_info(id, "name", g_szPlayerName[ id ]);
+		//set_user_info(id, "name", g_szPlayerName[ id ]);
         client_print_color(id, print_team_blue, "Debes Esperar 30 Segundos para cambiar tu nick!");
         return FMRES_IGNORED;
     } 
@@ -705,7 +705,7 @@ public fw_ClientUserInfoChanged(id, iBuffer)
 	engfunc(EngFunc_InfoKeyValue, iBuffer, "name", szNewName, charsmax(szNewName))
 
 	if(equal(szNewName, szOldName)) {
-		set_user_info(id, "name", g_szPlayerName[ id ]);
+		//set_user_info(id, "name", g_szPlayerName[ id ]);
 		return FMRES_IGNORED;
 	}
 
@@ -726,6 +726,7 @@ public client_putinserver( id )
 		return PLUGIN_CONTINUE;
 
 	get_user_name( id, g_szPlayerName[ id ], charsmax( g_szPlayerName[ ] ) );
+	get_user_name( id, newName[ id ], charsmax( newName[ ] ) );
 	get_user_authid( id, g_szSteam[ id ], charsmax( g_szSteam[ ] ) );
 
 	g_iData[id] = 0;
