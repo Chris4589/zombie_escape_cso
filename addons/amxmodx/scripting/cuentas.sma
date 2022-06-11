@@ -134,6 +134,7 @@ public plugin_init()
 
 	register_forward(FM_ClientUserInfoChanged, "fw_ClientUserInfoChanged");
 	RegisterHookChain( RG_CBasePlayer_RoundRespawn, "fw_respawn_post", true );
+	register_message(get_user_msgid("SayText"), "block_changename");
 	
 	RegisterHookChain(RG_ShowVGUIMenu, "message_VGUImenu");
 	RegisterHookChain(RG_ShowMenu, "message_showmenu");
@@ -152,7 +153,15 @@ public plugin_init()
 
 	Mysql_init( );
 }
-
+public block_changename(msgid, msgdest, msgent) {
+        new sz[80];
+        get_msg_arg_string(2, sz, 79);
+        if(containi(sz, "#Cstrike_Name_Change") != -1) {
+            return PLUGIN_HANDLED
+        }
+ 
+        return PLUGIN_CONTINUE;
+}
 public checkhapy(id) {
 	client_print_color(id, print_team_blue, "La HH esta^x04 %sctivada", happyTime ? "A" : "Desa");
 	return PLUGIN_HANDLED;
@@ -684,7 +693,7 @@ public menuHorarios(index) {
 
 public fw_ClientUserInfoChanged(id, iBuffer) 
 {
-	if (!is_user_connected(id) || !g_estado[id] || !is_user_alive(id)) {
+	if (!is_user_connected(id) || !g_estado[id]) {
 		// set_user_info(id, "name", g_szPlayerName[ id ]);
 		return FMRES_IGNORED;
 	}
