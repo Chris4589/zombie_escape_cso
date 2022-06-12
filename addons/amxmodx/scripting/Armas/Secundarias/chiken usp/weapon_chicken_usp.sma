@@ -26,7 +26,7 @@ public plugin_init()
 {
 	register_plugin("USP Chiquen", "0.1", "Randro")
 	// Add your own code here
-	g_item = zp_arma(NOMBRE, 0, 0, CATEGORIA, ADMIN_ALL, "");
+	g_item = zp_arma(NOMBRE, 15, 0, CATEGORIA, ADMIN_ALL, "");
 
 	RegisterHookChain( RG_CBasePlayerWeapon_DefaultDeploy,  "@fw_Deploy_Pre",  .post = false );
 	RegisterHam(Ham_Spawn, "player", "fw_playerspawn_post", 1) 

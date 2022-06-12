@@ -96,7 +96,7 @@ public plugin_init()
 	cvar_spd_m95 = register_cvar("zp_m95_spd", "1.3")
 	cvar_m95_ammo = register_cvar("zp_m95_ammo", "100")
 	
-	g_itemid_m95 = zp_arma("Barret M95", 15, 0, PRIMARIA, ADMIN_ALL, "");
+	g_itemid_m95 = zp_arma("Barret M95", 0, 3, PRIMARIA, ADMIN_ALL, "");
 	g_MaxPlayers = get_maxplayers()
 	gmsgWeaponList = get_user_msgid("WeaponList")
 }

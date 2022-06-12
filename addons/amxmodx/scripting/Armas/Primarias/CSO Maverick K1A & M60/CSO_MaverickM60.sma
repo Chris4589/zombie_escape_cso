@@ -75,7 +75,7 @@ public plugin_init()
 
 	register_event("HLTV", "Event_NewRound", "a", "1=0", "2=0")
 
-	g_Weapon = zp_arma("Maverick M60", 18, 2, PRIMARIA, ADMIN_ALL, "");		
+	g_Weapon = zp_arma("Maverick M60", 0, 4, PRIMARIA, ADMIN_ALL, "");		
 	
 	g_Msg_CurWeapon = get_user_msgid("CurWeapon")
 }

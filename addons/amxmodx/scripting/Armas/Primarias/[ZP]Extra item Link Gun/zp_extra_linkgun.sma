@@ -180,7 +180,7 @@ public plugin_init()
 	fm_ham_hook(false);
 	
 	//g_iItemID = zp_register_extra_item("LINK GUN", 0, ZP_TEAM_HUMAN)
-	g_iItemID = zp_arma(WEAPON_ITEM_NAME, 0, 1, PRIMARIA, ADMIN_ALL, "[SILVER]" );
+	g_iItemID = zp_arma(WEAPON_ITEM_NAME, 0, 2, PRIMARIA, ADMIN_ALL, "[SILVER]" );
 }
 
 public plugin_precache()

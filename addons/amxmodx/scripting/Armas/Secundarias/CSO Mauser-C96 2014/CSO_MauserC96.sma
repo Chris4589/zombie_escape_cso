@@ -80,7 +80,7 @@ public plugin_init()
 	g_maxplayers = get_maxplayers()
 	
 	//register_clcmd("say /get", "get_weapon", ADMIN_KICK)
-	g_item = zp_arma("Mauser", 5, 0, SECUNDARIA, ADMIN_ALL, "");
+	g_item = zp_arma("Mauser", 10, 0, SECUNDARIA, ADMIN_ALL, "");
 	
 }
 

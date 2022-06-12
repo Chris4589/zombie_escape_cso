@@ -86,7 +86,7 @@ public plugin_init()
 	
 	register_clcmd("weapon_m3", "hook_weapon")
 	
-	g_item = zp_arma( "Gatling", 28, 3, PRIMARIA, ADMIN_BAN, "[SILVER]" );
+	g_item = zp_arma( "Gatling", 15, 4, PRIMARIA, ADMIN_BAN, "[SILVER]" );
 	//register_clcmd("admin_get_gatling", "get_gatling", ADMIN_BAN)
 }
 

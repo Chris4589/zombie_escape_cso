@@ -117,7 +117,7 @@ public plugin_init()
 
 	/* Item register */
 	//g_balrog = zp_register_extra_item(ITEM_NAME, ITEM_COST, ZP_TEAM_HUMAN);
-	g_balrog = zp_arma(ITEM_NAME, 0, 1, PRIMARIA, ADMIN_ALL, "[SILVER]" );
+	g_balrog = zp_arma(ITEM_NAME, 20, 2, PRIMARIA, ADMIN_ALL, "[SILVER]" );
 	/* Events */
 	register_event("HLTV", "event_round_start", "a", "1=0", "2=0");
 
