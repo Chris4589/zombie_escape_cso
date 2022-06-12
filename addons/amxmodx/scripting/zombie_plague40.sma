@@ -7446,6 +7446,7 @@ zombieme(id, infector, nemesis, silentmode, rewards)
 			g_class[id] = FIRST_ZOMBIE;
 			
 			// Set health and gravity, unless frozen
+			ArrayGetArray(g_ArrayClass, g_has_class[id][CLASS_ZOMBIE], ClasesInfo);
 			set_user_health(id, floatround(float(ClasesInfo[ClassesHP]) * get_pcvar_float(cvar_zombiefirsthp)) + ammount_zhealth(g_habilidad[id][CLASS_ZOMBIE][1]))
 			if (!g_frozen[id]) set_pev(id, pev_gravity, Float:ClasesInfo[ClassesGrav] - ammount_zgravity(g_habilidad[id][CLASS_ZOMBIE][3]))
 			else g_frozen_gravity[id] = Float:ClasesInfo[ClassesGrav] - ammount_zgravity(g_habilidad[id][CLASS_ZOMBIE][3])
@@ -7461,6 +7462,7 @@ zombieme(id, infector, nemesis, silentmode, rewards)
 			// Infected by someone
 			
 			// Set health and gravity, unless frozen
+			ArrayGetArray(g_ArrayClass, g_has_class[id][CLASS_ZOMBIE], ClasesInfo);
 			set_user_health(id, ClasesInfo[ClassesHP] + ammount_zhealth(g_habilidad[id][CLASS_ZOMBIE][1]))
 			if (!g_frozen[id]) set_pev(id, pev_gravity, Float:ClasesInfo[ClassesGrav]- ammount_zgravity(g_habilidad[id][CLASS_ZOMBIE][3]))
 			else g_frozen_gravity[id] = Float:ClasesInfo[ClassesGrav] - ammount_zgravity(g_habilidad[id][CLASS_ZOMBIE][3])
@@ -7485,6 +7487,7 @@ zombieme(id, infector, nemesis, silentmode, rewards)
 		// Silent mode, no HUD messages, no infection sounds
 		
 		// Set health and gravity, unless frozen
+		ArrayGetArray(g_ArrayClass, g_has_class[id][CLASS_ZOMBIE], ClasesInfo);
 		set_user_health(id, ClasesInfo[ClassesHP] + ammount_zhealth(g_habilidad[id][CLASS_ZOMBIE][1]))
 		if (!g_frozen[id]) set_pev(id, pev_gravity, Float:ClasesInfo[ClassesGrav]- ammount_zgravity(g_habilidad[id][CLASS_ZOMBIE][3]))
 		else g_frozen_gravity[id] = Float:ClasesInfo[ClassesGrav] - ammount_zgravity(g_habilidad[id][CLASS_ZOMBIE][3])
@@ -7642,6 +7645,9 @@ humanme(id, survivor, silentmode)
 	g_has_class[id][CLASS_HUMAN] = nextClass[id][CLASS_HUMAN];
 	// If no class selected yet, use the first (default) one
 	//if (g_humanclass[id] == ZCLASS_NONE) g_humanclass[id] = 0
+	if (g_has_class[id][CLASS_HUMAN] == ZCLASS_NONE) {
+		g_has_class[id][CLASS_HUMAN] = getClass(CLASS_HUMAN);
+	}
 
 	// Remove previous tasks
 	g_has_speed_boost[id] = false
