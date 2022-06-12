@@ -7397,7 +7397,7 @@ zombieme(id, infector, nemesis, silentmode, rewards)
 				else g_frozen_gravity[id] = get_pcvar_float(cvar_nemgravity)
 			} else {
 				ArrayGetArray(g_ArrayClass, g_has_class[id][CLASS_NEMESIS], ClasesInfo);
-				set_user_health(id, ClasesInfo[ClassesHP]);
+				set_user_health(id, ClasesInfo[ClassesHP] * fnGetAlive());
 
 				// Set gravity, unless frozen
 				if (!g_frozen[id]) set_pev(id, pev_gravity, Float:ClasesInfo[ClassesGrav])
