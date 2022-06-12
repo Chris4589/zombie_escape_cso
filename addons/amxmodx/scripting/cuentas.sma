@@ -113,9 +113,15 @@ enum _:__HappyData { happy_hour[3], happy_damage, happy_multiplier };
 
 new const _HappyHour[][__HappyData] =
 {
-	{ "20", 400, 2 },
-	{ "22", 400, 3 },
-	{ "23", 400, 1 }
+	{ "06", 2500, 2 },
+	{ "07", 2500, 3 },
+	{ "14", 2500, 2 },
+	{ "15", 2500, 3 },
+	{ "16", 2500, 2 },
+	{ "19", 2500, 3 },
+	{ "20", 2500, 2 },
+	{ "22", 2500, 3 },
+	{ "23", 2500, 1 }
 };
 
 public plugin_init()  
@@ -162,9 +168,54 @@ public block_changename(msgid, msgdest, msgent) {
  
         return PLUGIN_CONTINUE;
 }
-public checkhapy(id) {
-	client_print_color(id, print_team_blue, "La HH esta^x04 %sctivada", happyTime ? "A" : "Desa");
-	return PLUGIN_HANDLED;
+public checkhapy(id)
+{
+        new hours_hh, mins_hh, secs_hh, hora[6], hour[3], mins[3], secs[3];
+        get_time("%H %M %S", hora, 10);
+        parse(hora, hour, 2, mins, 2, secs, 2);
+
+        
+        new happyhour;
+        for(new i=0; i < sizeof _HappyHour; i++)
+        {
+
+            if(equal(_HappyHour[i][happy_hour], "00"))
+                happyhour = 24;
+            else
+                happyhour = str_to_num(_HappyHour[i][happy_hour]);
+            if(str_to_num(hour) < happyhour)
+            {
+                hours_hh = (happyhour - str_to_num(hour));
+                if(str_to_num(mins) < 60)
+					mins_hh = (60-str_to_num(mins));
+
+		if(str_to_num(secs) < 60)
+		{
+			secs_hh = (60-str_to_num(secs));
+		}
+											        
+		break;
+            }
+        }
+	new szDay[5]
+	get_time( "%a", szDay, 4 );
+	if(equal( szDay, "Sun" ))
+	{
+		happyMultiplier = 2;
+		client_print_color(0, print_team_blue, "HORA FELIZ TODO EL DIA^x04!^x01 Multiplicador: ^x04%d!", happyMultiplier);
+	}
+	else
+	{	
+		static i;
+		if(happyTime)
+		{
+			client_print_color(id, print_team_default, "^3HORA FELIZ ^4activada ^3Ganas x%d ^4Exp",_HappyHour[i][happy_multiplier])
+		}
+		else
+		{
+			client_print_color(id, print_team_default, "^4Faltan:^3 %d hora%s, %d minuto%s %d Segundos ^4para la Hora Feliz",hours_hh-1, ((hours_hh-1) != 1 ? "s":""), mins_hh, mins_hh != 1 ? "s":"", secs_hh );
+		}
+	}
 }
 
 public plugin_natives()

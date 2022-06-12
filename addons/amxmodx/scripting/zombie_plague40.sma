@@ -362,18 +362,17 @@ new const rango[][range] =
 	{ "The Global Elite", 0, "https://i.ibb.co/WVqzsg7/18.png" }
 }
 new g_iRango[33];
-/*
+
 enum _:__TagData { SZTAG[32] , SZFLAG[22], mult_exp, multi_aps };
 new const __Tags[][__TagData] =
 {
-	{ "[ OWNER ]" , "abcdefghijklmnopqrstu", 2, 4 },
-    { "[ STAFF ]" , "abcdefijnopqrstu", 2, 4 },
-    { "[ MODERADOR ]" , "acdefijnopqrstu", 2, 4 },
-    { "[ GOLD ]" , "acdefijpqrstu", 2, 3 },
-	{ "[ SILVER ]" , "cdefijnqrstu", 2, 2 },
-	{ "[ BRONZE ]" , "cefijmqrstu", 2, 2 },
-	{ "[VIP]",          "mnopr",                   2, 2}
-}*/
+	{ "[OWNER]" , "abcdefghijklmnopqrstu",      2, 2 },
+    { "[OWNER]" , "acdefujo",                   2, 2 },
+    { "[STAFF]" , "acdefujn",                   2, 2 },
+	{ "[MODERADOR]" , "cdefujm",                2, 2 },
+	{ "[GOLD]" , "cdefuj",                      2, 2 },
+	{ "[VIP+]",          "mnop",                2, 2 }
+}
 
 new g_szTag[ 33 ][ 32 ];
 // new g_szFlags[ 33 ][ 32 ];
