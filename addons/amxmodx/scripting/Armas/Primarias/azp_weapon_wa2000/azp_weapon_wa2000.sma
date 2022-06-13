@@ -89,13 +89,13 @@ public plugin_init()
 	RegisterHam(Ham_TraceAttack, "func_plat", "fw_TraceAttack", 1)
 	RegisterHam(Ham_TraceAttack, "func_rotating", "fw_TraceAttack", 1)
 	register_logevent("event_round_start", 2, "1=Round_Start")
-	cvar_dmg_wa2000 = register_cvar("zp_wa2000_dmg", "2.7")
+	cvar_dmg_wa2000 = register_cvar("zp_wa2000_dmg", "3.0")
 	cvar_recoil_wa2000 = register_cvar("zp_wa2000_recoil", "0.625")
 	cvar_clip_wa2000 = register_cvar("zp_wa2000_clip", "8")
 	cvar_spd_wa2000 = register_cvar("zp_wa2000_spd", "1.67")
 	cvar_wa2000_ammo = register_cvar("zp_wa2000_ammo", "180")
 	
-	g_itemid_wa2000 = zp_arma("Walther WA2000", 15, 1, PRIMARIA, ADMIN_ALL, "");
+	g_itemid_wa2000 = zp_arma("Walther WA2000", 16, 1, PRIMARIA, ADMIN_ALL, "");
 	g_MaxPlayers = get_maxplayers()
 	gmsgWeaponList = get_user_msgid("WeaponList")
 }

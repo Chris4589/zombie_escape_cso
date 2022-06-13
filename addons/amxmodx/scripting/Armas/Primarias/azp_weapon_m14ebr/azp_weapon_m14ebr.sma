@@ -94,7 +94,7 @@ public plugin_init()
 	cvar_spd_m14ebr = register_cvar("zp_m14ebr_spd", "1.03")
 	cvar_m14ebr_ammo = register_cvar("zp_m14ebr_ammo", "180")
 	
-	g_itemid_m14ebr = zp_arma("M14 EBR", 5, 0, PRIMARIA, ADMIN_ALL, "");
+	g_itemid_m14ebr = zp_arma("M14 EBR", 11, 0, PRIMARIA, ADMIN_ALL, "");
 	
 	g_MaxPlayers = get_maxplayers()
 	gmsgWeaponList = get_user_msgid("WeaponList")

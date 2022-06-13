@@ -58,7 +58,7 @@ public plugin_init()
     //register_clcmd("buyammo2", "clcmd_buyammo")
     g_itemDmg =  zp_register_extra_item("M32", 500, 0 ,ZP_TEAM_HUMAN)
     g_buff =  zp_register_extra_item("M32 BUFF", 600, 0 ,ZP_TEAM_HUMAN)
-    g_itemid = zp_arma( "M32", 5, 1, PRIMARIA, ADMIN_ALL, "[SILVER]" );
+    g_itemid = zp_arma( "M32", 8, 1, PRIMARIA, ADMIN_ALL, "[SILVER]" );
     gmsgWeaponList = get_user_msgid("WeaponList")
     g_MaxPlayers = get_maxplayers()
 }

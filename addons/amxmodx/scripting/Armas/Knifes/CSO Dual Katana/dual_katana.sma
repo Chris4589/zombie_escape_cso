@@ -106,7 +106,7 @@ public plugin_init()
 	
 	//register_clcmd("admin_get_dualkatana", "get_dualkatana")
 	register_logevent("event_round_start", 2, "1=Round_Start")
-	g_item = zp_arma("Dual Katana", 0, 0, KNIFE, ADMIN_ALL, "");
+	g_item = zp_arma("Dual Katana", 0, 2, KNIFE, ADMIN_ALL, "");
 }
 
 public plugin_precache()

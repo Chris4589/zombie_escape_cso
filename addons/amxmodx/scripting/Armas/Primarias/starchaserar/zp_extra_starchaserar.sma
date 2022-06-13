@@ -107,7 +107,7 @@ public plugin_init()
 	RegisterHam(Ham_TraceAttack, "player", "fw_TraceAttack_Entity")
 	
 	//g_starchaserar = zp_register_extra_item("Star Chaser AR", 30, ZP_TEAM_HUMAN)
-	g_starchaserar = zp_arma( "Star Chaser AR", 0, 1, PRIMARIA, ADMIN_ALL, "[SILVER]" );
+	g_starchaserar = zp_arma( "Star Chaser AR", 20, 2, PRIMARIA, ADMIN_ALL, "[SILVER]" );
 }
 
 public plugin_precache()

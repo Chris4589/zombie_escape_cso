@@ -117,7 +117,7 @@ public plugin_init()
 
 	/* Item register */
 	//g_balrog = zp_register_extra_item(ITEM_NAME, ITEM_COST, ZP_TEAM_HUMAN);
-	g_balrog = zp_arma(ITEM_NAME, 20, 2, PRIMARIA, ADMIN_ALL, "[SILVER]" );
+	g_balrog = zp_arma(ITEM_NAME, 0, 3, PRIMARIA, ADMIN_ALL, "[SILVER]" );
 	/* Events */
 	register_event("HLTV", "event_round_start", "a", "1=0", "2=0");
 
@@ -153,7 +153,7 @@ public plugin_init()
 	/* Cvars */
 	cvar_balrog_clip = register_cvar("zp_balrog_minigun_clip", "50");
 	cvar_balrog_ammo = register_cvar("zp_balrog_minigun_ammo", "200");
-	cvar_balrog_damage = register_cvar("zp_balrog_minigun_damage", "3.0");
+	cvar_balrog_damage = register_cvar("zp_balrog_minigun_damage", "3.2");
 	cvar_balrog_oneround = register_cvar("zp_balrog_minigun_one_round", "0");
 	cvar_balrog_unlimited = register_cvar("zp_balrog_minigun_unlimited", "0");
 

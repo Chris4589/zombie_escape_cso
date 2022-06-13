@@ -96,7 +96,7 @@ public plugin_init()
 	register_logevent("event_round_start", 2, "1=Round_Start")
 	//register_clcmd("admin_get_oicw", "Get_OICW", ADMIN_KICK)
 	register_clcmd("weapon_oicw", "hook_weapon")
-	g_item = zp_arma("Oicw", 6, 0, PRIMARIA, ADMIN_ALL, "");
+	g_item = zp_arma("Oicw", 14, 0, PRIMARIA, ADMIN_ALL, "");
 }
 public event_round_start(){
 	for(new i=1; i<= get_maxplayers(); ++i)

@@ -117,7 +117,7 @@ public plugin_init()
 	//register_clcmd("admin_get_plasmagun", "getPlasmaa")
 	register_clcmd("weapon_plasmagun", "Hook_WeaponHud")
 	register_event("HLTV", "event_round_start", "a", "1=0", "2=0")
-	g_item = zp_arma( "PlasmaGun", 6, 5, PRIMARIA, ADMIN_ALL, "[GOLD]" );
+	g_item = zp_arma( "PlasmaGun", 0, 5, PRIMARIA, ADMIN_ALL, "[GOLD]" );
 }
 
 public getPlasmaa(id)

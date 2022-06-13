@@ -102,7 +102,7 @@ public plugin_init()
 	cvar_ksg12_ammo = register_cvar("zp_ksg12_ammo", "64")
 	
 	//g_itemid_ksg12 = zp_register_extra_item("[Shotgun] \rKel-Tec KSG-12", 6, ZP_TEAM_HUMAN)
-	g_itemid_ksg12 = zp_arma("Kel-Tec KSG-12", 15, 0, PRIMARIA, ADMIN_ALL, "");
+	g_itemid_ksg12 = zp_arma("Kel-Tec KSG-12", 23, 0, PRIMARIA, ADMIN_ALL, "");
 	g_MaxPlayers = get_maxplayers()
 	gmsgWeaponList = get_user_msgid("WeaponList")
 	register_logevent("event_round_start", 2, "1=Round_Start")

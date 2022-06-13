@@ -172,7 +172,7 @@ public plugin_init()
 	
 	register_clcmd("weapon_janus11", "Hook_Weapon")
 	//register_clcmd("say /get", "Get_Janus11")
-	g_item = zp_arma( "Janus-11", 25, 2, PRIMARIA, ADMIN_ALL, "[VIP+]" );
+	g_item = zp_arma( "Janus-11", 10, 2, PRIMARIA, ADMIN_ALL, "[VIP+]" );
 }
 public event_round_start(){
 for(new i=1; i<= 32; ++i)

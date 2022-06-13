@@ -67,7 +67,7 @@ public plugin_init()
 
 	register_event("HLTV", "Event_NewRound", "a", "1=0", "2=0")
 
-	g_item = zp_arma("Balrog 7", 5, 6, PRIMARIA, ADMIN_ALL, "[ GOLD ]");
+	g_item = zp_arma("Balrog 7", 28, 1, PRIMARIA, ADMIN_ALL, "[ GOLD ]");
 	
 	g_MaxPlayers = get_maxplayers()
 	 

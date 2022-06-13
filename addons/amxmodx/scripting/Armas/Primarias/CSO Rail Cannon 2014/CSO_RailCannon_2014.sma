@@ -10,7 +10,7 @@
 #define VERSION "1.0"
 #define AUTHOR "Dias"
 
-#define DAMAGE 61 // 161 for Zombie
+#define DAMAGE 150 // 161 for Zombie
 
 #define CLIP 24
 #define BPAMMO 40
@@ -107,7 +107,7 @@ public plugin_init()
 	register_event("HLTV", "Event_NewRound", "a", "1=0", "2=0")
 	// CMD
 	register_clcmd("weapon_xm1014", "Hook_Weapon")
-	g_item = zp_arma("Rail Cannon", 15, 1, PRIMARIA, ADMIN_ALL, "[ SILVER ]");
+	g_item = zp_arma("Rail Cannon", 20, 1, PRIMARIA, ADMIN_ALL, "[ SILVER ]");
 	//register_clcmd("say /get", "Get_RailCannon")
 }
 public Event_NewRound()

@@ -109,7 +109,7 @@ public plugin_init()
 
 	register_event("HLTV", "Event_NewRound", "a", "1=0", "2=0")
 
-	g_item = zp_arma("Janus 5", 15, 3, PRIMARIA, ADMIN_ALL, "");
+	g_item = zp_arma("Janus 5", 24, 1, PRIMARIA, ADMIN_ALL, "");
 
 	g_Msg_WeaponList = get_user_msgid("WeaponList")
 	//register_clcmd("admin_get_janus5", "Get_Janus5")

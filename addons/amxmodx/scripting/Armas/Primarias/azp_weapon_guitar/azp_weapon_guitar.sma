@@ -96,7 +96,7 @@ public plugin_init()
 	cvar_spd_guitar = register_cvar("zp_guitar_spd", "1.19")
 	cvar_guitar_ammo = register_cvar("zp_guitar_ammo", "180")
 	
-	g_itemid_guitar = zp_arma( "Guittar", 4, 0, PRIMARIA, ADMIN_ALL, "" );
+	g_itemid_guitar = zp_arma( "Guittar", 8, 0, PRIMARIA, ADMIN_ALL, "" );
 	g_MaxPlayers = get_maxplayers()
 	gmsgWeaponList = get_user_msgid("WeaponList")
 	register_logevent("event_round_start", 2, "1=Round_Start")

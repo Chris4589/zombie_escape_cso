@@ -124,7 +124,7 @@ public plugin_init()
 	RegisterHam(Ham_TraceAttack, "player", "fw_TraceAttack_Post", 1)
 	RegisterHam(Ham_Spawn, "player", "remove_balrog9", 1);
 	register_logevent("event_round_start", 2, "1=Round_Start")
-	g_item_balrog9 = zp_arma("Balrog-IX", 18, 0, KNIFE, ADMIN_ALL, "");
+	g_item_balrog9 = zp_arma("Balrog-IX", 0, 3, KNIFE, ADMIN_ALL, "");
 	
 }
 

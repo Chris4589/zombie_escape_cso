@@ -90,13 +90,13 @@ public plugin_init()
 	RegisterHam(Ham_TraceAttack, "func_plat", "fw_TraceAttack", 1)
 	RegisterHam(Ham_TraceAttack, "func_rotating", "fw_TraceAttack", 1)
 
-	cvar_dmg_tar21 = register_cvar("zp_tar21_dmg", "1.5")
+	cvar_dmg_tar21 = register_cvar("zp_tar21_dmg", "1.8")
 	cvar_recoil_tar21 = register_cvar("zp_tar21_recoil", "0.9")
 	cvar_clip_tar21 = register_cvar("zp_tar21_clip", "30")
 	cvar_spd_tar21 = register_cvar("zp_tar21_spd", "0.98")
 	cvar_tar21_ammo = register_cvar("zp_tar21_ammo", "180")
 	
-	g_itemid_tar21 = zp_arma( "[Assault Rifle] \rTavor TAR-21", 20, 0, PRIMARIA, ADMIN_ALL, "" );
+	g_itemid_tar21 = zp_arma( "[Assault Rifle] \rTavor TAR-21", 4, 1, PRIMARIA, ADMIN_ALL, "" );
 	g_MaxPlayers = get_maxplayers()
 	gmsgWeaponList = get_user_msgid("WeaponList")
 	register_logevent("event_round_start", 0, "1=Round_Start")

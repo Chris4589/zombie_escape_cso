@@ -99,7 +99,7 @@ public plugin_init()
 	cvar_thompson_ammo = register_cvar("zp_thompson_ammo", "200")
 	register_logevent("event_round_start", 2, "1=Round_Start")
 	//g_itemid_thompson = zp_register_extra_item("[Automat] \rThompson Chicago", 4, ZP_TEAM_HUMAN)
-	g_itemid_thompson = zp_arma("Thompson M1928", 14, 0, PRIMARIA, ADMIN_ALL, "");
+	g_itemid_thompson = zp_arma("Thompson M1928", 20, 0, PRIMARIA, ADMIN_ALL, "");
 	g_MaxPlayers = get_maxplayers()
 	gmsgWeaponList = get_user_msgid("WeaponList")
 }

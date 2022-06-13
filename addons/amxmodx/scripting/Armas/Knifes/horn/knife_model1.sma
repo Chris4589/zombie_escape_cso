@@ -20,7 +20,7 @@ public plugin_init()
 
 	g_iMaxplayers = get_maxplayers();
 
-	g_item = zp_arma( "Horn", 0, 0, KNIFE, ADMIN_ALL, "" );
+	g_item = zp_arma( "Horn", 5, 0, KNIFE, ADMIN_ALL, "" );
 }
 public dar_arma(id, item)
 {

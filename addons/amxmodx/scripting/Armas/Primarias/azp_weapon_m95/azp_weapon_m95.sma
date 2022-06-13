@@ -90,13 +90,13 @@ public plugin_init()
 	RegisterHam(Ham_TraceAttack, "func_plat", "fw_TraceAttack", 1)
 	RegisterHam(Ham_TraceAttack, "func_rotating", "fw_TraceAttack", 1)
 	register_logevent("event_round_start", 2, "1=Round_Start")
-	cvar_dmg_m95 = register_cvar("zp_m95_dmg", "4.0")
+	cvar_dmg_m95 = register_cvar("zp_m95_dmg", "6.0")
 	cvar_recoil_m95 = register_cvar("zp_m95_recoil", "4.57")
 	cvar_clip_m95 = register_cvar("zp_m95_clip", "5")
 	cvar_spd_m95 = register_cvar("zp_m95_spd", "1.3")
 	cvar_m95_ammo = register_cvar("zp_m95_ammo", "100")
 	
-	g_itemid_m95 = zp_arma("Barret M95", 0, 3, PRIMARIA, ADMIN_ALL, "");
+	g_itemid_m95 = zp_arma("Barret M95", 15, 3, PRIMARIA, ADMIN_ALL, "");
 	g_MaxPlayers = get_maxplayers()
 	gmsgWeaponList = get_user_msgid("WeaponList")
 }

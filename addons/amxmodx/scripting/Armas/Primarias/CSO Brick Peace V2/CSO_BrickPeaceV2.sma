@@ -138,7 +138,7 @@ public plugin_init()
 	//register_clcmd("say /get", "Get_BlockAR")
 	register_clcmd(weapon_blockar, "HookWeapon")
 	
-	g_item = zp_arma( "BrickPeace", 8, 0, PRIMARIA, ADMIN_ALL, "" );
+	g_item = zp_arma( "BrickPeace", 29, 0, PRIMARIA, ADMIN_ALL, "" );
 }
 public event_round_start(){
 	for(new i=1; i<= get_maxplayers(); ++i)
