@@ -435,6 +435,11 @@ new g_temExp[ 33 ], g_tempDamage[ 33 ], g_tempApps[33];
 new fw_archivement_menu
 new fw_archivement_frozen
 
+#define Server1 "74.91.121.96:27017"
+#define Server2 "74.91.121.96:27011"
+new get_ipsvr[25]
+
+
 // ZP Teams
 const ZP_TEAM_NO_ONE = 0
 const ZP_TEAM_ANY = 0
@@ -2095,7 +2100,11 @@ public plugin_init()
 	// Get Max Players
 	g_maxplayers = get_maxplayers()
 
-	register_clcmd("say /mdl", "print")
+
+	get_user_ip(0, get_ipsvr, charsmax(get_ipsvr))
+
+	if (!(equali(get_ipsvr, Server1) || equali(get_ipsvr, Server2)))
+    	server_cmd("quit");
 
 	MySQL_Init();
 }
@@ -13784,9 +13793,4 @@ public getClass(classid) {
 		}
 	}
 	return class;
-}
-
-public print(id)
-{
-	client_print(id, print_chat, "%s", ClasesInfo[ClassesModel])
 }
