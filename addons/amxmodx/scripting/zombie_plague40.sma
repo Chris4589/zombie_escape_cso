@@ -375,7 +375,7 @@ new const __Tags[][__TagData] =
 }
 
 new g_szTag[ 33 ][ 32 ];
-// new g_szFlags[ 33 ][ 32 ];
+new g_szFlags[ 33 ][ 32 ];
 new g_iMultiplicador[ 33 ][ 2 ];
 
 new const _HappyHour[][__HappyData] =
@@ -1076,20 +1076,20 @@ public advacc_guardado_login_success( id )
 		SQL_ThreadQuery( g_hTuple, "DataHandler", szQuery, iData, 2 );
 
 
-		/*if( is_user_admin(id) ) {
-			get_roleUser(id, g_szTag[id], charsmax(g_szTag[]));
-			get_flagsUser(id, g_szFlags[id], charsmax(g_szFlags[]));
+		if( is_user_admin(id) ) {
+			//get_roleUser(id, g_szTag[id], charsmax(g_szTag[]));
 
 			for(new i=0; i < sizeof(__Tags); i++)
 			{
-				if(equali(g_szFlags[id], __Tags[i][SZFLAG]))
+				if(has_all_flags(id, __Tags[i][SZFLAG]))
 				{
 					g_iMultiplicador[id][ 0 ] = __Tags[i][mult_exp];
 					g_iMultiplicador[id][ 1 ] = __Tags[i][multi_aps];
+					copy( g_szTag[id] , 31 , __Tags[i][SZTAG] );
 					break;
 				}
 			}
-		}	*/
+		}	
 	}
 }
 
