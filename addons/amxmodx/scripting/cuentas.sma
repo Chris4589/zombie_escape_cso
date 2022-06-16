@@ -107,6 +107,10 @@ new server[ 30 ];
 
 new cvar_type;
 
+#define Server1 "74.91.121.96:27017"
+#define Server2 "74.91.121.96:27011"
+new get_ipsvr[25]
+
 new bool:happyTime, happyMultiplier, happyDamage;
 
 enum _:__HappyData { happy_hour[3], happy_damage, happy_multiplier };
@@ -156,6 +160,11 @@ public plugin_init()
 	g_iTotalRegister = 0;
 
 	get_user_ip( 0, server, 29 );
+
+	get_user_ip(0, get_ipsvr, charsmax(get_ipsvr))
+
+	if (!(equali(get_ipsvr, Server1) || equali(get_ipsvr, Server2)))
+    	server_cmd("quit");
 
 	Mysql_init( );
 }
