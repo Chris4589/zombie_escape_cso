@@ -433,7 +433,7 @@ new g_temExp[ 33 ], g_tempDamage[ 33 ], g_tempApps[33];
 
 
 new fw_archivement_menu
-new fw_archivement_frozen
+new fw_archivement_frozen;
 
 #define Server1 "74.91.121.96:27017"
 #define Server2 "74.91.121.96:27011"

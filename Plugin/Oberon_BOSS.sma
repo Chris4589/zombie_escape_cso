@@ -4,6 +4,7 @@
 #include <hamsandwich> 
 #include <xs> 
 #include <engine>
+#include <fun>
 #include <zombie_escape_v1>
 #include <print_center_fx>
 
@@ -52,6 +53,7 @@ new g_iSaved = 0;
 new g_bCargado = false, g_bTocado = false;
 new g_iTiempo;
 
+const Float:NORMAL_SPEED = 450.0;
 public plugin_init() 
 { 
 	g_iSaved = 0;
@@ -73,7 +75,7 @@ public plugin_init()
 
 	get_mapname( g_szMap, charsmax( g_szMap ) );
 	get_configsdir( g_szPath, charsmax( g_szPath ) );
-	formatex( g_szRuta, charsmax( g_szRuta ), "%s/%s_BOSS.ini", g_szPath, g_szMap );
+	formatex( g_szRuta, charsmax( g_szRuta ), "%s/zex/%s_BOSS.ini", g_szPath, g_szMap );
 
 	ReadPos( );
 } 
@@ -238,8 +240,8 @@ public create_oberon()
 	entity_set_float(ent, EV_FL_friction, 1.0);
 	entity_set_float(ent, EV_FL_animtime, 2.0);
 	entity_set_float(ent, EV_FL_framerate, 1.0);
-	entity_set_float(ent, EV_VEC_velocity, 450.0);//speed
-	entity_set_float(ent, EV_FL_maxspeed, 500.0);//max speed
+	entity_set_float(ent, EV_VEC_velocity, NORMAL_SPEED);//speed
+	entity_set_float(ent, EV_FL_maxspeed, NORMAL_SPEED);//max speed
 
 	entity_set_int(ent, EV_INT_flags, FL_MONSTER|FL_MONSTERCLIP);
 	entity_set_int(ent, EV_INT_fixangle, 1);
@@ -287,10 +289,15 @@ public fw_think(ent)
         
 	static victim; 
 	static Float:Origin[3], Float:VicOrigin[3], Float:distance; 
+
+	static Float:velocity[3], Float:originT[3], Float:angles[3];
+	static Float:spd, Float:fraction, trace;
+	static lastjump;
 	
 	victim = FindClosesEnemy(ent); 
-	pev(ent, pev_origin, Origin); 
+	entity_get_vector(ent, EV_VEC_origin, Origin);
 	pev(victim, pev_origin, VicOrigin); 
+	lastjump = entity_get_int(ent, EV_INT_iuser1);
 	
 	distance = get_distance_f(Origin, VicOrigin); 
 	
@@ -356,6 +363,38 @@ public fw_think(ent)
 	} 
 	else 
 	{ 
+		entity_get_vector(ent, EV_VEC_velocity, velocity);
+		
+		//angle_vector(velocity, ANGLEVECTOR_FORWARD, angles);
+		xs_vec_normalize(velocity, angles);
+		angles[2] = 0.0;
+		xs_vec_mul_scalar(angles, 5.0, angles);// se se ATORA CAMBIAR ESTO
+		
+		xs_vec_add(Origin, angles, originT);
+		//origin[0] = origin[0] - (3.0 * origin[0] / lenght);
+		//origin[1] = origin[1] - (3.0 * origin[1] / lenght);
+		
+		engfunc(EngFunc_TraceLine, Origin, originT, DONT_IGNORE_MONSTERS, ent, trace);
+		
+		get_tr2(trace, TR_flFraction, fraction);
+		
+		if (fraction == 1.0)
+		{
+			spd = random_float(0.0, NORMAL_SPEED/4.0);
+			velocity[0] = velocity[0] + random_float(-NORMAL_SPEED/4.0, NORMAL_SPEED/4.0);
+			velocity[1] = velocity[1] > 0.0 ? floatsqroot(NORMAL_SPEED*NORMAL_SPEED - spd*spd) : 0.0 - floatsqroot(NORMAL_SPEED*NORMAL_SPEED - spd*spd);
+			
+			//velocity[2] = random(25) ? 0.0 : SALTO;
+			
+			entity_set_vector(ent, EV_VEC_velocity, velocity);
+			
+			vector_to_angle(velocity, velocity);
+			entity_set_vector(ent, EV_VEC_angles, velocity);
+		}
+		else
+		{
+			roach_random_move(ent, velocity);
+		}
 		if(pev(ent, pev_sequence) != 12) 
 			set_entity_anim(ent, 12);      
 		
@@ -995,26 +1034,29 @@ stock fm_get_aimorigin(index, Float:origin[3])
 	return 1; 
 }   
 
-public FindClosesEnemy(entid) 
+public FindClosesEnemy(ent) 
 { 
-	new Float:Dist; 
-	new Float:maxdistance=4000.0;
-	new indexid=0;     
-	for(new i=1; i <= MAX_PLAYERS;i++)
-	{ 
-		if(is_user_alive(i) && is_valid_ent(i) && can_see_fm(entid, i) && zp_get_class(i) < ZOMBIE) 
-		{ 
-			Dist = entity_range(entid, i); 
-			if(Dist <= maxdistance) 
-			{ 
-				maxdistance=Dist; 
-				indexid=i; 
-				
-				return indexid; 
-			} 
-		}     
-	}     
-	return 0; 
+	static players[32], num;
+	get_players(players, num, "a");
+	
+	new player = 0;
+	static id, Float:dist, Float:mindist;
+	mindist = 5000.0;
+	
+	for (new i = 0; i < num; i++)
+	{
+		player = players[i];
+		
+		dist = entity_range(player, ent);
+		
+		if (dist <= mindist)
+		{
+			id = player;
+			mindist = dist;
+		}
+	}
+	
+	return id;
 } 
 
 public npc_turntotarget(ent, Float:Ent_Origin[3], target, Float:Vic_Origin[3])  
@@ -1269,4 +1311,17 @@ set_velocity(ent, Float:angles[3])
 	xs_vec_mul_scalar(Direction, entity_get_float(ent, EV_FL_speed), Direction); 
 	
 	entity_set_vector(ent, EV_VEC_velocity, Direction); 
+}
+roach_random_move(ent, Float:velocity[3])
+{
+	static Float:spd;
+	spd = random_float(0.0, NORMAL_SPEED);
+	velocity[0] = random_num(0, 1) ? spd : -spd; // Por alguna razon, random() sale casi siempre 0, es mejor random_num
+	velocity[1] = random_num(0, 1) ? floatsqroot(NORMAL_SPEED*NORMAL_SPEED - spd*spd) : 0.0 - floatsqroot(NORMAL_SPEED*NORMAL_SPEED - spd*spd);
+	//velocity[2] = random(25) ? 0.0 : SALTO;
+				
+	entity_set_vector(ent, EV_VEC_velocity, velocity);
+		
+	vector_to_angle(velocity, velocity);
+	entity_set_vector(ent, EV_VEC_angles, velocity);
 }
