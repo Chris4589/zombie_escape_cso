@@ -59,7 +59,7 @@ public plugin_precache()
 	spr_skull = precache_model("sprites/ef_bat.spr")
 	
 	idclass_banchee = zp_register_class(CLASS_ZOMBIE, zclass_name, zclass_info, zclass_model, zclass_clawmodel, 
-		15, 0, ADMIN_BAN, zclass_health, 0, zclass_speed, zclass_gravity, zclass_knockback)
+		15, 0, ADMIN_ALL, zclass_health, 0, zclass_speed, zclass_gravity, zclass_knockback)
 }
 
 new fw_archivement_banshee

@@ -63,7 +63,7 @@ public plugin_init()
 
 public plugin_precache()
 {
-	g_zombieclass = zp_register_class(CLASS_ZOMBIE, zclass_name, zclass_info, zclass4_model, "v_knife_z4hide.mdl", 5, 1, ADMIN_IMMUNITY, 
+	g_zombieclass = zp_register_class(CLASS_ZOMBIE, zclass_name, zclass_info, zclass4_model, "v_knife_z4hide.mdl", 5, 1, ADMIN_LEVEL_A, 
 		zclass_health, 0, zclass_speed, zclass_gravity, zclass_knockback)
 }
 
