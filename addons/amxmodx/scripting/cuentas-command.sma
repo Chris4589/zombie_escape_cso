@@ -5,7 +5,7 @@
 #include <fakemeta>
 #include <print_center_fx>
 
-#define use_reapi
+//#define use_reapi
 
 #if !defined use_reapi
 	stock is_user_steam_2( i )
@@ -79,10 +79,10 @@ new const g_szForo[] = "petardas.com";
 new const g_szTabla[ ] = "zp_cuentas";
 new const g_szPrefijo[ ] = "[ SVLMexico ]";
 
-new const MYSQL_HOST[] = "45.58.56.30";
-new const MYSQL_USER[] = "adminpanel";
-new const MYSQL_PASS[] = "obidiotapia";
-new const MYSQL_DATEBASE[] = "svlmexico";
+new const MYSQL_HOST[] = "127.0.0.1";
+new const MYSQL_USER[] = "root";
+new const MYSQL_PASS[] = "Chris4589@";
+new const MYSQL_DATEBASE[] = "counter_strike";
 
 new Handle:g_hTuple;
 

@@ -8,8 +8,6 @@
 #include <zombie_escape_v1>
 #include <print_center_fx>
 
-#pragma semicolon 1
-
 #define TIEMPO 15
 
 #define OBERON_CLASSNAME "oberon" 
@@ -53,7 +51,9 @@ new g_iSaved = 0;
 new g_bCargado = false, g_bTocado = false;
 new g_iTiempo;
 
-const Float:NORMAL_SPEED = 450.0;
+const Float:NORMAL_SPEED = 550.0;
+const Float:PURSUIT_SPEED = 420.0; // Velocidad de persecucion
+const Float:SALTO = 500.0; // Maxima altura que puede saltar una cucaracha.
 public plugin_init() 
 { 
 	g_iSaved = 0;
@@ -255,11 +255,11 @@ public create_oberon()
 	
 	set_pev(ent, pev_iuser4, 0); 
 	
-	entity_set_float(ent, EV_FL_nextthink, halflife_time() + 0.01);
+	entity_set_float(ent, EV_FL_nextthink, halflife_time() + 5.0);
 
 	if(task_exists(g_IdEnt+666)) remove_task(g_IdEnt+666);
 
-	set_task(18.0, "do_random_skill", ent+666, _, _, "b"); 
+	set_task(12.0, "do_random_skill", ent+666, _, _, "b"); 
 	
 	if(!g_reg) 
 	{ 
@@ -289,7 +289,7 @@ public fw_think(ent)
         
 	static victim; 
 	static Float:Origin[3], Float:VicOrigin[3], Float:distance; 
-
+	const Float:JUMP_CONST = 1000.0;
 	static Float:velocity[3], Float:originT[3], Float:angles[3];
 	static Float:spd, Float:fraction, trace;
 	static lastjump;
@@ -303,19 +303,163 @@ public fw_think(ent)
 	
 	if(is_user_alive(victim) && zp_get_class(victim) < ZOMBIE) 
 	{ 
-		if(distance <= 300.0) 
+		engfunc(EngFunc_WalkMove, ent, angles[1], 1.0, WALKMOVE_NORMAL); 
+		if(distance <= 300.0) //300
 		{ 
-			if(!is_valid_ent(ent)) 
-				return PLUGIN_CONTINUE; 
+			/*if(!is_valid_ent(ent)) 
+				return PLUGIN_CONTINUE;*/ 
+
+			//
+			entity_get_vector(victim, EV_VEC_origin, originT);
+			entity_get_vector(ent, EV_VEC_velocity, velocity);
+			
+			//origin[0] = origin[0] - (2.0 * origin[0] / lenght);
+			//origin[1] = origin[1] - (2.0 * origin[1] / lenght);
+			//origin[2] = origin[2] - 1.0;
+			
+			engfunc(EngFunc_TraceLine, Origin, originT, IGNORE_MONSTERS, ent, trace);
+		
+			get_tr2(trace, TR_flFraction, fraction);
+			
+			static Float:backup;
+			
+			if (fraction == 1.0)
+			{
+				backup = velocity[2];
+				
+				xs_vec_sub(originT, Origin, velocity);
+				vector_to_angle(velocity, velocity);
+				
+				entity_set_vector(ent, EV_VEC_angles, velocity);
+				
+				angle_vector(velocity, ANGLEVECTOR_FORWARD, velocity);
+				xs_vec_normalize(velocity, velocity);
+				xs_vec_mul_scalar(velocity, PURSUIT_SPEED, velocity);
+				
+				if (!lastjump && get_distance_f(Origin, originT) < 50.0 && originT[2] > Origin[2])
+				{
+					velocity[2] = floatsqroot(JUMP_CONST*floatmin(SALTO, (originT[2]-Origin[2])));
+					entity_set_int(ent, EV_INT_iuser1, 10);
+				}
+				else
+					velocity[2] = backup;
+				
+				entity_set_vector(ent, EV_VEC_velocity, velocity);
+			}
+			else
+			{
+				if (originT[2] > Origin[2])
+				{
+					backup = Origin[2];
+					Origin[2] = originT[2];
+					
+					engfunc(EngFunc_TraceLine, Origin, originT, IGNORE_MONSTERS, ent, trace);
+					get_tr2(trace, TR_flFraction, fraction);
+					
+					if (fraction == 1.0)
+					{
+						Origin[2] = backup;
+						backup = velocity[2];
+						
+						xs_vec_sub(originT, Origin, velocity);
+						
+						vector_to_angle(velocity, velocity);
+						entity_set_vector(ent, EV_VEC_angles, velocity);
+						
+						angle_vector(velocity, ANGLEVECTOR_FORWARD, velocity);
+						xs_vec_normalize(velocity, velocity);
+						xs_vec_mul_scalar(velocity, PURSUIT_SPEED, velocity);
+						
+						if (!lastjump)
+						{
+							velocity[2] = floatsqroot(JUMP_CONST*floatmin(SALTO, (originT[2]-Origin[2])));
+							entity_set_int(ent, EV_INT_iuser1, 10);
+						}
+						else
+							velocity[2] = backup;
+						
+						entity_set_vector(ent, EV_VEC_velocity, velocity);
+					}
+					else
+					{
+						Origin[2] = backup + SALTO;
+						backup = originT[2];
+						originT[2] = Origin[2];
+						
+						engfunc(EngFunc_TraceLine, Origin, originT, IGNORE_MONSTERS, ent, trace);
+						get_tr2(trace, TR_flFraction, fraction);
+						
+						if (fraction == 1.0)
+						{
+							originT[2] = backup;
+							backup = velocity[2];
+							
+							xs_vec_sub(originT, Origin, velocity);
+							
+							vector_to_angle(velocity, velocity);
+							entity_set_vector(ent, EV_VEC_angles, velocity);
+							
+							angle_vector(velocity, ANGLEVECTOR_FORWARD, velocity);
+							xs_vec_normalize(velocity, velocity);
+							xs_vec_mul_scalar(velocity, PURSUIT_SPEED, velocity);
+							
+							if (!lastjump)
+							{
+								velocity[2] = floatsqroot(JUMP_CONST*SALTO);
+								entity_set_int(ent, EV_INT_iuser1, 10);
+							}
+							else
+								velocity[2] = backup;
+							
+							entity_set_vector(ent, EV_VEC_velocity, velocity);
+						}
+						else
+						{
+							roach_random_move(ent, velocity);
+						}
+					}
+				}
+				else
+				{
+					backup = originT[2];
+					originT[2] = Origin[2];
+					
+					engfunc(EngFunc_TraceLine, Origin, originT, IGNORE_MONSTERS, ent, trace);
+					get_tr2(trace, TR_flFraction, fraction);
+					
+					if (fraction == 1.0)
+					{
+						originT[2] = backup;
+						backup = velocity[2];
+						
+						xs_vec_sub(originT, Origin, velocity);
+						
+						vector_to_angle(velocity, velocity);
+						entity_set_vector(ent, EV_VEC_angles, velocity);
+						
+						angle_vector(velocity, ANGLEVECTOR_FORWARD, velocity);
+						xs_vec_normalize(velocity, velocity);
+						xs_vec_mul_scalar(velocity, PURSUIT_SPEED, velocity);
+						
+						velocity[2] = backup;
+						
+						entity_set_vector(ent, EV_VEC_velocity, velocity);
+					}
+					else
+					{
+						roach_random_move(ent, velocity);
+					}
+				}
+			}
 
 			//client_print(0, print_center, "think");    
 			
-			new Float:Ent_Origin[3], Float:Vic_Origin[3]; 
+			/*new Float:Ent_Origin[3], Float:Vic_Origin[3]; 
 			
 			pev(ent, pev_origin, Ent_Origin); 
 			pev(victim, pev_origin, Vic_Origin);             
 			
-			npc_turntotarget(ent, Ent_Origin, victim, Vic_Origin); 
+			npc_turntotarget(ent, Ent_Origin, victim, Vic_Origin); */
 			
 			if( random_num( 1, 2 )  == 1 ) 
 			{ 
@@ -324,8 +468,6 @@ public fw_think(ent)
 				emit_sound(ent, CHAN_BODY, oberon_attack_sound[4], 1.0, ATTN_NORM, 0, PITCH_NORM); 
 				
 				set_task(1.0, "do_takedmg", ent);//baja hp a la gente en su rango
-				
-				entity_set_float(ent, EV_FL_nextthink, get_gametime() + 1.0); 
 			} 
 			else 
 			{ 
@@ -334,9 +476,8 @@ public fw_think(ent)
 				emit_sound(ent, CHAN_BODY, oberon_attack_sound[5], 1.0, ATTN_NORM, 0, PITCH_NORM); 
 				
 				set_task(0.5, "do_takedmg", ent); //baja hp a la gente en su rango           
-				
-				entity_set_float(ent, EV_FL_nextthink, get_gametime() + 0.01); 
 			} 
+			entity_set_float(ent, EV_FL_nextthink, get_gametime() + 1.0); 
 		} 
 		else //esta caminando
 		{ 
@@ -359,7 +500,7 @@ public fw_think(ent)
 			hook_ent(ent, victim, 490.0);  
 			
 			entity_set_float(ent, EV_FL_nextthink, get_gametime() + 0.2);  
-		} 
+		}
 	} 
 	else 
 	{ 
@@ -425,6 +566,7 @@ public do_random_skill(ent)
 		//case 38..68: do_hole(ent);
 		case 69..100: do_bomb(ent);      
 	}     
+	entity_set_float(ent, EV_FL_nextthink, halflife_time() + 1.0);
 	
 	return PLUGIN_CONTINUE; 
 } 
@@ -450,7 +592,7 @@ public stop_skill_bomb(oberon)
 	remove_task(oberon+2015); 
 	
 	set_entity_anim(oberon, 12); 
-	entity_set_float(oberon, EV_FL_nextthink, halflife_time() + 0.01);
+	entity_set_float(oberon, EV_FL_nextthink, halflife_time() + 1.0);
 	set_task(2.0, "reset_think", oberon); 
 } 
 
@@ -467,7 +609,7 @@ public do_skill_bomb(oberon)
 	emit_sound(oberon, CHAN_BODY, oberon_bomb_sound, 1.0, ATTN_NORM, 0, PITCH_NORM); 
 	
 	// 1st Bomb 
-	Random1 = random_float(120.0, 600.0); 
+	Random1 = random_float(120.0, 700.0); 
 	VicOrigin[0][0] = StartOrigin[0] + Random1; 
 	VicOrigin[0][1] = StartOrigin[1]; 
 	VicOrigin[0][2] = StartOrigin[2]; 
@@ -487,7 +629,7 @@ public do_skill_bomb(oberon)
 	TempOrigin[1][2] = VicOrigin[1][2] + 500.0;     
 	
 	// 3rd Bomb 
-	Random1 = random_float(100.0, 500.0); 
+	Random1 = random_float(100.0, 800.0); 
 	VicOrigin[2][0] = StartOrigin[0] - Random1; 
 	VicOrigin[2][1] = StartOrigin[1]; 
 	VicOrigin[2][2] = StartOrigin[2]; 
@@ -733,7 +875,7 @@ public stop_hook(oberon)
 	remove_task(512512); 
 	
 	do_takedmg(oberon); 
-	entity_set_float(oberon, EV_FL_nextthink, halflife_time() + 0.01);
+	entity_set_float(oberon, EV_FL_nextthink, halflife_time() + 1.0);
 	set_task(1.0, "reset_think", oberon); 
 } 
 
@@ -746,6 +888,7 @@ public do_attack3(ent)
 	
 	set_entity_anim(ent, 16); 
 	
+	entity_set_float(ent, EV_FL_nextthink, get_gametime() + 1.0); 
 	emit_sound(ent, CHAN_BODY, oberon_attack_sound[6], 1.0, ATTN_NORM, 0, PITCH_NORM); 
 	set_task(0.1, "attack3_jump", ent); 
 } 
@@ -762,6 +905,7 @@ public attack3_jump(ent)
 	Enemy = FindClosesEnemy(ent);     
 	
 	pev(Enemy, pev_origin, g_attacking3_origin); 
+	entity_set_float(ent, EV_FL_nextthink, get_gametime() + 1.0); 
 	return PLUGIN_HANDLED;
 } 
 
@@ -788,7 +932,7 @@ public hookingup(ent)
 	pev(Enemy, pev_origin, Vic_Origin); 
 	
 	npc_turntotarget(ent, Ent_Origin, Enemy, Vic_Origin); 
-
+	entity_set_float(ent, EV_FL_nextthink, get_gametime() + 1.0);
 	remove_task(ent+TASK_HOOKINGUP);   
 	return PLUGIN_HANDLED;
 } 
@@ -804,6 +948,7 @@ public hookingdown(ent)
 	set_task(0.5, "set_func1", ent); 
 	
 	set_task(0.01, "hookingdown2", ent+TASK_HOOKINGDOWN, _, _, "b"); 
+	entity_set_float(ent, EV_FL_nextthink, halflife_time() + 1.0);
 } 
 
 public set_func1(ent) 
@@ -834,6 +979,7 @@ public hookingdown2(ent)
 	pev(Enemy, pev_origin, Vic_Origin); 
 	
 	npc_turntotarget(ent, Ent_Origin, Enemy, Vic_Origin);
+	entity_set_float(ent, EV_FL_nextthink, halflife_time() + 1.0);
 	return PLUGIN_HANDLED;
 } 
 
@@ -918,7 +1064,7 @@ public do_takedmg(ent2)
 		if(zp_get_class(i) >= ZOMBIE)
 			continue;
 
-		if(is_user_alive(i) && entity_range(ent2, i) <= 400.0) 
+		if(is_user_alive(i) && entity_range(ent2, i) <= 300.0) 
 		{ 
 			hit_screen(i); 
 
@@ -984,7 +1130,7 @@ public move_entity(ent)
     Origin[2] = 4290.0 ;
      
     set_pev(ent, pev_origin, Origin) ;
-    entity_set_float(ent, EV_FL_nextthink, halflife_time() + 99999999.0) ;
+    entity_set_float(ent, EV_FL_nextthink, halflife_time() + 1.0) ;
 } 
 
 
@@ -1074,6 +1220,7 @@ public npc_turntotarget(ent, Float:Ent_Origin[3], target, Float:Vic_Origin[3])
 			newAngle[1] -= 180.0; 
 		
 		entity_set_vector(ent, EV_VEC_angles, newAngle); 
+		entity_set_float(ent, EV_FL_nextthink, get_gametime() + 1.0); 
 	} 
 } 
 
@@ -1169,6 +1316,7 @@ public hook_ent(ent, victim, Float:speed)
 	} 
 	
 	entity_set_vector(ent, EV_VEC_velocity, fl_Velocity); 
+	entity_set_float(ent, EV_FL_nextthink, halflife_time() + 1.0);
 } 
 
 public hook_ent2(ent, Float:VicOrigin[3], Float:speed) 
@@ -1200,7 +1348,7 @@ public hook_ent2(ent, Float:VicOrigin[3], Float:speed)
 	} 
 	
 	entity_set_vector(ent, EV_VEC_velocity, fl_Velocity); 
-	entity_set_float(ent, EV_FL_nextthink, halflife_time() + 0.01); 
+	entity_set_float(ent, EV_FL_nextthink, halflife_time() + 1.0); 
 	return PLUGIN_HANDLED;
 } 
 
@@ -1219,7 +1367,7 @@ public reset_think(ent)
 		return;
 
 	g_doing_other = 0;  
-	entity_set_float(ent, EV_FL_nextthink, get_gametime() + 0.01);  
+	entity_set_float(ent, EV_FL_nextthink, get_gametime() + 1.0);  
 } 
 
 

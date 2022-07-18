@@ -5,7 +5,7 @@
 #include <fakemeta>
 #include <print_center_fx>
 
-#define use_reapi
+//#define use_reapi
 
 #if !defined use_reapi
 	stock is_user_steam_2( i )
@@ -71,8 +71,8 @@ new const PluginAuthor[] = "Hypnotize";
 
 //apartado para escribir el nombre del creador del mod
 //area modificable
-new const ModName[] = "Zombie Escape";//nombre del mod
-new const ModAuthor[] = "Hypnotize"; //acá pones tu nombre si lo usaste para un modo tuyo
+new const ModName[] = "remod";//nombre del mod
+new const ModAuthor[] = "none"; //acá pones tu nombre si lo usaste para un modo tuyo
 new const ModVersion[] = "1.0b";//versión del modo
 new const g_szForo[] = "soon!";
 //apartado para escribir el nombre del creador del mod
@@ -108,7 +108,7 @@ new server[ 30 ];
 new cvar_type;
 
 #define Server1 "74.91.121.96:27017"
-#define Server2 "74.91.121.96:27011"
+#define Server2 "74.91.121.96:27016"
 new get_ipsvr[25]
 
 new bool:happyTime, happyMultiplier, happyDamage;
