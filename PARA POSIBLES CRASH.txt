@@ -6,3 +6,112 @@ FATAL ERROR (shutting down): PF_MessageBegin_I: Tried to create a message with a
 
 
 ES ERROR DEL AMX 1.9.0 DE LOS PLUGINS BASEEEEE!!!!
+
+
+--
+
+SINO PASARLOS A PLUGINS.INI Y YA
+
++++
+
+
+ULTIMO TEST FUE EL ORDEN DE LOS PLUGINS BASE
+
+
+
+;Main plugin
+buton_pres.amxx debug++
+Precache_Manager.amxx debug++
+cuentas.amxx debug++
+zombie_plague40.amxx debug++
+;Logros.amxx debug++
+
+; Default zombie classes
+zp_zclasses40.amxx debug ;lvl1- 8++
+
+
+human_class.amxx debug ; lvl 1 - 3++
+
+
+trigger_hurt.amxx++
+zp_team_semiclip.amxx debug++
+
+;==================
+show_damage.amxx debug++
+nademodes.amxx debug++
+scm_traceline_fix.amxx ; Deathrun Traceline Fix++
+bazooka.amxx debug++
+
+; Default zombie classes
+ze_zclass_toxico.amxx debug
+zm_nofire.amxx debug ; lvl10
+zp_zclass_regeneration.amxx debug ; lvl13
+DJB_ZbClass_Banchee_ZP43.amxx debug ;lvl15
+zp_zcls_ghost.amxx debug ; lvl18
+zp_undertaker.amxx debug ;lvl 22
+zp_zclass_voodoo.amxx debug
+zp_zclass_siren.amxx debug ; lvl 26
+zd_zclass_heavy.amxx debug ; rr1 lvl13
+zd_zclass_nightstalker.amxx debug ; rr1 lvl17
+
+;hclass
+human_vampire.amxx debug ;lvl 8
+zp_extra_deadly-shot.amxx debug lvl;13
+hm_aspirante.amxx debug ; lvl15
+zp_human_doble_jump.amxx debug ; lvl 18
+human_paratroper.amxx debug ; lvl 24
+hm_metal_human.amxx debug ; rr1
+zp_hclass_jumper.amxx debug ; rr 1
+zp_zclass_bhzombie_new.amxx debug ; rr2
+hm_mei.amxx debug ;rr2
+hm_fisher.amxx debug ; rr3
+hm_no_jump.amxx debug ; rr7
+
+
+;sub plugin lvl knife
+weapon_knife.amxx debug			;Lvl 0
+knife_model1.amxx debug			;Lvl 5
+knife_model2.amxx debug			;Lvl 10
+knife_model3.amxx debug			;Lvl 15
+knife_model4.amxx debug			;Lvl 20
+dual_katana.amxx debug 			;RR2
+zp_extra_balrog9.amxx debug 		;RR3
+
+
+;sub plugin sec
+weapon_glock18.amxx debug		;Lvl 0
+weapon_usp.amxx debug			;Lvl 3
+weapon_deagle.amxx debug		;Lvl 8
+
+
+; armas
+weapon_galil.amxx debug
+weapon_ak47.amxx debug
+weapon_aug.amxx debug
+weapon_famas.amxx debug
+weapon_m4a1.amxx debug
+azp_weapon_guitar.amxx debug		;Lvl 8
+azp_weapon_m14ebr.amxx debug		;Lvl 11
+oicw.amxx debug				;Lvl 14
+azp_weapon_m1887.amxx debug		;lvl 17
+azp_weapon_thompson.amxx debug		;Lvl 20
+azp_weapon_ksg12.amxx debug		;Lvl 23
+azp_weapon_as50.amxx debug		;Lvl 26
+CSO_BrickPeaceV2.amxx debug		;Lvl 29
+azp_weapon_skull7.amxx debug		;RR 1
+azp_weapon_tar21.amxx debug		;Lvl 4 RR 1
+m32.amxx debug				;Lvl 8 RR 1
+azp_weapon_wa2000.amxx debug		;Lvl 16 RR 1
+CSO_RailCannon_2014.amxx debug		;Lvl 20 RR 1
+CSO_Janus5.amxx debug			;Lvl 24 RR 1
+CSO_Balrog7.amxx debug			;Lvl 28 RR 1
+CSO_Janus3.amxx debug			;RR 2
+CSO_Janus11.amxx debug			;Lvl 10 RR 2
+zp_extra_starchaserar.amxx debug 	;Lvl 20 RR 2
+zp_extra_balrog_ethereal.amxx debug	;RR 3
+azp_weapon_m95.amxx debug		;Lvl 15 RR3
+CSO_MaverickM60.amxx debug		;Lvl 20 RR 3
+gatling.amxx debug			;RR 4
+zp_extra_PlasmaGun.amxx debug		;RR5
+zp_extra_linkgun.amxx debug		;RR 6
+zp_extra_dragon_cannon.amxx debug 	;RR 8
