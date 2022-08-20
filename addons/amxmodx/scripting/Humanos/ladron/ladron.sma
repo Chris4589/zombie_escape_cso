@@ -3,7 +3,7 @@
 #include <fakemeta>
 #include <hamsandwich>
 #include <fakemeta_util>
-#include <zp_lvl>
+#include <zombie_escape_v1>
 
 native zp_set_drop(id, cant)
 

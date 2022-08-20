@@ -13,7 +13,7 @@
 enum{ PRIMARIA=1, SECUNDARIA, KNIFE, ESPECIALES, MAX_ARMS };
 native zp_arma(const name[], level, reset, categoria, admin, const adm_tipo[]);
 forward dar_arma(id, item);
-native enable_skins(id)
+// native enable_skins(id)
 
 #define MODEL_V "models/zp/v_ak47_zp.mdl"
 #define MODEL_P "models/zp/p_ak47_zp.mdl"

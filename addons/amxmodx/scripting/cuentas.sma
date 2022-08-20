@@ -5,7 +5,7 @@
 #include <fakemeta>
 #include <print_center_fx>
 
-//#define use_reapi
+#define use_reapi
 
 #if !defined use_reapi
 	stock is_user_steam_2( i )
@@ -79,12 +79,12 @@ new const g_szForo[] = "soon!";
 //area modificable
 
 new const g_szTabla[ ] = "zp_cuentas";
-new const g_szPrefijo[ ] = "[ CEA ]";
+new const g_szPrefijo[ ] = "[ ZE ]";
 
-new const MYSQL_HOST[] = "127.0.0.1";
-new const MYSQL_USER[] = "root";
-new const MYSQL_PASS[] = "Chris4589@";
-new const MYSQL_DATEBASE[] = "counter_strike";
+new const MYSQL_HOST[] = "127.0.0.1";//190.106.146.6
+new const MYSQL_USER[] = "ogpuser";
+new const MYSQL_PASS[] = "EQ6SpNQrZgv9";
+new const MYSQL_DATEBASE[] = "ogp_panel";
 
 new Handle:g_hTuple;
 
@@ -163,8 +163,8 @@ public plugin_init()
 
 	get_user_ip(0, get_ipsvr, charsmax(get_ipsvr))
 
-	if (!(equali(get_ipsvr, Server1) || equali(get_ipsvr, Server2)))
-    	server_cmd("quit");
+	//if (!(equali(get_ipsvr, Server1) || equali(get_ipsvr, Server2)))
+    	//server_cmd("quit");
 
 	Mysql_init( );
 }

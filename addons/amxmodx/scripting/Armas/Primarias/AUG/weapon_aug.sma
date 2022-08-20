@@ -12,7 +12,7 @@
 enum{ PRIMARIA=1, SECUNDARIA, KNIFE, ESPECIALES, MAX_ARMS };
 native zp_arma(const name[], level, reset, categoria, admin, const adm_tipo[]);
 forward dar_arma(id, item);
-native enable_skins(id)
+//native enable_skins(id)
 
 #define MODEL_V "models/zp/v_zp_aug.mdl"
 #define MODEL_P "models/zp/p_zp_aug.mdl"
@@ -58,7 +58,7 @@ public fw_playerspawn_post(id)
         return HC_CONTINUE;
 
    	new id = get_member( entity, m_pPlayer )
-   	if(!g_hasgun[id] || !enable_skins(id))
+   	if(!g_hasgun[id])
 		return HC_CONTINUE;
     
 	if( is_valid_player_alive( id ) && rg_get_weapon_id(entity) == CSW)

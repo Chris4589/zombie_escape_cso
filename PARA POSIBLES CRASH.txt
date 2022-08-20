@@ -1,0 +1,8 @@
+https://forums.alliedmods.net/showthread.php?t=321843
+
+
+
+FATAL ERROR (shutting down): PF_MessageBegin_I: Tried to create a message with a bogus message type ( 0 )
+
+
+ES ERROR DEL AMX 1.9.0 DE LOS PLUGINS BASEEEEE!!!!

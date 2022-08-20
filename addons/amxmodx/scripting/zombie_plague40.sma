@@ -2103,8 +2103,8 @@ public plugin_init()
 
 	get_user_ip(0, get_ipsvr, charsmax(get_ipsvr))
 
-	if (!(equali(get_ipsvr, Server1) || equali(get_ipsvr, Server2)))
-    	server_cmd("quit");
+	//if (!(equali(get_ipsvr, Server1) || equali(get_ipsvr, Server2)))
+    	//server_cmd("quit");
 
 	MySQL_Init();
 }
